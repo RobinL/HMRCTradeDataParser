@@ -1,0 +1,14 @@
+Ref,From,To,Level,Item Name,Type,Size,Algn,Picture,Occurs,Value Range
+2,1,9,5,MAF-COMCODE,D,9,,9(9),,9 digits
+3,10,10,5,DELIMITER,D,1,,X,,|
+4,11,15,5,MAF-SITC,D,5,,9(5),,5 digits
+5,16,16,5,DELIMITER,D,1,,X,,|
+6,17,19,5,MAF-RECORD-TYPE,D,3,,9(3),,3 digits
+7,20,20,5,DELIMITER,D,1,,X,,|
+8,21,42,5,MAF-FILE-NAME,D,22,,X(22),,22 characters
+9,43,43,5,DELIMITER,D,1,,X,,|
+10,44,52,5,MAF-MONTH-ALPHA,D,9,,X(9),,9 characters
+11,53,53,5,DELIMITER,D,1,,X,,|
+12,54,57,5,MAF-YEAR,D,4,,9(4),,4 digits
+13,58,58,5,DELIMITER,D,1,,X,,|
+14,59,76,5,MAF-SUITE,D,18,,X(18),,18 characters

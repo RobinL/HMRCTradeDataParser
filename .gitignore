@@ -1,0 +1,5 @@
+*.db
+pycharm/data
+*.pyc
+.idea
+.ipynb_checkpoints

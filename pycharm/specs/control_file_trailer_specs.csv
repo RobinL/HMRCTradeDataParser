@@ -1,0 +1,4 @@
+Ref,From,To,Level,Item Name,Type,Size,Algn,Picture,Occurs,Value Range
+2,1,151,5,FILLER,D,151,,X(151),,151 characters
+3,152,152,5,DELIMITER,D,1,,X,,|
+4,153,159,5,MK-HEADING-COUNT,D,7,,9(7),,7 digits
