@@ -94,6 +94,40 @@ class EightDigitCode(Base):
     mk_commodity_alpha_2 = Column(String(48))
     mk_commodity_alpha_all = Column(String(4906))
 
+class ImporterHeader(Base):
+    __tablename__ = "importersheaders"
+
+    id = Column(Integer,primary_key = True)
+
+    ia_record_type = Column(String(2))
+    ia_runno = Column(String(5))
+    ia_year = Column(String(4))
+
+
+class Importer(Base):
+    __tablename__ = "importers"
+
+    id = Column(Integer,primary_key = True)
+
+    ia_record_type = Column(String(2))
+    ia_name = Column(String(105))
+    ia_addr_1 = Column(String(30))
+    ia_addr_2 = Column(String(30))
+    ia_addr_3 = Column(String(30))
+    ia_addr_4 = Column(String(30))
+    ia_addr_5 = Column(String(30))
+    ia_pcode = Column(String(8))
+    ia_comcode_count = Column(String(3))
+    ia_comcode = Column(String(4235))
+
+class ImporterEightDigitCodes(Base):
+    __tablename__  = "importerseightdigitcodes"
+
+    id = Column(Integer, primary_key=True)
+
+    importer_id = Column(Integer)
+    comcode = Column(String(9))
+
 
 
 
