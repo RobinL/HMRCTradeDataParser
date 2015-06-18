@@ -39,12 +39,13 @@ def raw_control_data_to_database(file_path):
 
 
 
-
-
     #Write the main data to the database
     middle_record_specs = pd.read_csv("specs/control_file_middle_specs.csv")
     middle_record_specs = get_fields_df(middle_record_specs)
     middle_record_specs_dict = middle_record_specs.to_dict(orient="records")
+
+    #Add in the 8 digit comcode - this isn't in the spec
+    middle_record_specs_dict.append({'To': 8L, 'Item Name': 'MK-COMCODE8', 'From': 1L})
 
 
     middle_records_df = pd.DataFrame(middle_records,columns=["all"])
@@ -105,6 +106,8 @@ def write_middle_records_to_db(df):
         ed.mk_commodity_alpha_1 = r["mk_commodity_alpha_1"]
         ed.mk_commodity_alpha_2 = r["mk_commodity_alpha_2"]
         ed.mk_commodity_alpha_all = r["mk_commodity_alpha_all"]
+
+        ed.mk_comcode8 = r["mk_comcode8"]
 
         session.add(ed)
     session.commit()

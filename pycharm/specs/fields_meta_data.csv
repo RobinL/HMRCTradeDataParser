@@ -1,0 +1,191 @@
+,field_name,full_name,description
+0,ACCOUNT - CCYY,Century and Year of Account,Identifies the century and year of an item in format CCYY. For non-amendment records this will be the same as the file month; for amendment records it will be the year to which the amendment relates.
+1,ACCOUNT - MM,Month of Account,Identifies the month of account of an item in format MM. For non-amendment records this will be the same as the file month; for amendment records it will be the month to which the amendment relates.
+2,ADDR-1,Address – Line 1,1st Line of Postal Address 
+3,ADDR-2,Address – Line 2,2nd Line of Postal Address
+4,ADDR-3,Address – Line 3,3rd Line of Postal Address
+5,ADDR-4,Address – Line 4,4th Line of Postal Address
+6,ADDR-5,Address – Line 5,5th Line of Postal Address
+7,CB CODE,CB code,"This code denotes items subject to certain customs procedures or belonging to certain duty groups:
+01 - EFTA/EEA countries
+02 - agreements between EU and Andorra, Albania, Bosnia
+& Herzegovina, Ceuta, Mellila, Faroes, Occupied Palestinian Territory, Croatia, Israel, FYR Macedonia, Mexico, San Marino, South Africa (Vol 1 pt 7 of Tariff).
+03 - Mashraq countries (Vol 1 pt 7 of Tariff)
+04 - Maghreb countries (Vol 1 pt 7 of Tariff)
+05 - ACP countries
+06 - OCT countries
+07 - GSP
+08 - EU free circulation
+09 - re-imported goods
+10 - inward processing
+11 - not currently in use
+12 - outward processing relief
+13 - outward processing relief textiles
+It is important to note that procedure information relates only to the regime initially declared in the UK. Where a consignment undergoes a subsequent change of procedure, this change will not be reflected."
+8,CN-Q2,Combined Nomenclature-2nd Quantity ,"Indicates whether the 2nd quantity is a national (UK) or a Combined Nomenclature (EU) requirement and is relevant when compiling figures similar to those produced by the UK for Eurostat.
+000 – No CN 2nd quantity required
+200 – CN 2nd quantity required"
+9,COD - ALPHA,COD alpha,"Alpha code for Country of Destination (Exports/Dispatches) or Country of Dispatch (Imports/Arrivals). For codes see here.
+Country of Destination (Exports/Dispatches) - country of ultimate destination. This is the final country to which the goods are being exported from the UK irrespective of any changes to the means of transport en route (provided they are not subject to a commercial transaction in an intermediate country).
+Country of Dispatch (Imports/Arrivals) - country from which the goods were originally dispatched to the UK (regardless of transhipment through intermediate countries en route). This is not necessarily the country of origin/manufacture or the last country from which the goods were shipped to the UK. Where a change of ownership occurs en route or where the sale occurs via an intermediary country, the Country of Dispatch is the country where the last commercial transaction took place (i.e. the intermediary country, even though the goods never physically resided in that country)."
+10,COD - SEQUENCE,COD sequence,Numeric sequence for Country of Destination or Country of Dispatch. See above for definition.
+11,COMCODE,Commodity code,"9 digit commodity code comprising:
+1-8 Combined Nomenclature
+9 zero (formerly national sub-division)
+The following pseudo commodity codes exist for specific categories of trade:
+9920 9900 Parcel Post
+9930 2400 ) Ships & Aircraft stores with 
+9930 2700 ) effect from 1.1.02, valid for 
+9930 9900 ) Non-EU and EU trade.
+9950 0000 Low Value* 
+9990 9908 Continental Shelf
+* aggregated under pseudo code 9950 0000 and cannot 
+be allocated to a specific comcode or to country. For values see OTS Methodology Paper.
+Consult Tariff or ICN for a full list of commodity codes and descriptions."
+12,COMMODITY-ALPHA-1 ,Commodity code alpha description,Description of the commodity code – line 1
+13,COMMODITY-ALPHA-2 ,Commodity code alpha description,Description of the commodity code – line 2
+14,CONTAINER,Container,"Code identifying goods transported by container:
+0 not in container
+1 in container 
+‘0’ for Trade Indicator 5 items."
+15,COO - ALPHA,COO alpha,"Alpha code for Country of Origin. The Country of Origin is the country where the goods were originally produced, which may be different from the Country of Dispatch (Country of Origin will be different from Country of Dispatch if goods have been sold to another country before being consigned to the UK). 
+This field is mandatory for imports, not required for the rest.
+For codes see here."
+16,COO - SEQ,COO sequence,Numeric sequence for Country of Origin. See above for definition and usage. 
+17,COUNTRY - ALPHA - COO IMP,Country of Origin  Impure alpha,"Alpha code for Country of Origin (Impure). COO (Impure) is a country of origin definition specified by the EU for transmission of non-EU data to Eurostat. Under this system the declared COO is replaced by the COD when: 
+the goods fall in Chapter 97 
+the COD is an EU country
+the COO is an EU country
+For example an item with COD ’IE’/ COO ‘US’ would be converted to IE/IE, and COD ‘BR’/ COO ‘FR’ would be converted to BR/BR. This is to prevent double counting by Eurostat when Member State’s statistics are aggregated. "
+18,COUNTRY –SEQ. COO IMP ,Country of Origin Impure sequence,Numeric sequence corresponding to the COO Impure alpha (COOIMP). See country seq. COO IMP above for definition and usage. 
+19,ESTIMATED VALUE,Estimated Value,Value of estimated trade at SITC 2 digit level. 
+20,EU/NON-EU – IND,EU/Non-EU indicator ,"Identifies whether a commodity code is EU, Non-EU trade or both:
+1 = EU only; 2 = Non-EU only; 0 = both"
+21,EU-MM-OFF,EU month off,Indicates the final month that a commodity code was valid for EU trade. 
+22,EU-MM-ON,EU month on,"Indicates the first month that a commodity code was introduced for EU trade. This date remains on the file until the end of the calendar year, when it reverts to zeros."
+23,EU-YY-OFF,EU year off,Indicates the year that a commodity code was discontinued for EU trade. Discontinued commodity codes will remain on the file until the end of the calendar year following the year in which they expired.
+24,EU-YY-ON,EU year on,Indicates the year that a commodity code was introduced for EU trade. This date remains on the file until the end of the calendar year following the year in which it was introduced. The date reverts to zeros. 
+25,FLAG – ALPHA,Flag alpha,Alpha code for the flag of the ship transporting the goods to/from the UK. Same country codes as used for COD/COO (goods not transported by ship are allocated a pseudo country code). Zero for Trade Indicator ‘5’ items. For codes see here.
+26,FLAG -SEQUENCE,Flag sequence,Numeric sequence for the flag (nationality) of the ship. Zero for Trade Indicator ‘5’ items. 
+27,GOLO – ALPHA ,Location alpha,"Alpha code indicating location of inland clearance (inland clearance depot or inland rail depot) if goods were not cleared at the border. Also used to indicate relevant free zone location for goods entering or leaving freezone. Zero for Trade Indicator ‘5’ items. 
+For codes see here."
+28,GOLO - SEQUENCE,Location sequence,Numeric sequence for Location alpha above.
+29,INDUSTRIALPLANT - COMCODE,IP commodity code,A pseudo concessionary comcode beginning 98 used for declaration of high value Industrial Plant. IP comcode appears in this field (Tariff comcode appears in ‘COMCODE’ field). 
+30,INLAND- MOT,Inland Mode of Transport,"Optional code identifying the mode of transport where there has been an ‘internal’ movement within the Community before goods have been subject to Customs formalities (Imports) or after they have been subject to Customs formalities (Exports). No code will be present where Customs formalities are carried out at point of exit from or entry into the Community, which is the normal situation.
+(00 for TRADEIND ‘5’ items).
+10 - sea transport (not vehicle on ferry)
+20 - rail transport
+30 - road transport
+40 - air transport
+50 - mail
+70 - fixed installations, e.g. pipeline and Channel Tunnel
+80 – inland waterway transport
+90 - own propulsion, e.g. imported vehicle driven across
+land boundary 
+"
+31,MODE - OF – TRANSPORT,Mode of Transport,"Mode of transport by which goods leave or arrive in the UK.
+(00 for TRADEIND ‘5’ items).
+10 - sea transport (not vehicle on ferry)
+20 - rail transport
+30 - road transport
+40 - air transport
+50 - mail
+70 - fixed installations, e.g. pipeline and Channel Tunnel
+80 – inland waterway transport
+90 - own propulsion, e.g. imported vehicle driven across
+land boundary 
+"
+32,MONTH-IND,Month Indicator,"Indicates the Year and the Month of the estimated item of trade. 
+"
+33,NAME,Importers’ Name,"The name of the declared importer.
+"
+34,NATURE - OF TRANSACTION,Nature of Transaction,"Codes used for EU (Intrastat) trade only, describing the type of transaction. Codes have the following meaning:
+001 - all transactions involving actual or intended change of
+ownership.
+002 - returned goods and replacement goods
+003 - free of charge transactions involving permanent change
+of ownership.
+004 - goods for processing or repair
+005 - goods returned following process/repair (other than 007)
+(no code 006)
+007 - joint defence projects or other joint inter-governmental
+programmes
+008 - supply of building materials and equipment as part of a 
+general construction or engineering contract
+009 - other transactions
+000 - below threshold trade allocations
+See Intrastat Public Notice 60 for more. See Section 5 for Below Threshold Trade Allocations."
+35,NET - MASS,Net Mass,Weight of the item in kilograms excluding packaging. Format: Leading sign + 13 digits.
+36,NO OF CON SIGNMENTS,Number of consignments,"Optional field used to indicate the number of consignments. Please note that several consignments may be aggregated. 
+Format: Leading sign + 11 digits. "
+37,NON-EU-MM-ON,Non-EU month on,"Indicates the month that a commodity code was introduced for Non-EU trade. This date remains on the file until the end of the calendar year, then reverts to zeros."
+38,NON-EU- MM-OFF,Non-EU month off,Indicates the final month that a commodity code was valid for Non-EU trade. 
+39,NON-EU-YY-ON,Non-EU year on,"Indicates the year that a commodity code was introduced for Non-EU trade. This date remains on the file until the end of the calendar year following the year of introduction, then reverts to zeros. "
+40,NON-EU-YY-OFF,Non-EU year off,Indicates the year that a commodity code was discontinued for Non-EU trade. Discontinued commodity codes will remain on the file until the end of the calendar year following the year in which they expired. 
+41,PCODE,Postcode,Postal code within the UK.
+42,PERIOD – REFERENCE,Period reference,Identifies the month of account of an item in format 0YYYYMM. For non-amendment records this will be the same as the file month; for amendment records and late supplementary declarations it will be the month to which the amendment or supplementary declaration relates.
+43,PORT - ALPHA,Port alpha,"Alpha code for the port of import/export. 
+For codes see here.
+"
+44,PORT - SEQUENCE,Port sequence,"Numeric code for port of import/export. 
+For codes see here. "
+45,PROCEDURE - CODE,Procedure code,"This identifies specific types of Customs Procedure (codes from 1/1/2015 shown):
+1- Normal trade
+2 - Inward Processing
+3 - Outward Processing Procedure
+4 - Re-export from a warehouse or free zone
+5 - Re-export from/after Processing under Customs Control
+6 - Re-export, other.
+For definitions and previous years, see Table 5.
+The import equivalent of these codes is in the CB code field on the import data file.
+It is important to note that procedure information relates only to the regime initially declared in the UK. Subsequent changes of procedure will not be reflected."
+46,QTY 1 ALPHA,Quantity 1 Alpha ,Lists the 3 digit abbreviation of the quantity 1 description for the commodity code. See Table 5 for Standard Abbreviations and their meanings.
+47,QTY 2 ALPHA,Quantity 2 Alpha ,Lists the 3 digit abbreviation of the quantity 2 description for the commodity code. See Table 5 for Standard Abbreviations and their meanings.
+48,RECORD -TYPE,Record Type,"Range 0-3 identifies the kind of suppression record. For a list of the type of record and the suppression code, see Section 6 Suppression and Confidentiality & Tables 1 and 2."
+49,SITC,SITC-5,"Standard International Trade Classification - a United Nations commodity classification system based on a five digit numeric code. Current version is ‘Revision 4’. Each 8 digit Combined Nomenclature code correlates to an SITC 5 digit code. SITC data is commonly published at different levels. Each level is designated as follows:
+1 digit - Section
+2 digit - Division
+3 digit - Group
+4 digit - Sub-group
+5 digit - Item"
+50,SITC-0,SITC zero field,1 digit field – value set to 0
+51,SITC-2,SITC 2 Digit Divisional Level,See description under SITC-5 above.
+52,SITC-CONV-A,SITC conversion A,"Indicates the necessary conversion to obtain the relevant SITC quantity 1 unit. 
+See Table 4, SITC Quantity Conversions. "
+53,SITC-CONV-B,SITC conversion B,"Indicates the necessary conversion to obtain the relevant SITC quantity 2 unit. 
+See Table 4, SITC Quantity Conversions."
+54,SITC-IND,SITC Indicator,"Indicates which quantities should be selected for SITC based outputs:
+0 = No quantities; 1= Quantity 1 only; 2 = Quantities 1 and 2
+4 = Quantity 2 only."
+55,STAT - VALUE,Stat Value,"Invoice or contract price of the goods (£ sterling) as used for statistical purposes. The export value is the cost of the goods to the purchaser abroad. The import value is the value of the goods including the cost, insurance and freight. 
+Format: Leading sign + 15 digits."
+56,SUB-GROUP-ARR / DISPIMP / EXP,SITC Aggregation||Indicators,"Indicators for use in aggregating to SITC 4 (sub group) where these levels contain suppressed commodity codes. Codes indicate what data should be published to be compatible with UK based publications.
+For a list of standard definitions, see Table 3, SITC Aggregation Indicators. "
+57,SUB-ITEM- ARRDISPIMPEXP,SITC Aggregation||Indicators,"Indicators for use in aggregating to SITC 5 (item) where these levels contain suppressed commodity codes. Codes indicate what data should be published to be compatible with UK based publications.
+"
+58,SUITE INDICATOR,Suite Indicator,"Identifies commodity codes to be excluded from General and Special trade compilations: 
+00 - trade commodity codes
+03 - no longer used
+04 - no longer used
+08 - non-monetary gold excluded from General Trade
+09 - monetary gold and gold coin excluded from General and
+Special Trade
+SUITE is used in conjunction with TRADEIND to compile General and Special trade. See Section 3 General and Special Trade. "
+59,SUPP- ARRIVALS DISPATCHES IMPORTSEXPORTS,Suppression code,"Indicates whether the commodity code is subject to suppression and the level of suppression which applies (2 character field, leading sign + 1 digit): 
+0 - no suppression 
+1 - complete suppression 
+2 - suppression of countries and ports 
+3 - suppression of countries, ports & total trade qty
+4 – suppression of quantity for countries and ports
+5 – suppression of quantity for countries, ports and total trade "
+60,SUPPUNIT,Supp Unit,"Second quantity (e.g. number) required for certain commodities, as specified in the Tariff/ICN. Format: Leading sign + 13 digits."
+61,TRADE - IND,Trade Indicator,"A code used to identify the type of trade. Code is used in conjunction with Suite Indicator to select appropriate items for General and Special trade compilations. Indicators are:
+Imports & Arrivals
+5 removal from warehouse into free circulation
+4 import into warehouse (goods not in free circulation)
+0 all other items
+Exports & Dispatches
+1 exports from warehouse (goods not in free
+circulation)
+0 all other items
+See Section 3 General and Special Trade."

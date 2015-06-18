@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+
+<div id="filters" class="main hideonload"></div>
+<div id="mapcontainer" class="main hideonload">
+	<p>Consignments received by product, country of origin, and DPE.  Click on countries to filter data.  Hover over countries to see further details.  Select item(s) from the boxes above to filter data.</p>
+</div>
+<div id="sankeycontainer" class="main hideonload">
+  <p>Sankey diagram of consignments by country of origin, product, and DPE</p>
+</div>
+
+<div class="tooltip"></div>
+
+
+</div>
+
+
+
+{% endblock %}
+
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('static', filename='handlebars-v3.0.0.js') }}"></script>
+<script src="{{url_for('static', filename='underscore-min.js') }}"></script>
+<script src="{{url_for('static', filename='d3.v3.min.js') }}"></script>
+<script src="{{url_for('static', filename='topojson.v1.min.js') }}"></script>
+<script src="{{url_for('static', filename='queue.v1.min.js') }}"></script>
+<script src="{{url_for('static', filename='sankey.js') }}"></script>
+<script src="{{url_for('static', filename='main.js') }}"></script>
+
+{% endblock %}
+
+{%- block styles %}
+{{super()}}
+
+<link href="{{ url_for('static', filename='mystyle.css') }}" rel="stylesheet" media="screen">
+{%- endblock styles %}

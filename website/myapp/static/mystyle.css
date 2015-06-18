@@ -1,0 +1,137 @@
+svg {
+  font-size: 10px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+}
+
+.node rect {
+  cursor: move;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+}
+
+.node text {
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff;
+}
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .10;
+}
+
+.link:hover {
+  stroke-opacity: .5;
+
+}
+
+.linktext {
+
+  fill: #000;
+
+  opacity: 0.3;
+
+  pointer-events:none;
+  font-size:8px;
+
+}
+
+.main {
+  margin:10px;
+  padding:10px;
+  border: 1px solid #B4B4B4;
+
+}
+
+
+
+svg { 
+  display:block;
+  margin-left: auto ;
+  margin-right: auto ;
+
+}
+
+.countrypath {
+
+  pointer-events:all;
+  stroke: #C9C9C9;
+  stroke-width:0.5px;
+  stroke-linejoin: round;
+}
+
+
+
+.select_divs {
+  display: inline-block;
+  margin-left:1%;
+  padding:0px;
+
+}
+
+div{
+  font: 16px sans-serif;  
+
+
+}
+
+select {
+  height:150px;
+}
+
+div.tooltip {   
+  position: absolute;           
+           
+                                  
+  padding: 2px;             
+  font: 12px sans-serif;        
+  background: #F4FD04;   
+  border: 0px;      
+  border-radius: 8px;           
+  pointer-events: none;         
+}
+
+p{ text-align: center}
+
+div.tooltip p {
+   text-align: left; 
+   padding:0px;
+   margin:2px;
+}
+
+#red {
+  color: red;
+  text-align: center;
+}
+
+
+
+
+label {display:block;}
+
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #FFFFFF;
+    shape-rendering: crispEdges;
+    opacity: 0.5
+}
+
+
+.hideonload {
+  visibility: hidden;
+}
+
+#datacaveat {
+  font-size: 8pt;
+  color: gray;
+  display: inline;
+}

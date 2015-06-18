@@ -34,7 +34,7 @@ def raw_import_data_to_database(file_path):
 
     #Tail record - currently I don't write this out to db as I don't know what it contains
     #Using the specification of the tail record from https://www.uktradeinfo.com/Statistics/Documents/Tech_Spec_SMKE19.DOC
-    tail_record_specs = pd.read_csv("specs/import_tail_record_specs.csv")
+    tail_record_specs = pd.read_csv("specs/import_trailer_record_specs.csv")
     tail_record_specs = get_fields_df(tail_record_specs)
 
     tail_record_dict = {}
@@ -54,6 +54,9 @@ def raw_import_data_to_database(file_path):
     middle_record_specs = get_fields_df(middle_record_specs)
 
     middle_record_specs_dict = middle_record_specs.to_dict(orient="records")
+
+    #Add in the 8 digit comcode - this isn't in the spec
+    middle_record_specs_dict.append({'To': 8L, 'Item Name': 'MAF-COMCODE8', 'From': 1L})
 
     middle_records_df = pd.DataFrame(middle_records,columns=["all"])
 
@@ -116,6 +119,10 @@ def write_middle_records_to_db(df):
         i.maf_value = r["maf_value"]
         i.maf_quantity_1 = r["maf_quantity_1"]
         i.maf_quantity_2 = r["maf_quantity_2"]
+
+        #Not part of file spec but enables easier joins
+        i.maf_comcode8 = r["maf_comcode8"]
+
         session.add(i)
     session.commit()
 

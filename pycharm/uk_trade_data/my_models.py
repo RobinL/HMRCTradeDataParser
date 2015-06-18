@@ -35,6 +35,12 @@ class Import(Base):
     maf_quantity_1 = Column(String(14))
     maf_quantity_2 = Column(String(14))
 
+    #Not part of file spec but enables easier joins
+    maf_comcode8 = Column(String(8), ForeignKey("eightdigitcodes.mk_comcode8"))
+
+    #Establish this as linked to the comcode table.
+    comcode = relationship("EightDigitCode")
+
 
 class ImportHeader(Base):
     __tablename__ = 'importsheaders'
@@ -94,6 +100,12 @@ class EightDigitCode(Base):
     mk_commodity_alpha_2 = Column(String(48))
     mk_commodity_alpha_all = Column(String(4906))
 
+    #Not part of spec but makes for easier joins
+    mk_comcode8 = Column(String(8))
+
+    #We want to be able to pick up importers from a code if they exist
+    importers = relationship("ImporterEightDigitCodes")
+
 class ImporterHeader(Base):
     __tablename__ = "importersheaders"
 
@@ -120,13 +132,50 @@ class Importer(Base):
     ia_comcode_count = Column(String(3))
     ia_comcode = Column(String(4235))
 
+    comcodes = relationship("ImporterEightDigitCodes",cascade="delete")
+
+
 class ImporterEightDigitCodes(Base):
     __tablename__  = "importerseightdigitcodes"
 
     id = Column(Integer, primary_key=True)
 
-    importer_id = Column(Integer)
-    comcode = Column(String(9))
+    #Establish this as linked to the comcode table.
+    comcode8 = Column(String(8), ForeignKey("eightdigitcodes.mk_comcode8"))
+    comcode = relationship("EightDigitCode")
+
+    #Establish
+    importer_id = Column(Integer, ForeignKey("importers.id"))
+    impoter = relationship("Importer")
+
+
+class MetaData(Base):
+    __tablename__ = "metadata"
+
+    id = Column(Integer, primary_key=True)
+    field_name = Column(String(100))
+    full_name = Column(String(200))
+    description =  Column(String(2000))
+
+class Country(Base):
+    __tablename__ = "countries"
+
+    id = Column(Integer, primary_key=True)
+    country_name = Column(String(140))
+    alpha_code = Column(String(3))
+    sequence_code = Column(Integer)
+    comments = Column(String(400))
+
+class Port(Base):
+    __tablename__ = "ports"
+
+    id = Column(Integer, primary_key=True)
+    port_name = Column(String(140))
+    alpha_code = Column(String(3))
+    sequence_code = Column(Integer)
+
+
+
 
 
 
