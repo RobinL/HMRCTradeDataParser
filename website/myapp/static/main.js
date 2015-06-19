@@ -305,6 +305,8 @@ function create_filters() {
         })
         .attr("selected", "")
 
+    // $("#filters").select2()
+
     d3.selectAll("select").on("change", function() {
             redraw()
         }

@@ -30,6 +30,8 @@ def get_imports_data():
 
     group by country_name, mk_commodity_alpha_all, port_name
 
+    limit 100
+
 
     """
 
