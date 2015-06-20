@@ -22,21 +22,25 @@ function resize() {
 
 
 
-queue()
-    .defer(d3.json, "static/world-110m.json")
-    .defer(d3.csv, "static/countries.csv")
-    .defer(d3.json, "importsdata.json")
-    .await(ready);
 
-function ready(error, worlddata, countrydata,csvdata) {
+var p1 = $.getJSON("static/world-110m.json")
+var p2 = $.ajax("static/countries.csv")
+var p3 = $.getJSON("selectboxdata.json")
 
-    IMPORTAPP.worlddata = worlddata
-    IMPORTAPP.countrydata = countrydata
-    upload(csvdata["csv_like_data"])
-    
-    
-   
-}
+
+
+$.when(p1,p2,p3).done(function(worlddata,countrydata, select_data) {
+
+    IMPORTAPP.worlddata = worlddata[0]
+    IMPORTAPP.countrydata = d3.csv.parse(countrydata[0])
+    IMPORTAPP.select_box_data = select_data[0]["csv_like_data"]
+
+    create_filters()
+    get_new_imports_data()
+})
+
+
+
 
 function draw_sankey(sankey_data, max_height) {
 
@@ -221,19 +225,49 @@ function get_sankey_height(data) {
 }
 
 
-function redraw() {
-    filter_data()
-    get_consignments_by_country()
-    var sankey_data = csv_to_sankey_data(IMPORTAPP.filtered_data);
-    var max_height = get_sankey_height(IMPORTAPP.filtered_data)
-    draw_sankey(sankey_data, max_height);
-    map_colours()
-    key_colours()
+function get_new_imports_data() {
 
+
+    dates = $("#date").val()
+    countries = $("#country").val()
+    products = $("#product").val()
+    ports = $("#port").val()
+
+    post_data =  {dates: dates,
+            countries: countries,
+            products: products,
+            ports: ports}
+
+
+    p1 = $.getJSON("importsdata2.json", post_data)
+    
+    $.when(p1).done(function(data) {
+
+        debugger;
+
+
+
+        IMPORTAPP.filtered_data = data
+
+        if (data["csv_like_data"].length>0) {
+
+        get_consignments_by_country()
+        var sankey_data = csv_to_sankey_data(IMPORTAPP.filtered_data);
+        var max_height = get_sankey_height(IMPORTAPP.filtered_data)
+        draw_sankey(sankey_data, max_height);
+        map_colours()
+        key_colours()
+
+    }
+
+
+    })
 
 }
 
-function create_filters() {
+
+
+function update_filters() {
 
     d3.select("#filters").html("")
     var data = IMPORTAPP.importdata
@@ -241,6 +275,9 @@ function create_filters() {
 
     var keys =  ["country", "product", "port", "quantity"]
     for (var i = 0; i < 3; i++) {
+
+
+
 
         var filter_name = keys[i]
 
@@ -298,17 +335,125 @@ function create_filters() {
             return d
         })
         .text(function(d) {
-            return d.substr(0,60)
+            return d.substr(0,30)
         })
-        .filter(function(d) {
-            return d == "All";
+        // .filter(function(d,i) {
+        //     return i==1
+        // })
+        // .attr("selected", "")
+
+    $(".select_boxes").each(function(index) {
+
+        $(this).select2()
+      // $(this).select2().on("change", function() {
+      //   alert("hi")
+      //   redraw()
+      // })
+    })
+
+    $(".select_boxes").on("change", function() {
+            //Post data to form
+
+            // $.getJSON("/importsdata2.json") {
+
+            // }
+
+
+            get_new_imports_data()
+        }
+
+    )
+
+}
+
+function create_filters() {
+
+    d3.select("#filters").html("")
+   
+    filters_dict = {}
+
+    var keys =  ["date", "country", "product", "port"]
+    
+
+    _.each(keys, function(d) {
+        filters_dict[d]=  []
+    })
+
+    _.each(IMPORTAPP.select_box_data, function(d) {
+
+        filters_dict[d.select_box].push(d )
+    })
+
+
+
+    filters = []
+
+    _.each(filters_dict, function(d,k,i){ 
+
+        if (k != "product") {
+            d.unshift({key: "All", value: "All"})
+        }
+
+        filters.push({filter_name: k, filter_options: d})
+        
+
+
+    })
+
+
+
+
+    output_area = d3.select("#filters")
+
+    select_divs = output_area
+        .selectAll("div")
+        .data(filters)
+
+    select_divs.enter().append("div").classed("select_divs", true)
+
+    select_boxes = select_divs.append("label").text(function(d) {
+        my_str = d["filter_name"]
+        my_str = my_str.charAt(0).toUpperCase() + my_str.slice(1);
+        return my_str
+    })
+
+    select_boxes = select_divs.append("select")
+        .attr("id", function(d) {
+            return d["filter_name"]
         })
-        .attr("selected", "")
+        .attr("key", function(d) {
+            return d["filter_name"]
+        })
+        .attr("class", "select_boxes")
+        .attr("multiple", "")
 
-    // $("#filters").select2()
 
-    d3.selectAll("select").on("change", function() {
-            redraw()
+
+
+    options = select_boxes
+        .selectAll(".select_boxes")
+        .data(function(d) {
+            return d["filter_options"]
+        })
+
+    options
+        .enter()
+        .append("option")
+        .attr("value", function(d) {
+            return d["key"]
+        })
+        .text(function(d) {
+            return d["value"].substr(0,60)
+        })
+
+    $(".select_boxes").each(function(index) {
+
+        $(this).select2()
+
+    })
+
+    $(".select_boxes").on("change", function() {
+            get_new_imports_data()
         }
 
     )
@@ -848,40 +993,7 @@ function linky(d) {
 }
 
 
-
- function browserSupportFileUpload() {
-        var isCompatible = false;
-        if (window.File && window.FileReader && window.FileList && window.Blob) {
-        isCompatible = true;
-        }
-        return isCompatible;
-    }   
-
-function upload(data) {
-
-
-
-    if (data && data.length > 0) {
-
-        if (IMPORTAPP.csv_loaded) {
-            update_csv(data)
-        }
-        else 
-        {first_csv(data)}
-      
-        
-
-      
-    } else {
-        alert('No data to import!');
-    }
-      
-
-   
-}
-
 function first_csv(data) {
-
 
 
     d3.selectAll(".hideonload").style("visibility","visible");

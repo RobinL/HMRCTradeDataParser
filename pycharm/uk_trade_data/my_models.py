@@ -13,11 +13,11 @@ class Import(Base):
     maf_cod_sequence = Column(String(3))
     maf_cod_alpha = Column(String(2))
     maf_coo_sequence = Column(String(3))
-    maf_coo_alpha = Column(String(2))
+    maf_coo_alpha = Column(String(2), ForeignKey("countries.alpha_code"))
     maf_account_mm = Column(String(2))
     maf_account_ccyy = Column(String(4))
     maf_port_sequence = Column(String(3))
-    maf_port_alpha = Column(String(3))
+    maf_port_alpha = Column(String(3), ForeignKey("ports.alpha_code"))
     maf_flag_sequence = Column(String(3))
     maf_flag_alpha = Column(String(2))
     maf_country_sequence_coo_imp = Column(String(3))
@@ -38,8 +38,11 @@ class Import(Base):
     #Not part of file spec but enables easier joins
     maf_comcode8 = Column(String(8), ForeignKey("eightdigitcodes.mk_comcode8"))
 
+
     #Establish this as linked to the comcode table.
     comcode = relationship("EightDigitCode")
+    country = relationship("Country")
+    port = relationship("Port")
 
 
 class ImportHeader(Base):
@@ -101,10 +104,16 @@ class EightDigitCode(Base):
     mk_commodity_alpha_all = Column(String(4906))
 
     #Not part of spec but makes for easier joins
-    mk_comcode8 = Column(String(8))
+    mk_comcode8 = Column(String(8), index=True)
 
     #We want to be able to pick up importers from a code if they exist
     importers = relationship("ImporterEightDigitCodes")
+
+
+class OtherDigitCodes(Base):
+    __tablename__ = "otherdigitcodes"
+
+    id = Column(Integer, primary_key=True)
 
 class ImporterHeader(Base):
     __tablename__ = "importersheaders"
@@ -165,6 +174,8 @@ class Country(Base):
     alpha_code = Column(String(3))
     sequence_code = Column(Integer)
     comments = Column(String(400))
+
+    imports = relationship("Import")
 
 class Port(Base):
     __tablename__ = "ports"

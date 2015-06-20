@@ -6,12 +6,31 @@
         <h1>Hello</h1>
         <p>Welcome to interactive trade statistics</p>
         
-       
+  		<div id="test"></div>
         
     </div>
  
 </div>
 
 
+
+
+{% endblock %}
+
+
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('static', filename='jquery-2.1.4.min.js') }}"></script>
+<script src="{{url_for('static', filename='select2.min.js') }}"></script>
+
+<script src="{{url_for('static', filename='handlebars-v3.0.0.js') }}"></script>
+<script src="{{url_for('static', filename='underscore-min.js') }}"></script>
+<script src="{{url_for('static', filename='d3.v3.min.js') }}"></script>
+<script src="{{url_for('static', filename='d3.promise.min.js') }}"></script>
+<script src="{{url_for('static', filename='topojson.v1.min.js') }}"></script>
+<script src="{{url_for('static', filename='queue.v1.min.js') }}"></script>
+<script src="{{url_for('static', filename='sankey.js') }}"></script>
+<script src="{{url_for('static', filename='test.js') }}"></script>
 
 {% endblock %}
