@@ -3,20 +3,27 @@ var IMPORTAPP = {csv_loaded:false}
 
 function resize() {
 
+
     var chart = d3.select("svg.map")
     aspect = chart.attr("width") / chart.attr("height")
-    var targetWidth = window.innerWidth - 50
+    var targetWidth = $("#mapcontainer").width()
     targetWidth = Math.min(1200, targetWidth)
     chart.attr("width", targetWidth);
     chart.attr("height", targetWidth / aspect);
 
     var chart = d3.select("svg.sankey")
-    aspect = chart.attr("width") / chart.attr("height") * 1
-    var targetWidth = window.innerWidth - 50
-    targetWidth = Math.min(1200, targetWidth)
 
-    chart.attr("width", targetWidth);
-    chart.attr("height", targetWidth / aspect);
+    if (!chart.empty()) {
+        aspect = chart.attr("width") / chart.attr("height") * 1
+        var targetWidth = $("#sankeycontainer").width()
+        targetWidth = Math.min(1200, targetWidth)
+
+        chart.attr("width", targetWidth);
+        chart.attr("height", targetWidth / aspect);
+
+}
+
+    console.log(targetWidth)
 
 }
 
@@ -39,6 +46,9 @@ $.when(p1,p2,p3).done(function(worlddata,countrydata, select_data) {
     draw_map_key()
     create_filters()
     get_new_imports_data()
+
+    resize()
+    d3.select(window).on('resize', resize);
 })
 
 
@@ -250,16 +260,18 @@ function get_new_imports_data() {
 
         IMPORTAPP.filtered_data = data["csv_like_data"]
 
-        if (data["csv_like_data"].length>0) {
+        if (data["csv_like_data"].length>=0) {
 
-        get_consignments_by_country()
-        var sankey_data = csv_to_sankey_data(IMPORTAPP.filtered_data);
-        var max_height = get_sankey_height(IMPORTAPP.filtered_data)
-        draw_sankey(sankey_data, max_height);
-        map_colours()
-        key_colours()
+            get_consignments_by_country()
+            var sankey_data = csv_to_sankey_data(IMPORTAPP.filtered_data);
+            var max_height = get_sankey_height(IMPORTAPP.filtered_data)
+            draw_sankey(sankey_data, max_height);
+            map_colours()
+            key_colours()
 
-    }
+
+
+        }
 
 
     })
@@ -374,6 +386,7 @@ function create_filters() {
     filters_dict = {}
 
     var keys =  ["date", "country", "product", "port"]
+    var sizes = [100,200,400,100]
     
 
     _.each(keys, function(d) {
@@ -430,7 +443,6 @@ function create_filters() {
 
 
 
-
     options = select_boxes
         .selectAll(".select_boxes")
         .data(function(d) {
@@ -448,8 +460,8 @@ function create_filters() {
         })
 
     $(".select_boxes").each(function(index) {
-
-        $(this).select2()
+        debugger;
+        $(this).select2({width:sizes[index]})
 
     })
 
@@ -477,29 +489,7 @@ function get_multi_select_array(selection_box_d3_selection) {
     return return_values
 }
 
-function filter_data() {
 
-    var keys = _.keys(IMPORTAPP.filtered_data[0])
-    var data = IMPORTAPP.filtered_data
-
-
-    for (var i = 0; i < 3; i++) {
-        var selection_box = d3.select("#" + keys[i])
-
-        filter_values = get_multi_select_array(selection_box)
-
-
-        if (!(_.contains(filter_values, "All"))) {
-            data = _.filter(data, function(d) {
-                return _.contains(filter_values, d[keys[i]])
-            })
-        }
-
-    };
-
-
-    IMPORTAPP.filtered_data = data
-}
 
 function csv_to_sankey_data() {
 
@@ -715,6 +705,10 @@ function draw_map(world, names) {
 
 function map_tooltip_html(d) {
 
+    var formatNumber = d3.format(",.0f"),
+        format = function(d) {
+            return "£" + formatNumber(d) ;
+        }
 
     this_country = d["name"]
     var source = d3.select("#map-tooltip-template").html();
@@ -725,7 +719,7 @@ function map_tooltip_html(d) {
     var quantity_exports = IMPORTAPP.country_totals[this_country]["quantity_exports"]
 
     var html = template({
-        quantity_exports: quantity_exports,
+        quantity_exports: format(quantity_exports),
         this_country: this_country
     })
 
@@ -889,7 +883,7 @@ function draw_map_key() {
     svg.append("g")
         .attr("transform", "translate(70,170) rotate(90)")
         .append("text")
-        .text("Number of consignments")
+        .text("Value of exports (£)")
         .style("font-weight", "bold")
         .style("font-size", "12px")
 
@@ -954,29 +948,5 @@ function linky(d) {
 }
 
 
-function first_csv(data) {
 
 
-    d3.selectAll(".hideonload").style("visibility","visible");
-    d3.selectAll(".hideafterload").remove()
-
-    IMPORTAPP.filtered_data = data
-    IMPORTAPP.csv_loaded=true
-
-    create_filters()
-    draw_map()
-    draw_map_key()
-    redraw()
-    
-    d3.select(window).on('resize', resize);
-    resize()
-    
-}
-
-function update_csv(data) {
-
-    IMPORTAPP.filtered_data = data
-     create_filters()
-     redraw()
-
-}
