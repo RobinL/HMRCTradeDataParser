@@ -185,6 +185,13 @@ class Port(Base):
     alpha_code = Column(String(3))
     sequence_code = Column(Integer)
 
+class RawFileLog(Base):
+    __tablename__ = "rawfiles"
+
+    id = Column(Integer, primary_key=True)
+    file_name = String(40)
+
+
 
 
 

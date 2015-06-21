@@ -1,6 +1,5 @@
 __author__ = 'Robin'
 
-
 from my_models import Country, Port
 from my_database import session
 import pandas as pd
@@ -32,7 +31,12 @@ def download_and_insert_port_data():
     df_sea = pd.read_excel(url, "Seaport codes")
     df_air = df_air[["Name", "Alpha Code","Sequence Code"]]
     df_sea = df_sea[["Name", "Alpha Code","Sequence Code"]]
+
+    #Some sea ports are duplicated.  Only keep the ones with all caps (these are the 'main' ones)
+
+    df_sea = df_sea[~df_sea["Name"].str.contains("[a-z]")]
     df = pd.concat([df_air, df_sea])
+
     df["Name"] = df["Name"].str.title()
 
     df.fillna("")

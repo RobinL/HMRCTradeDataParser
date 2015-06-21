@@ -1,6 +1,6 @@
 __author__ = 'Robin'
 import pandas as pd
-from .utils import get_fields_df
+from utils import get_fields_df
 
 
 def raw_control_data_to_database(file_path):
@@ -62,6 +62,72 @@ def raw_control_data_to_database(file_path):
     middle_records_df["mk_commodity_alpha_all"] = middle_records_df["mk_commodity_alpha_all"].str.strip()
 
     write_middle_records_to_db(middle_records_df)
+
+
+def raw_control_data_to_database2(zipfile,filename):
+
+    import codecs
+
+
+    with zipfile.open(filename) as fh:
+        lines = fh.readlines()
+        header_record = lines[0].decode("windows-1252")
+        middle_records = [l.decode("windows-1252") for l in lines[1:-1]]
+        tail_record = lines[-1].decode("windows-1252")
+
+    #Write the control record to the database
+    header_record_specs = pd.read_csv("specs/control_file_header_specs.csv")
+
+    header_record_specs = get_fields_df(header_record_specs)
+
+    header_record_specs = header_record_specs[header_record_specs["Item Name"].isin(["MK-FILENAME","MK-MONTH", "MK-YEAR"])]
+
+    header_record_dict = {}
+    for row in header_record_specs.iterrows():
+        r = row[1]
+        key = r["Item Name"]
+        value = header_record[r["From"]-1:r["To"]].strip()
+        header_record_dict[key] = value
+    hr_df = pd.DataFrame([header_record_dict])
+
+    #Turn into columns for database
+    my_cols = list(hr_df.columns)
+    my_cols = [c.lower().replace("-","_") for c in my_cols]
+    hr_df.columns = my_cols
+
+    write_header_record_to_db(hr_df)
+
+
+
+
+
+    #Write the main data to the database
+    middle_record_specs = pd.read_csv("specs/control_file_middle_specs.csv")
+    middle_record_specs = get_fields_df(middle_record_specs)
+    middle_record_specs_dict = middle_record_specs.to_dict(orient="records")
+
+    #Add in the 8 digit comcode - this isn't in the spec
+    middle_record_specs_dict.append({'To': 8L, 'Item Name': 'MK-COMCODE8', 'From': 1L})
+
+
+    middle_records_df = pd.DataFrame(middle_records,columns=["all"])
+
+    for col in middle_record_specs_dict:
+        middle_records_df[col["Item Name"]] = middle_records_df["all"].str.slice(col["From"]-1,col["To"])
+
+    middle_records_df = middle_records_df.drop(["all"],axis=1)
+
+    my_cols = list(middle_records_df.columns)
+    my_cols = [c.lower().replace("-","_") for c in my_cols]
+    middle_records_df.columns = my_cols
+
+    middle_records_df["mk_commodity_alpha_all"] = middle_records_df["mk_commodity_alpha_all"].str.strip()
+
+    write_middle_records_to_db(middle_records_df)
+
+
+
+
 
 
 from my_models import EightDigitCode
