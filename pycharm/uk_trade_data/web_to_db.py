@@ -59,7 +59,10 @@ def unzip_url(url):
     return zipfile
 
 
-from write_control_data import raw_control_data_to_database2
+from write_control_data import raw_control_data_to_database
+
+from zipfile import BadZipfile
+
 def find_new_files_and_add_to_database():
 
     #Start with control files
@@ -70,10 +73,15 @@ def find_new_files_and_add_to_database():
         url_full = url["url_full"]
         file_name = url["file_name"]
 
-        zip_file = unzip_url(url_full)
+        print url_full
 
-        raw_control_data_to_database2(zip_file, file_name)
-        break
+        try:
+            zip_file = unzip_url(url_full)
+        except BadZipfile:
+            continue
+
+        raw_control_data_to_database(zip_file, file_name)
+
 
 
 

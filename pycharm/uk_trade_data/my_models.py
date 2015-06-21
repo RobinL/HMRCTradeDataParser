@@ -190,6 +190,7 @@ class RawFileLog(Base):
 
     id = Column(Integer, primary_key=True)
     file_name = String(40)
+    url = String(120)
 
 
 
