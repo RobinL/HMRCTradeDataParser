@@ -35,6 +35,8 @@ $.when(p1,p2,p3).done(function(worlddata,countrydata, select_data) {
     IMPORTAPP.countrydata = d3.csv.parse(countrydata[0])
     IMPORTAPP.select_box_data = select_data[0]["csv_like_data"]
 
+    draw_map()
+    draw_map_key()
     create_filters()
     get_new_imports_data()
 })
@@ -243,11 +245,10 @@ function get_new_imports_data() {
     
     $.when(p1).done(function(data) {
 
-        debugger;
 
 
 
-        IMPORTAPP.filtered_data = data
+        IMPORTAPP.filtered_data = data["csv_like_data"]
 
         if (data["csv_like_data"].length>0) {
 
@@ -270,7 +271,7 @@ function get_new_imports_data() {
 function update_filters() {
 
     d3.select("#filters").html("")
-    var data = IMPORTAPP.importdata
+    var data = IMPORTAPP.filtered_data
     filters = []
 
     var keys =  ["country", "product", "port", "quantity"]
@@ -390,9 +391,9 @@ function create_filters() {
 
     _.each(filters_dict, function(d,k,i){ 
 
-        if (k != "product") {
+        
             d.unshift({key: "All", value: "All"})
-        }
+        
 
         filters.push({filter_name: k, filter_options: d})
         
@@ -478,8 +479,8 @@ function get_multi_select_array(selection_box_d3_selection) {
 
 function filter_data() {
 
-    var keys = _.keys(IMPORTAPP.importdata[0])
-    var data = IMPORTAPP.importdata
+    var keys = _.keys(IMPORTAPP.filtered_data[0])
+    var data = IMPORTAPP.filtered_data
 
 
     for (var i = 0; i < 3; i++) {
@@ -681,32 +682,10 @@ function draw_map(world, names) {
         .data(countries)
 
     shapes
-        .on("click", function(d, i) {
-
-            country = d.name;
-            // d3.select("#country").attr("value", country)
-
-            //Get countries
-            var this_data = IMPORTAPP.importdata.map(function(d) {
-                return d["country"]
-            })
-
-            var unique_options = _.uniq(this_data)
-
-
-            if (_.contains(unique_options, country)) {
-
-                document.getElementById('country').value = country;
-            } else {
-
-                document.getElementById('country').value = "All";
-            }
-
-            redraw()
-
-
-        })
+     
         .on("mousemove", function(d) {
+
+
 
             if (d["name"] in IMPORTAPP.country_totals) {
 
@@ -743,29 +722,11 @@ function map_tooltip_html(d) {
     var template = Handlebars.compile(source)
 
 
-    var products = d3.select("#product");
-    var products = get_multi_select_array(products);
-    if (_.contains(products, "All")) {
-        product = "All products"
-    } else {
-        product = products.join()
-    }
-
-    var port = d3.select("#port");
-    ports = get_multi_select_array(port);
-    if (_.contains(ports, "All")) {
-        port = "All ports"
-    } else {
-        port = ports.join()
-    }
-
-    var num_consignments = IMPORTAPP.country_totals[this_country]["num_consignments"]
+    var quantity_exports = IMPORTAPP.country_totals[this_country]["quantity_exports"]
 
     var html = template({
-        num_consignments: num_consignments,
-        product: product,
-        port: port,
-        country: this_country
+        quantity_exports: quantity_exports,
+        this_country: this_country
     })
 
     return html
@@ -794,17 +755,17 @@ function get_consignments_by_country() {
     final_totals = {}
     _.forEach(totals, function(d) {
         final_totals[d["key"]] = {
-            "num_consignments": d["values"]["sum"]
+            "quantity_exports": d["values"]["sum"]
         }
     })
 
     most_consignments = _.max(final_totals, function(value, key) {
-        return value["num_consignments"]
+        return value["quantity_exports"]
     })
-    most_consignments = most_consignments["num_consignments"]
+    most_consignments = most_consignments["quantity_exports"]
 
     _.forEach(final_totals, function(d) {
-        d["proportion_of_max"] = d["num_consignments"] / most_consignments
+        d["proportion_of_max"] = d["quantity_exports"] / most_consignments
     })
 
 
@@ -947,9 +908,9 @@ function key_colours() {
 
     //update numbers
     my_max = _.max(IMPORTAPP.country_totals, function(d) {
-        return d["num_consignments"]
+        return d["quantity_exports"]
     })
-    my_max = my_max["num_consignments"]
+    my_max = my_max["quantity_exports"]
 
     var axis_scale = d3.scale.log().domain([1, my_max]).range([300, 0])
 
@@ -999,7 +960,7 @@ function first_csv(data) {
     d3.selectAll(".hideonload").style("visibility","visible");
     d3.selectAll(".hideafterload").remove()
 
-    IMPORTAPP.importdata = data
+    IMPORTAPP.filtered_data = data
     IMPORTAPP.csv_loaded=true
 
     create_filters()
@@ -1014,7 +975,7 @@ function first_csv(data) {
 
 function update_csv(data) {
 
-    IMPORTAPP.importdata = data
+    IMPORTAPP.filtered_data = data
      create_filters()
      redraw()
 

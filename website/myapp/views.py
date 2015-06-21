@@ -16,7 +16,7 @@ def get_selection_box_data():
 
     select distinct  'product' as select_box, mk_comcode8 as key,mk_comcode8 || " -  " || mk_commodity_alpha_all as value
     from eightdigitcodes
-    where cast(substr(mk_comcode8,1,2) as integer) < 23
+    where cast(substr(mk_comcode8,1,2) as integer) < 23 and mk_comcode8 in (select distinct maf_comcode8 from imports)
 
     union all
 
@@ -156,6 +156,7 @@ def get_imports_data2(countries_list,ports_list,products_list,dates_list):
 
 
     group by country_name, mk_commodity_alpha_all, port_name
+    limit 500
 
     """
 
@@ -168,7 +169,7 @@ def get_imports_data2(countries_list,ports_list,products_list,dates_list):
     for i in [[countries_all, countries_list, "and c.alpha_code in ({countries_list})"],
               [ports_all, ports_list, 'and p.alpha_code in ({ports_list})'],
               [products_all, products_list, "and i.maf_comcode8 in ({products_list})"],
-              [months_all, months_list, "and i.maf_account_mm in {:months_list})"],
+              [months_all, months_list, "and i.maf_account_mm in ({months_list})"],
               [years_all,years_list,"and i.maf_account_ccyy in ({years_list})"]]:
 
         if "All" not in i[1]:
@@ -177,16 +178,19 @@ def get_imports_data2(countries_list,ports_list,products_list,dates_list):
 
     sql2 = sql.format(queryconditions=queryconditions)
 
-
-    #protect against injection attack
-    result = db.session.execute(sql2.format(**{"products_list": products_list,
+    sql3 = sql2.format(**{"products_list": products_list,
                                       "ports_list": ports_list,
                                       "countries_list": countries_list,
                                       "years_list": years_list,
                                       "months_list": months_list,
-                                      }))
+                                      })
 
 
+    #protect against injection attack
+    result = db.session.execute(sql3)
+
+
+    print sql3
 
     return result
 
