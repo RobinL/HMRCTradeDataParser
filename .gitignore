@@ -3,3 +3,6 @@ pycharm/data
 *.pyc
 .idea
 .ipynb_checkpoints
+.env
+*.env
+*.db-journal

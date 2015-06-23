@@ -3,9 +3,11 @@ import pandas as pd
 from utils import get_fields_df
 
 
+MAX_IMPORT_ROWS = 10
 
+def raw_control_data_to_database(zipfile,url_info):
 
-def raw_control_data_to_database(zipfile,filename):
+    filename = url_info["file_name"]
 
     with zipfile.open(filename) as fh:
         lines = fh.readlines()
@@ -67,19 +69,19 @@ def raw_control_data_to_database(zipfile,filename):
 
 
 
-
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 
 from my_models import EightDigitCode
 from my_database import session
 def write_middle_records_to_db(df):
 
-    for row in df.iterrows():
+    for row in df[:MAX_IMPORT_ROWS].iterrows():
         r = row[1]
 
         try:
             session.query(EightDigitCode).filter(EightDigitCode.mk_comcode8 == r["mk_comcode8"]).one()
-        except:
+        except NoResultFound:
 
             ed = EightDigitCode()
 
@@ -120,6 +122,9 @@ def write_middle_records_to_db(df):
             ed.mk_comcode8 = r["mk_comcode8"]
 
             session.add(ed)
+        except MultipleResultsFound:
+            logger.debug("Multiple rows found for code {}".format(r["mk_comcode8"]))
+
     session.commit()
 
 from my_models import EightDigitCodeHeader

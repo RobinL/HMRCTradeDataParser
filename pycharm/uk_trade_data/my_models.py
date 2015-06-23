@@ -131,15 +131,16 @@ class Importer(Base):
     id = Column(Integer,primary_key = True)
 
     ia_record_type = Column(String(2))
-    ia_name = Column(String(105))
-    ia_addr_1 = Column(String(30))
-    ia_addr_2 = Column(String(30))
-    ia_addr_3 = Column(String(30))
-    ia_addr_4 = Column(String(30))
-    ia_addr_5 = Column(String(30))
-    ia_pcode = Column(String(8))
-    ia_comcode_count = Column(String(3))
-    ia_comcode = Column(String(4235))
+    ia_name = Column(String(105), index=True)
+    ia_addr_1 = Column(String(30), index=True)
+    ia_addr_2 = Column(String(30), index=True)
+    ia_addr_3 = Column(String(30), index=True)
+    ia_addr_4 = Column(String(30), index=True)
+    ia_addr_5 = Column(String(30), index=True)
+    ia_pcode = Column(String(8), index=True)
+    # ia_comcode_count = Column(String(3))
+    # ia_comcode = Column(String(4235))
+
 
     comcodes = relationship("ImporterEightDigitCodes",cascade="delete")
 
@@ -152,6 +153,10 @@ class ImporterEightDigitCodes(Base):
     #Establish this as linked to the comcode table.
     comcode8 = Column(String(8), ForeignKey("eightdigitcodes.mk_comcode8"))
     comcode = relationship("EightDigitCode")
+
+    month_of_import = Column(Integer)
+    year_of_import = Column(Integer)
+
 
     #Establish
     importer_id = Column(Integer, ForeignKey("importers.id"))
@@ -189,8 +194,8 @@ class RawFileLog(Base):
     __tablename__ = "rawfiles"
 
     id = Column(Integer, primary_key=True)
-    file_name = String(40)
-    url = String(120)
+    file_name = Column(String(40))
+    url = Column(String(120))
 
 
 
