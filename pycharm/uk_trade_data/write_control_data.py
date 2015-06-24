@@ -3,7 +3,10 @@ import pandas as pd
 from utils import get_fields_df
 
 
-MAX_IMPORT_ROWS = 10
+MAX_IMPORT_ROWS = 50000000000000000
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 def raw_control_data_to_database(zipfile,url_info):
 
@@ -76,7 +79,13 @@ from my_models import EightDigitCode
 from my_database import session
 def write_middle_records_to_db(df):
 
+    counter = 0
     for row in df[:MAX_IMPORT_ROWS].iterrows():
+
+        counter +=1
+        if counter % 500 ==0:
+            logger.debug("done {} rows".format(counter))
+
         r = row[1]
 
         try:

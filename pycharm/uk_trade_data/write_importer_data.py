@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-MAX_IMPORT_ROWS = 10
+MAX_IMPORT_ROWS = 50000000000000
 
 
 def raw_importer_data_to_database_old(file_path):
@@ -135,7 +135,7 @@ def write_middle_records_to_db(df,month, year):
     for row in df[:MAX_IMPORT_ROWS].iterrows():
 
         counter +=1
-        if counter % 2000 == 0:
+        if counter % 500 == 0:
             logger.debug("processed {} records".format(counter))
 
         r = row[1]

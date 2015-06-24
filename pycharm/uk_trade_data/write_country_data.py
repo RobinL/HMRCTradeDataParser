@@ -10,7 +10,8 @@ def download_and_insert_country_data():
     url = "https://www.uktradeinfo.com/CodesAndGuides/Documents/Country_alpha.xls"
     df = pd.read_excel(url)
 
-    df.fillna("")
+    df = df.fillna("")
+    df = df.drop_duplicates("Alpha Code")
 
     for row in df.iterrows():
 

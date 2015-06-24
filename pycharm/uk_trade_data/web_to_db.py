@@ -81,6 +81,7 @@ from zipfile import BadZipfile
 def find_new_files_and_add_to_database():
 
     write_meta_data_to_db()
+
     download_and_insert_country_data()
     download_and_insert_port_data()
 
@@ -90,7 +91,7 @@ def find_new_files_and_add_to_database():
         
         urls = get_urls(specific_url_part)
 
-        for url_info in urls[:2]:
+        for url_info in urls:
 
             logger.debug("file: {}".format(url_info["url_full"]))
           
@@ -121,11 +122,13 @@ def find_new_files_and_add_to_database():
 
     #Control files
 
-    get_and_iterate_urls("SMKI19", raw_import_data_to_database)
+
 
     get_and_iterate_urls("SMKA12", raw_control_data_to_database)
 
     get_and_iterate_urls("SIAI11", raw_importer_data_to_database)
+
+    get_and_iterate_urls("SMKI19", raw_import_data_to_database)
 
 
 

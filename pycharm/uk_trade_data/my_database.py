@@ -6,7 +6,15 @@ from sqlalchemy.ext.declarative import declarative_base
 
 p = r"C:\Users\Robin\Desktop\trade_data\trade_data.db"
 
-engine = create_engine('sqlite:///' + p)
+
+
+import urllib
+
+params = urllib.quote_plus('DRIVER={SQL Server};SERVER=.\SQLEXPRESS;DATABASE=TRADEDATA;Trusted_Connection=Yes')
+engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
+#engine = create_engine('mssql+pyodbc://SQLEXPRESS/TRADEDATA;Trusted_Connection=Yes')
+
+#engine = create_engine('sqlite:///' + p)
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()

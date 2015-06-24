@@ -2,7 +2,11 @@ __author__ = 'Robin'
 import pandas as pd
 from .utils import get_fields_df
 
-MAX_IMPORT_ROWS = 10
+MAX_IMPORT_ROWS = 5000000000000000000
+
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 def raw_import_data_to_database_old(file_path):
     #Text file is split - first line is a header records (not column names)
@@ -158,7 +162,14 @@ def write_header_record_to_db(df):
 
 def write_middle_records_to_db(df):
 
+    counter = 0
     for row in df[:MAX_IMPORT_ROWS].iterrows():
+
+        counter +=1
+        if counter % 500 ==0:
+            logger.debug("done {} rows".format(counter))
+
+
         r = row[1]
 
         i = Import()
