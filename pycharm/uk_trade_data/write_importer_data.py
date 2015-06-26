@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-MAX_IMPORT_ROWS = 1000
+MAX_IMPORT_ROWS = 1000000000
 
 
 

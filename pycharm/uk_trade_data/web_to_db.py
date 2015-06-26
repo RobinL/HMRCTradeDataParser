@@ -1,6 +1,6 @@
 __author__ = 'Robin'
 
-MAX_URLS = 4
+MAX_URLS = 5
 
 # url  = "https://www.uktradeinfo.com/Statistics/Documents/Forms/AllItems.aspx?SortField=Modified&SortDir=Desc"
 #
@@ -82,10 +82,10 @@ from zipfile import BadZipfile
 
 def find_new_files_and_add_to_database():
 
-    #write_meta_data_to_db()
+    write_meta_data_to_db()
 
-    #download_and_insert_country_data()
-    #download_and_insert_port_data()
+    download_and_insert_country_data()
+    download_and_insert_port_data()
 
     # Start with control files
 

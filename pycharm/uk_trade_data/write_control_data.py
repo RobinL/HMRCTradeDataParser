@@ -4,7 +4,7 @@ from utils import get_fields_df
 
 from my_models import EightDigitCode
 from my_database import session
-MAX_IMPORT_ROWS = 1000
+MAX_IMPORT_ROWS = 1000000000
 import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)

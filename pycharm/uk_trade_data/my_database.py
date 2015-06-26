@@ -21,8 +21,8 @@ CONNECTION_STRING = os.environ.get('CONNECTION_STRING')
 import urllib
 
 #params = urllib.quote_plus('DRIVER={SQL Server};SERVER=.\SQLEXPRESS;DATABASE=TRADEDATA;Trusted_Connection=Yes')
-params = urllib.quote_plus(CONNECTION_STRING)
-engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
+# params = urllib.quote_plus(CONNECTION_STRING)
+# engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
 #engine = create_engine('mssql+pyodbc://SQLEXPRESS/TRADEDATA;Trusted_Connection=Yes')
 
 p = r"C:\Users\Robin\Desktop\trade_data\trade_data_new.db"
