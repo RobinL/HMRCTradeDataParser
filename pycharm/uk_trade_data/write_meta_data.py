@@ -8,6 +8,9 @@ def write_meta_data_to_db():
 
     meta_data_csv = pd.read_csv("specs/fields_meta_data.csv", encoding="utf8")
 
+    session.query(MetaData).delete()
+    session.commit()
+
     for row in meta_data_csv.iterrows():
 
         r = row[1]

@@ -2,79 +2,14 @@ __author__ = 'Robin'
 import pandas as pd
 from .utils import get_fields_df
 
-MAX_IMPORT_ROWS = 5000000000000000000
+MAX_IMPORT_ROWS = 1000
 
 import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-def raw_import_data_to_database_old(file_path):
-    #Text file is split - first line is a header records (not column names)
-    #Middle records are the data
-    #Final record is also different
 
-    with open(file_path) as fh:
-        lines = fh.readlines()
-        header_record = lines[0]
-        middle_records =  lines[1:-1]
-        tail_record = lines[-1]
-
-    #Header record
-    #The specification of the header record from https://www.uktradeinfo.com/Statistics/Documents/Tech_Spec_SMKE19.DOC
-    header_record_specs = pd.read_csv("specs/import_header_record_specs.csv")
-    header_record_specs = get_fields_df(header_record_specs)
-
-    header_record_dict = {}
-    for row in header_record_specs.iterrows():
-        r = row[1]
-        key = r["Item Name"]
-        value = header_record[r["From"]-1:r["To"]].strip()
-        header_record_dict[key] = value
-
-    header_record_df = pd.DataFrame([header_record_dict])
-    header_record_df.columns = [c.lower().replace("-","_") for c in header_record_df.columns]
-
-    write_header_record_to_db(header_record_df)
-
-
-
-    #Tail record - currently I don't write this out to db as I don't know what it contains
-    #Using the specification of the tail record from https://www.uktradeinfo.com/Statistics/Documents/Tech_Spec_SMKE19.DOC
-    tail_record_specs = pd.read_csv("specs/import_trailer_record_specs.csv")
-    tail_record_specs = get_fields_df(tail_record_specs)
-
-    tail_record_dict = {}
-    for row in tail_record_specs.iterrows():
-        r = row[1]
-        key = r["Item Name"]
-        value = tail_record[r["From"]-1:r["To"]].strip()
-        tail_record_dict[key] = value
-
-    tail_record_df = pd.DataFrame([tail_record_dict])
-
-
-
-    #Middle records - this is the bulk of the data
-
-    middle_record_specs = pd.read_csv("specs/import_middle_record_specs.csv")
-    middle_record_specs = get_fields_df(middle_record_specs)
-
-    middle_record_specs_dict = middle_record_specs.to_dict(orient="records")
-
-    #Add in the 8 digit comcode - this isn't in the spec
-    middle_record_specs_dict.append({'To': 8L, 'Item Name': 'MAF-COMCODE8', 'From': 1L})
-
-    middle_records_df = pd.DataFrame(middle_records,columns=["all"])
-
-    for col in middle_record_specs_dict:
-        middle_records_df[col["Item Name"]] = middle_records_df["all"].str.slice(col["From"]-1,col["To"])
-    middle_records_df = middle_records_df.drop(["all", "MAF-ITEM-FIELDS"],axis=1)
-    middle_records_df.columns = [c.lower().replace("-","_") for c in middle_records_df.columns]
-
-    write_middle_records_to_db(middle_records_df)
-
-
-def raw_import_data_to_database(zipfile, url_info):
+def raw_import_data_to_database(zipfile, url_info,rawfile):
     #Text file is split - first line is a header records (not column names)
     #Middle records are the data
     #Final record is also different
@@ -139,8 +74,10 @@ def raw_import_data_to_database(zipfile, url_info):
     middle_records_df = middle_records_df.drop(["all", "MAF-ITEM-FIELDS"],axis=1)
     middle_records_df.columns = [c.lower().replace("-","_") for c in middle_records_df.columns]
 
-    write_middle_records_to_db(middle_records_df)
+    write_middle_records_to_db(middle_records_df,rawfile)
 
+    rows = session.query(Import).count()
+    logger.debug("there are now {} records in the import table".format(rows))
 
 
 from my_models import Import, ImportHeader
@@ -160,7 +97,7 @@ def write_header_record_to_db(df):
         session.add(ihr)
     session.commit()
 
-def write_middle_records_to_db(df):
+def write_middle_records_to_db(df,rawfile):
 
     counter = 0
     for row in df[:MAX_IMPORT_ROWS].iterrows():
@@ -168,6 +105,7 @@ def write_middle_records_to_db(df):
         counter +=1
         if counter % 500 ==0:
             logger.debug("done {} rows".format(counter))
+            session.commit()
 
 
         r = row[1]
@@ -203,6 +141,7 @@ def write_middle_records_to_db(df):
 
         #Not part of file spec but enables easier joins
         i.maf_comcode8 = r["maf_comcode8"]
+        i.rawfile = rawfile
 
         session.add(i)
     session.commit()

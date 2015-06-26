@@ -2,13 +2,14 @@ __author__ = 'Robin'
 import pandas as pd
 from utils import get_fields_df
 
-
-MAX_IMPORT_ROWS = 50000000000000000
+from my_models import EightDigitCode
+from my_database import session
+MAX_IMPORT_ROWS = 1000
 import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-def raw_control_data_to_database(zipfile,url_info):
+def raw_control_data_to_database(zipfile,url_info, rawfile):
 
     filename = url_info["file_name"]
 
@@ -66,7 +67,10 @@ def raw_control_data_to_database(zipfile,url_info):
 
     middle_records_df["mk_commodity_alpha_all"] = middle_records_df["mk_commodity_alpha_all"].str.strip()
 
-    write_middle_records_to_db(middle_records_df)
+    write_middle_records_to_db(middle_records_df,rawfile)
+
+    rows = session.query(EightDigitCode).count()
+    logger.debug("there are now {} records in the eightdigitcodes table".format(rows))
 
 
 
@@ -75,64 +79,77 @@ def raw_control_data_to_database(zipfile,url_info):
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 
-from my_models import EightDigitCode
-from my_database import session
-def write_middle_records_to_db(df):
+
+def write_middle_records_to_db(df,rawfile):
 
     counter = 0
+    #This assumes we iterate backwards through the files to make sure the files on record are the 'most recent'
+    #First get a list of all the existing eight digit codes
+
+    existing_codes = session.query(EightDigitCode.mk_comcode8).all()
+    codes_set = set([c[0] for c in existing_codes])
+
+
     for row in df[:MAX_IMPORT_ROWS].iterrows():
 
         counter +=1
         if counter % 500 ==0:
             logger.debug("done {} rows".format(counter))
+            session.commit()
 
         r = row[1]
 
-        try:
-            session.query(EightDigitCode).filter(EightDigitCode.mk_comcode8 == r["mk_comcode8"]).one()
-        except NoResultFound:
+        if r["mk_comcode8"] in codes_set:
+            continue
 
-            ed = EightDigitCode()
 
-            ed.mk_comcode = r["mk_comcode"]
-            ed.mk_intra_extra_ind = r["mk_intra_extra_ind"]
-            ed.mk_intra_mm_on = r["mk_intra_mm_on"]
-            ed.mk_intra_yy_on = r["mk_intra_yy_on"]
-            ed.mk_intra_mm_off = r["mk_intra_mm_off"]
-            ed.mk_intra_yy_off = r["mk_intra_yy_off"]
-            ed.mk_extra_mm_on = r["mk_extra_mm_on"]
-            ed.mk_extra_yy_on = r["mk_extra_yy_on"]
-            ed.mk_extra_mm_off = r["mk_extra_mm_off"]
-            ed.mk_extra_yy_off = r["mk_extra_yy_off"]
-            ed.mk_non_trade_id = r["mk_non_trade_id"]
-            ed.mk_sitc_no = r["mk_sitc_no"]
-            ed.mk_sitc_ind = r["mk_sitc_ind"]
-            ed.mk_sitc_conv_a = r["mk_sitc_conv_a"]
-            ed.mk_sitc_conv_b = r["mk_sitc_conv_b"]
-            ed.mk_cn_q2 = r["mk_cn_q2"]
-            ed.mk_supp_arrivals = r["mk_supp_arrivals"]
-            ed.mk_supp_despatches = r["mk_supp_despatches"]
-            ed.mk_supp_imports = r["mk_supp_imports"]
-            ed.mk_supp_exports = r["mk_supp_exports"]
-            ed.mk_sub_group_arr = r["mk_sub_group_arr"]
-            ed.mk_item_arr = r["mk_item_arr"]
-            ed.mk_sub_group_desp = r["mk_sub_group_desp"]
-            ed.mk_item_desp = r["mk_item_desp"]
-            ed.mk_sub_group_imp = r["mk_sub_group_imp"]
-            ed.mk_item_imp = r["mk_item_imp"]
-            ed.mk_sub_group_exp = r["mk_sub_group_exp"]
-            ed.mk_item_exp = r["mk_item_exp"]
-            ed.mk_qty1_alpha = r["mk_qty1_alpha"]
-            ed.mk_qty2_alpha = r["mk_qty2_alpha"]
-            ed.mk_commodity_alpha_1 = r["mk_commodity_alpha_1"]
-            ed.mk_commodity_alpha_2 = r["mk_commodity_alpha_2"]
-            ed.mk_commodity_alpha_all = r["mk_commodity_alpha_all"]
+        #This code is right for the initial database build.  However, when we get new records we will want to check each record to see whether we want to update it
 
-            ed.mk_comcode8 = r["mk_comcode8"]
 
-            session.add(ed)
-        except MultipleResultsFound:
-            logger.debug("Multiple rows found for code {}".format(r["mk_comcode8"]))
+        ed = EightDigitCode()
+
+        ed.mk_comcode = r["mk_comcode"]
+        ed.mk_intra_extra_ind = r["mk_intra_extra_ind"]
+        ed.mk_intra_mm_on = r["mk_intra_mm_on"]
+        ed.mk_intra_yy_on = r["mk_intra_yy_on"]
+        ed.mk_intra_mm_off = r["mk_intra_mm_off"]
+        ed.mk_intra_yy_off = r["mk_intra_yy_off"]
+        ed.mk_extra_mm_on = r["mk_extra_mm_on"]
+        ed.mk_extra_yy_on = r["mk_extra_yy_on"]
+        ed.mk_extra_mm_off = r["mk_extra_mm_off"]
+        ed.mk_extra_yy_off = r["mk_extra_yy_off"]
+        ed.mk_non_trade_id = r["mk_non_trade_id"]
+        ed.mk_sitc_no = r["mk_sitc_no"]
+        ed.mk_sitc_ind = r["mk_sitc_ind"]
+        ed.mk_sitc_conv_a = r["mk_sitc_conv_a"]
+        ed.mk_sitc_conv_b = r["mk_sitc_conv_b"]
+        ed.mk_cn_q2 = r["mk_cn_q2"]
+        ed.mk_supp_arrivals = r["mk_supp_arrivals"]
+        ed.mk_supp_despatches = r["mk_supp_despatches"]
+        ed.mk_supp_imports = r["mk_supp_imports"]
+        ed.mk_supp_exports = r["mk_supp_exports"]
+        ed.mk_sub_group_arr = r["mk_sub_group_arr"]
+        ed.mk_item_arr = r["mk_item_arr"]
+        ed.mk_sub_group_desp = r["mk_sub_group_desp"]
+        ed.mk_item_desp = r["mk_item_desp"]
+        ed.mk_sub_group_imp = r["mk_sub_group_imp"]
+        ed.mk_item_imp = r["mk_item_imp"]
+        ed.mk_sub_group_exp = r["mk_sub_group_exp"]
+        ed.mk_item_exp = r["mk_item_exp"]
+        ed.mk_qty1_alpha = r["mk_qty1_alpha"]
+        ed.mk_qty2_alpha = r["mk_qty2_alpha"]
+        ed.mk_commodity_alpha_1 = r["mk_commodity_alpha_1"]
+        ed.mk_commodity_alpha_2 = r["mk_commodity_alpha_2"]
+        ed.mk_commodity_alpha_all = r["mk_commodity_alpha_all"]
+
+        ed.mk_comcode8 = r["mk_comcode8"]
+
+        ed.rawfile = rawfile
+
+        session.add(ed)
+
+        codes_set = codes_set.union(r["mk_comcode8"])
+
 
     session.commit()
 

@@ -4,7 +4,7 @@ from my_models import Country, Port
 from my_database import session
 import pandas as pd
 
-def download_and_insert_country_data():
+def download_and_insert_country_data(overwrite = True):
     #Create table of countries and their ISO equivalents
 
     url = "https://www.uktradeinfo.com/CodesAndGuides/Documents/Country_alpha.xls"
@@ -13,7 +13,11 @@ def download_and_insert_country_data():
     df = df.fillna("")
     df = df.drop_duplicates("Alpha Code")
 
+    session.query(Country).delete()
+    session.commit()
+
     for row in df.iterrows():
+
 
         r = row[1]
         c = Country()
@@ -26,7 +30,7 @@ def download_and_insert_country_data():
 
     session.commit()
 
-def download_and_insert_port_data():
+def download_and_insert_port_data(overwrite = True):
     url = "https://www.uktradeinfo.com/CodesAndGuides/Documents/Port_codes.xls"
     df_air = pd.read_excel(url, "Airport codes")
     df_sea = pd.read_excel(url, "Seaport codes")
@@ -42,6 +46,9 @@ def download_and_insert_port_data():
 
     df.fillna("")
 
+    session.query(Port).delete()
+    session.commit()
+
     for row in df.iterrows():
         r = row[1]
         p = Port()
@@ -50,4 +57,6 @@ def download_and_insert_port_data():
         p.sequence_code = r["Sequence Code"]
 
         session.add(p)
+
+    session.commit()
 

@@ -1,20 +1,37 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+import pyodbc
 
 
+#get connection string from .env
+import os
+env_path = r".env"
+if os.path.exists(env_path):
+    for line in open(env_path):
+        var = line.strip().split('=',1)
+        if len(var) == 2:
+            os.environ[var[0]] = var[1]
 
-p = r"C:\Users\Robin\Desktop\trade_data\trade_data.db"
+CONNECTION_STRING = os.environ.get('CONNECTION_STRING')
+
 
 
 
 import urllib
 
-params = urllib.quote_plus('DRIVER={SQL Server};SERVER=.\SQLEXPRESS;DATABASE=TRADEDATA;Trusted_Connection=Yes')
+#params = urllib.quote_plus('DRIVER={SQL Server};SERVER=.\SQLEXPRESS;DATABASE=TRADEDATA;Trusted_Connection=Yes')
+params = urllib.quote_plus(CONNECTION_STRING)
 engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
 #engine = create_engine('mssql+pyodbc://SQLEXPRESS/TRADEDATA;Trusted_Connection=Yes')
 
-#engine = create_engine('sqlite:///' + p)
+p = r"C:\Users\Robin\Desktop\trade_data\trade_data_new.db"
+engine = create_engine('sqlite:///' + p)
+
+# def connect():
+#     return pyodbc.connect(CONNECTION_STRING)
+# engine = sqlalchemy.create_engine('mssql://', creator=connect)
+
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()

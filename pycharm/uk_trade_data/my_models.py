@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
 from sqlalchemy.orm import relationship
 from my_database import Base
 
@@ -36,13 +36,14 @@ class Import(Base):
     maf_value = Column(String(16))
     maf_quantity_1 = Column(String(14))
     maf_quantity_2 = Column(String(14))
+    source_file_id = Column(Integer, ForeignKey("rawfiles.id"))
 
     #Not part of file spec but enables easier joins
     #maf_comcode8 = Column(String(8), ForeignKey("eightdigitcodes.mk_comcode8"))
     maf_comcode8 = Column(String(8))
 
 
-
+    rawfile = relationship("RawFileLog")
     #Establish this as linked to the comcode table.
     #comcode = relationship("EightDigitCode")
     #country = relationship("Country")
@@ -109,6 +110,8 @@ class EightDigitCode(Base):
 
     #Not part of spec but makes for easier joins
     mk_comcode8 = Column(String(8), index=True,unique=True)
+    source_file_id = Column(Integer, ForeignKey("rawfiles.id"))
+    rawfile = relationship("RawFileLog")
 
     #We want to be able to pick up importers from a code if they exist
     #importers = relationship("ImporterEightDigitCodes")
@@ -135,13 +138,19 @@ class Importer(Base):
     id = Column(Integer,primary_key = True)
 
     ia_record_type = Column(String(2))
-    ia_name = Column(String(105), index=True)
-    ia_addr_1 = Column(String(30), index=True)
-    ia_addr_2 = Column(String(30), index=True)
-    ia_addr_3 = Column(String(30), index=True)
-    ia_addr_4 = Column(String(30), index=True)
-    ia_addr_5 = Column(String(30), index=True)
-    ia_pcode = Column(String(8), index=True)
+    ia_name = Column(String(105))
+    ia_addr_1 = Column(String(30))
+    ia_addr_2 = Column(String(30))
+    ia_addr_3 = Column(String(30))
+    ia_addr_4 = Column(String(30))
+    ia_addr_5 = Column(String(30))
+    ia_pcode = Column(String(8))
+
+    #This is not in the original files from hmrc
+    importer_hash = Column(String(56), index=True)
+
+    source_file_id = Column(Integer,ForeignKey("rawfiles.id"))
+    rawfile = relationship("RawFileLog")
     # ia_comcode_count = Column(String(3))
     # ia_comcode = Column(String(4235))
 
@@ -162,8 +171,11 @@ class ImporterEightDigitCodes(Base):
     month_of_import = Column(Integer)
     year_of_import = Column(Integer)
 
+    source_file_id = Column(Integer, ForeignKey("rawfiles.id"))
+    rawfile = relationship("RawFileLog")
 
-    #Establish
+
+
     importer_id = Column(Integer, ForeignKey("importers.id"))
     impoter = relationship("Importer")
 
@@ -201,6 +213,7 @@ class RawFileLog(Base):
     id = Column(Integer, primary_key=True)
     file_name = Column(String(40))
     url = Column(String(120))
+    processing_completed = Column(Boolean)
 
 
 

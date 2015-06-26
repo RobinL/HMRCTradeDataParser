@@ -1,5 +1,6 @@
 __author__ = 'Robin'
 
+MAX_URLS = 4
 
 # url  = "https://www.uktradeinfo.com/Statistics/Documents/Forms/AllItems.aspx?SortField=Modified&SortDir=Desc"
 #
@@ -53,8 +54,9 @@ def get_urls(specific_url_part):
 
         final_urls.append({"url_full": url_full, "file_name":file_name, "month":month, "year": year})
 
+    final_urls = sorted(final_urls, key=lambda x: float(x["year"])*1000 + float(x["month"]), reverse=True)
 
-    return final_urls
+    return final_urls[:MAX_URLS]
 
 
 from StringIO import StringIO
@@ -80,10 +82,10 @@ from zipfile import BadZipfile
 
 def find_new_files_and_add_to_database():
 
-    write_meta_data_to_db()
+    #write_meta_data_to_db()
 
-    download_and_insert_country_data()
-    download_and_insert_port_data()
+    #download_and_insert_country_data()
+    #download_and_insert_port_data()
 
     # Start with control files
 
@@ -106,22 +108,24 @@ def find_new_files_and_add_to_database():
                 except BadZipfile:
                     logger.info("File from {} was a bad zip file".format(url_info["url_full"]))
                     continue
-           
-                
-
-                add_to_database_function(zip_file, url_info)
 
                 r = RawFileLog()
                 r.file_name = url_info["file_name"]
                 r.url = url_info["url_full"]
+                r.processing_completed = False
+
+                session.add(r)
+                session.commit()
+                
+
+                add_to_database_function(zip_file, url_info,r)
+
+                r.processing_completed = True
 
                 session.add(r)
                 session.commit()
             except MultipleResultsFound:
                 logger.debug("The file {} seems to have been added to the database multiple times".format(file_name))
-
-    #Control files
-
 
 
     get_and_iterate_urls("SMKA12", raw_control_data_to_database)
@@ -129,7 +133,3 @@ def find_new_files_and_add_to_database():
     get_and_iterate_urls("SIAI11", raw_importer_data_to_database)
 
     get_and_iterate_urls("SMKI19", raw_import_data_to_database)
-
-
-
-   
