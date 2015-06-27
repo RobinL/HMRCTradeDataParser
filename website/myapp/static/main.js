@@ -252,15 +252,20 @@ function get_new_imports_data() {
 
 
     p1 = $.getJSON("importsdata2.json", post_data)
+    p2 = $.getJSON("timeseries.json", post_data)
+    p3 = $.getJSON("importers.json", post_data)
     
-    $.when(p1).done(function(data) {
+    
+    $.when(p1,p2,p3).done(function(imports_data, timeseries_data, importers_data) {
 
 
 
 
-        IMPORTAPP.filtered_data = data["csv_like_data"]
+        IMPORTAPP.filtered_data = imports_data[0]["csv_like_data"]
+        IMPORTAPP.timeseries_data = timeseries_data[0]["csv_like_data"]
+        IMPORTAPP.importers_data = importers_data[0]["csv_like_data"]
 
-        if (data["csv_like_data"].length>=0) {
+        if (IMPORTAPP.filtered_data.length>=0) {
 
             get_consignments_by_country()
             var sankey_data = csv_to_sankey_data(IMPORTAPP.filtered_data);
@@ -269,7 +274,14 @@ function get_new_imports_data() {
             map_colours()
             key_colours()
 
+        }
 
+         if (IMPORTAPP.importers_data.length>=0) {
+
+          
+            create_importers_table(IMPORTAPP.importers_data);
+            create_stacked_bar(IMPORTAPP.timeseries_data)
+         
 
         }
 
@@ -278,6 +290,217 @@ function get_new_imports_data() {
 
 }
 
+
+function create_stacked_bar(data) {
+
+
+    // First we need to munge the data into the format specified in https://github.com/mbostock/d3/wiki/Stack-Layout
+
+
+ // {
+ //      "month": "01", 
+ //      "port": "London Heathrow Airport", 
+ //      "quantity": 284699, 
+ //      "year": "2015"
+ //    }, 
+ //    {
+ //      "month": "02", 
+ //      "port": "London Heathrow Airport", 
+ //      "quantity": 22119, 
+ //      "year": "2015"
+ //    }, 
+
+
+    //date  Felixstow  Stanstead  
+    //11-Oct-13   41.62   22.36
+
+
+    //Get list of dates
+    dates = _.uniq(data, function(d) { return d.date; })
+    //Get list of ports
+    ports = _.uniq(data, function(d) { return d.port; })
+
+    final_data = []
+
+      
+    _.each(dates, function(date) {
+        date = date.date
+        var this_row = {}
+        
+        _.each(ports, function(port) {
+            port = port.port
+            this_row[port] = 0
+
+            _.each(data, function(d) {
+                if ((d["port"] == port) & (d["date"] == date)) {
+                    this_row[port] += d["quantity"]
+                } 
+
+            })
+
+        })
+        this_row["date"] = date
+        final_data.push(this_row)
+    })
+
+    data = final_data
+
+
+
+    var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .1);
+
+var y = d3.scale.linear()
+    .rangeRound([height, 0]);
+
+var color = d3.scale.ordinal()
+    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .tickFormat(d3.format(".2s"));
+
+d3.selectAll("#timeseriescontainer svg").remove()
+
+var svg = d3.select("#timeseriescontainer").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+  color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
+
+  data.forEach(function(d) {
+    var y0 = 0;
+    d.ages = color.domain().map(function(name) { return {name: name, y0: y0, y1: y0 += +d[name]}; });
+    d.total = d.ages[d.ages.length - 1].y1;
+  });
+
+  data.sort(function(a, b) { return b.date - a.date; });
+
+  x.domain(data.map(function(d) { return d.date; }));
+  y.domain([0, d3.max(data, function(d) { return d.total; })]);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Population");
+
+  var state = svg.selectAll(".state")
+      .data(data)
+    .enter().append("g")
+      .attr("class", "g")
+      .attr("transform", function(d) { return "translate(" + x(d.date) + ",0)"; });
+
+  state.selectAll("rect")
+      .data(function(d) { return d.ages; })
+    .enter().append("rect")
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return y(d.y1); })
+      .attr("height", function(d) { return y(d.y0) - y(d.y1); })
+      .style("fill", function(d) { return color(d.name); });
+
+  var legend = svg.selectAll(".legend")
+      .data(color.domain().slice().reverse())
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+  legend.append("rect")
+      .attr("x", width - 18)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", color);
+
+  legend.append("text")
+      .attr("x", width - 24)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text(function(d) { return d; });
+
+
+
+}
+
+
+function create_importers_table(table_data) {
+
+    d3.select("#importerstable").remove()
+
+    svgContainer = d3.select("#importerscontainer")
+
+        myTable = svgContainer.append("table")
+                    .attr("class","table table-striped table-bordered table-condensed smalltabletext")
+                    .attr("id", "importerstable")
+                    .append("tbody");
+
+     
+        
+
+
+        headers = _.keys(table_data[0])
+
+        var th =myTable.append("tr")
+
+        th.selectAll("th")
+            .data(headers)
+            .enter()
+            .append("th")
+            .html(function(d){return d})
+
+
+        var tr = myTable.selectAll("tr2").data(table_data).enter().append("tr")
+
+        var td = tr.selectAll("td").data(function(d) {
+
+                return_array = []
+
+                _.each(d, function(j,k) {
+                    return_array.push({value: j, key:k})
+                    
+                })
+
+              
+                return return_array
+
+                })
+                .enter()
+                .append("td")
+                .html(function(d,i) {
+                    
+                   
+                    if (d["key"]=="date") {
+
+                        return d3.time.format("%b %Y")(d3.time.format("%Y-%m-%d").parse(d["value"]))
+                    
+                    }
+                    else {
+                        return d["value"]
+                    }
+                })
+}
 
 
 function update_filters() {
@@ -460,7 +683,6 @@ function create_filters() {
         })
 
     $(".select_boxes").each(function(index) {
-        debugger;
         $(this).select2({width:sizes[index]})
 
     })

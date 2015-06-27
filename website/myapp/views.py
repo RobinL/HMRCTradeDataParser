@@ -1,6 +1,7 @@
 from flask import render_template,  url_for, current_app, request
 from . import myapp
 from . import db
+import datetime
 
 
 
@@ -14,26 +15,8 @@ def get_selection_box_data():
 
     sql = """
 
-    select distinct  'product' as select_box, mk_comcode8 as key,mk_comcode8 || " -  " || mk_commodity_alpha_all as value
-    from eightdigitcodes
-    where cast(substr(mk_comcode8,1,2) as integer) < 23 and mk_comcode8 in (select distinct maf_comcode8 from imports)
-
-    union all
-
-    select distinct  'port' as select_box, alpha_code key,port_name as value
-    from ports
-
-    union all
-
-    select distinct 'country' as select_box, alpha_code as key, country_name as value
-    from countries
-
-    union all
-
-    select distinct 'date' as select_box, maf_account_ccyy || " " || maf_account_mm as key, maf_account_ccyy || " " || maf_account_mm as value
-    from imports
-
-    order by select_box, value
+    select select_box, key, value 
+    from select_box_values
 
 
 
@@ -43,42 +26,21 @@ def get_selection_box_data():
 
     return result
 
-def get_imports_data():
-
-    sql = """
-
-    select  country_name as country,mk_commodity_alpha_all as product,e.mk_comcode8 as product_code,  port_name as port,  sum(cast(maf_value as integer)) as quantity
-    from imports as i
-    left join eightdigitcodes as e
-    on i.maf_comcode8 = e.mk_comcode8
-
-    left join countries as c
-
-    on i.maf_coo_alpha = c.alpha_code
-
-    left join ports as p
-    on p.alpha_code = i.maf_port_alpha
-    where country_name is not null and mk_commodity_alpha_all is not null and port_name is not null and maf_value is not null
-    and cast(substr(e.mk_comcode8,1,2) as integer) < 23
-
-    group by country_name, mk_commodity_alpha_all, port_name
-
-    limit 0
-
-
-    """
-
-    result = db.session.execute(sql)
-
-    return result
 
 # import logging
 # logging.basicConfig()
 # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-def get_imports_data2(countries_list,ports_list,products_list,dates_list):
 
+def quotify(my_list):
+        return (', '.join('"' + item + '"' for item in my_list))
 
+def check_injection(my_list):
+    if len(my_list)>8:
+        return True
+    else:
+        return False    
 
+def get_years_months_list(dates_list):
 
     years_list = []
     months_list = []
@@ -95,104 +57,180 @@ def get_imports_data2(countries_list,ports_list,products_list,dates_list):
         if d[1] not in months_list:
             months_list.append(d[1])
 
+    return {"years_list": years_list, "months_list":months_list}
+
+
+def get_imports_data2(countries_list,ports_list,products_list,dates_list):
+
+
+    d = get_years_months_list(dates_list)
+    months_list = d["months_list"]
+    years_list = d["years_list"]
+
 
     #You can't parametize the in keyword in sqlite which makes using parametized sql very hard for the queries i'm trying to run
     #http://stackoverflow.com/questions/14512228/sqlalchemy-raw-sql-parameter-substitution-with-an-in-clause
 
     #We need some way of santizing the SQL.  Make sure that the length of all of the lists is right.  They're all short so this should be relatively secure.
 
-    products_all = ""
-    countries_all = ""
-    ports_all = ""
-    months_all = ""
-    years_all = ""
+
+    query_dict = {
+    "countries_list" : {"list": countries_list, "sql" : "and country_code in ({countries_list})" } ,
+    "ports_list" : {"list": ports_list, "sql" : "and port_code in ({ports_list})" }, 
+    "products_list" : {"list": products_list, "sql" : "and product_code in ({products_list})" } ,
+    "months_list" : {"list": months_list, "sql" : "and month in ({months_list})" } ,
+    "years_list" : {"list": years_list, "sql" : "and year in ({years_list})" } 
+    }
 
 
-    def quotify(my_list):
-        return (', '.join('"' + item + '"' for item in my_list))
+    queryconditions = ""
+    for key in query_dict:
+        check_injection(query_dict[key]["list"])
+        query_dict[key]["quotify"] = quotify(query_dict[key]["list"])
+        if "All" not in query_dict[key]["quotify"]:
 
-    def check_no_injection(my_list):
-        if len(my_list)>8:
-            return
-
-    check_no_injection(years_list)
-    check_no_injection(months_list)
-    check_no_injection(products_list)
-    check_no_injection(ports_list)
-    check_no_injection(countries_list)
-
-    years_list = quotify(years_list)
-    months_list = quotify(months_list)
-    products_list = quotify(products_list)
-    ports_list = quotify(ports_list)
-    countries_list = quotify(countries_list)
-
-
+            queryconditions += " " + query_dict[key]["sql"]
 
 
     sql = """
-    select  country_name as country,mk_commodity_alpha_all as product,e.mk_comcode8 as product_code,  port_name as port, sum(cast(maf_value as integer)) as quantity
-    from imports as i
+    select country, product, product_code, port, sum(quantity) as quantity from 
+    country_products_port_month
+    where country is not null
 
-    left join eightdigitcodes as e
-    on i.maf_comcode8 = e.mk_comcode8
+    {queryconditions}
 
-    left join countries as c
-    on i.maf_coo_alpha = c.alpha_code
+    group by country, product, product_code, port
+    limit 500
+    """
 
-    left join ports as p
-    on p.alpha_code = i.maf_port_alpha
+    sql2 = sql.format(queryconditions=queryconditions)
 
-    where country_name is not null
-    and mk_commodity_alpha_all is not null
-    and port_name is not null
-    and maf_value is not null
-    and cast(substr(e.mk_comcode8,1,2) as integer) < 23
+    format_dict = {k: query_dict[k]["quotify"] for k in query_dict}
+
+    sql3 = sql2.format(**format_dict)
+
+    #Need to do more to protect against sql injection attack.
+
+    result = db.session.execute(sql3)
+
+    return result
 
 
+def get_timeseries_data(countries_list,ports_list,products_list,dates_list):
+
+
+    d = get_years_months_list(dates_list)
+    months_list = d["months_list"]
+    years_list = d["years_list"]
+
+
+    #You can't parametize the in keyword in sqlite which makes using parametized sql very hard for the queries i'm trying to run
+    #http://stackoverflow.com/questions/14512228/sqlalchemy-raw-sql-parameter-substitution-with-an-in-clause
+
+    #We need some way of santizing the SQL.  Make sure that the length of all of the lists is right.  They're all short so this should be relatively secure.
+
+
+    query_dict = {
+    "countries_list" : {"list": countries_list, "sql" : "and country_code in ({countries_list})" } ,
+    "ports_list" : {"list": ports_list, "sql" : "and port_code in ({ports_list})" }, 
+    "products_list" : {"list": products_list, "sql" : "and product_code in ({products_list})" } ,
+    "months_list" : {"list": months_list, "sql" : "and month in ({months_list})" } ,
+    "years_list" : {"list": years_list, "sql" : "and year in ({years_list})" } 
+    }
+
+
+    queryconditions = ""
+    for key in query_dict:
+        check_injection(query_dict[key]["list"])
+        query_dict[key]["quotify"] = quotify(query_dict[key]["list"])
+        if "All" not in query_dict[key]["quotify"]:
+
+            queryconditions += " " + query_dict[key]["sql"]
+
+
+    sql = """
+    select month, year, port, sum(quantity) as quantity from 
+    country_products_port_month
+    where country is not null
+
+    {queryconditions}
+
+    group by port, month, year
+    limit 500
+    """
+
+    sql2 = sql.format(queryconditions=queryconditions)
+
+    format_dict = {k: query_dict[k]["quotify"] for k in query_dict}
+
+    sql3 = sql2.format(**format_dict)
+
+    #Need to do more to protect against sql injection attack.
+
+    result = db.session.execute(sql3)
+
+    return result
+
+
+def get_importers_data(countries_list,ports_list,products_list,dates_list):
+
+
+    d = get_years_months_list(dates_list)
+    months_list = d["months_list"]
+    years_list = d["years_list"]
+
+
+    #You can't parametize the in keyword in sqlite which makes using parametized sql very hard for the queries i'm trying to run
+    #http://stackoverflow.com/questions/14512228/sqlalchemy-raw-sql-parameter-substitution-with-an-in-clause
+
+    #We need some way of santizing the SQL.  Make sure that the length of all of the lists is right.  They're all short so this should be relatively secure.
+
+
+    query_dict = {
+    "products_list" : {"list": products_list, "sql" : "and e.comcode8 in ({products_list})" } ,
+    "months_list" : {"list": months_list, "sql" : "and month_of_import in ({months_list})" } ,
+    "years_list" : {"list": years_list, "sql" : "and year_of_import in ({years_list})" } 
+    }
+
+
+    queryconditions = ""
+    for key in query_dict:
+        check_injection(query_dict[key]["list"])
+        query_dict[key]["quotify"] = quotify(query_dict[key]["list"])
+        if "All" not in query_dict[key]["quotify"]:
+
+            queryconditions += " " + query_dict[key]["sql"]
+
+
+    sql = """
+    select * from importerseightdigitcodes as e
+    left join importers as i
+    on i.id = e.importer_id 
+    where e.importer_id is not null
+    
 
     {queryconditions}
 
 
-
-    group by country_name, mk_commodity_alpha_all, port_name
     limit 500
-
     """
 
 
 
-
-
-
-    queryconditions = ""
-    for i in [[countries_all, countries_list, "and c.alpha_code in ({countries_list})"],
-              [ports_all, ports_list, 'and p.alpha_code in ({ports_list})'],
-              [products_all, products_list, "and i.maf_comcode8 in ({products_list})"],
-              [months_all, months_list, "and i.maf_account_mm in ({months_list})"],
-              [years_all,years_list,"and i.maf_account_ccyy in ({years_list})"]]:
-
-        if "All" not in i[1]:
-
-            queryconditions += " " + i[2]
-
     sql2 = sql.format(queryconditions=queryconditions)
 
-    sql3 = sql2.format(**{"products_list": products_list,
-                                      "ports_list": ports_list,
-                                      "countries_list": countries_list,
-                                      "years_list": years_list,
-                                      "months_list": months_list,
-                                      })
+    format_dict = {k: query_dict[k]["quotify"] for k in query_dict}
+
+    sql3 = sql2.format(**format_dict)
 
 
-    #protect against injection attack
+    #Need to do more to protect against sql injection attack.
+
     result = db.session.execute(sql3)
 
-
-    print sql3
-
     return result
+
+
 
 import json
 def db_result_to_json_in_d3csv_format(dbresult):
@@ -206,7 +244,6 @@ def db_result_to_json_in_d3csv_format(dbresult):
         return my_dict
 
     final = map(to_dict,fa)
-    print json.dumps(final)
     return final
 
 
@@ -225,20 +262,15 @@ def imports_view():
 
     return render_template('imports.html')
 
-#All json routes are below
 
+
+
+
+
+#All json routes are below
 from flask import jsonify
 
-@myapp.route('/importsdata.json', methods=["GET","POST"])
-def get_imports_json():
-    result = get_imports_data()
-    result = db_result_to_json_in_d3csv_format(result)
 
-
-    resp = jsonify(csv_like_data = result)
-    resp.status_code = 200
-
-    return resp
 
 @myapp.route('/importsdata2.json', methods=["GET","POST"])
 def get_imports_json2():
@@ -275,6 +307,124 @@ def get_imports_json2():
 def get_select_box_json():
     result = get_selection_box_data()
     result = db_result_to_json_in_d3csv_format(result)
+
+
+    resp = jsonify(csv_like_data = result)
+    resp.status_code = 200
+
+    return resp
+
+
+
+
+@myapp.route('/timeseries.json', methods=["GET","POST"])
+def get_timeseries_json():
+
+
+
+    arguments = request.args
+
+    all_arguments_populated = True
+
+    for k in arguments:
+        if request.args[k] == "":
+            all_arguments_populated = False
+
+    if all_arguments_populated:
+
+        countries_list = arguments.getlist("countries[]")
+        ports_list = arguments.getlist("ports[]")
+        products_list = arguments.getlist("products[]")
+        dates_list = arguments.getlist("dates[]")
+
+        result = get_timeseries_data(countries_list,ports_list,products_list,dates_list)
+        result = db_result_to_json_in_d3csv_format(result)
+
+        new_results = []
+
+        for this_result in result:
+
+            new_result = {}
+
+
+            new_result["date"] = datetime.datetime(int(this_result["year"]), int(this_result["month"]), 1).date().isoformat()
+            new_result["port"] = this_result["port"]
+            new_result["quantity"] = this_result["quantity"]
+
+            new_results.append(new_result)
+        result = new_results
+
+
+
+    else:
+        result =  {"csv_like_data":[]}
+
+
+    resp = jsonify(csv_like_data = result)
+    resp.status_code = 200
+
+    print resp
+
+    return resp
+
+import re
+@myapp.route('/importers.json', methods=["GET","POST"])
+def get_importers_json():
+
+    
+
+    arguments = request.args
+
+    all_arguments_populated = True
+
+    for k in arguments:
+        if request.args[k] == "":
+            all_arguments_populated = False
+
+    if all_arguments_populated:
+
+        countries_list = arguments.getlist("countries[]")
+        ports_list = arguments.getlist("ports[]")
+        products_list = arguments.getlist("products[]")
+        dates_list = arguments.getlist("dates[]")
+
+        result = get_importers_data(countries_list,ports_list,products_list,dates_list)
+        result = db_result_to_json_in_d3csv_format(result)
+
+        fields_list = ["ia_name",
+        "ia_addr_1",
+        "ia_addr_2",
+        "ia_addr_3",
+        "ia_addr_4",
+        "ia_addr_5"]
+
+
+        new_results = []
+    
+        for this_result in result:
+
+            new_result = {}
+            new_result["full_address"] = ", ".join([this_result[a].strip().title() for a in fields_list])
+            new_result["full_address"]  = new_result["full_address"] + ", " + this_result["ia_pcode"].strip()
+
+            new_result["full_address"] = re.sub(r"\s{2,100}",r" ",new_result["full_address"])
+            new_result["full_address"] = re.sub(r"(, ){2,100}",r", ",new_result["full_address"])
+
+            new_result["date"] = datetime.datetime(int(this_result["year_of_import"]), int(this_result["month_of_import"]), 1).date().isoformat()
+            new_result["product"] = this_result["comcode8"]
+
+            new_results.append(new_result)
+        result = new_results
+
+
+
+
+
+
+
+
+    else:
+        result =  {"csv_like_data":[]}
 
 
     resp = jsonify(csv_like_data = result)

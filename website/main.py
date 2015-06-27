@@ -2,15 +2,15 @@
 import os
 import logging
 import sys
-root = logging.getLogger()
-root.setLevel(logging.DEBUG)
-ch = logging.StreamHandler(sys.stdout)
-ch.setLevel(logging.DEBUG)
-root.addHandler(ch)
-root.info("Starting logger")
+# root = logging.getLogger()
+# root.setLevel(logging.DEBUG)
+# ch = logging.StreamHandler(sys.stdout)
+# ch.setLevel(logging.DEBUG)
+# root.addHandler(ch)
+# root.info("Starting logger")
 
 if os.path.exists('.env'):
-    root.info('Importing environment from .env...')
+    # root.info('Importing environment from .env...')
     for line in open('.env'):
         var = line.strip().split('=')
         if len(var) == 2:

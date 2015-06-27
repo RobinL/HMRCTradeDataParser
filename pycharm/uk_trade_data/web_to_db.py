@@ -133,3 +133,5 @@ def find_new_files_and_add_to_database():
     get_and_iterate_urls("SIAI11", raw_importer_data_to_database)
 
     get_and_iterate_urls("SMKI19", raw_import_data_to_database)
+
+    #create_derived_tables
