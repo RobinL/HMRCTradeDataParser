@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def get_selection_box_data():
 
     sql = """
-    select select_box, my_key, value 
+    select select_box, key, value 
     from select_box_values
     """
 
@@ -234,7 +234,7 @@ def db_result_to_json_in_d3csv_format(dbresult):
     fa = dbresult.fetchall()
     k  = dbresult.keys()
 
-    fa = [[word.decode("windows-1252") for word in sets] for sets in fa]
+    # fa = [[word.decode("windows-1252") for word in sets] for sets in fa]
 
 
 

@@ -31,7 +31,7 @@ def get_urls(specific_url_part):
 
     final_urls = []
 
-    for y in range(2014,now.year):
+    for y in range(2012,now.year):
         for m in range(1,13):
             url_part = str(y)[-2:]+'{num:02d}'.format(num=m)
             month = m
