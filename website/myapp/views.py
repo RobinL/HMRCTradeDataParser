@@ -28,7 +28,7 @@ def get_selection_box_data():
 # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 def quotify(my_list):
-        return (', '.join("'"" + item + "'"' for item in my_list))
+        return (', '.join("'" + item + "'" for item in my_list))
 
 def check_injection(my_list):
     if len(my_list)>8:
