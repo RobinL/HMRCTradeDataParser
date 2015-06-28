@@ -124,3 +124,15 @@ This is how to create an engine in SQLAlchemy
 	def connect():
 	    return pyodbc.connect("DSN=SQLDemo;UID=<uid>@sdfmyname;PWD=<password>")
 	engine = sqlalchemy.create_engine('mssql://', creator=connect)
+
+A bit more experimenting has found that the following works in Flask SQLAlchemy:
+
+Supposing we have:
+
+Username: username
+password: password
+database:  mydatabase.database.windows.net
+
+and we have set everything up as above, the following can be the SQLALCHEMY_DATABASE_URI
+
+`"mssql+pyodbc://username@mydatabase:password@SQLDemo"`

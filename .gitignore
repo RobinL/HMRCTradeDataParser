@@ -4,5 +4,7 @@ pycharm/data
 .idea
 .ipynb_checkpoints
 .env
-*.env
+website/.env
+website/*.env
+
 *.db-journal

@@ -23,7 +23,18 @@ function resize() {
 
 }
 
-    console.log(targetWidth)
+ var chart = d3.select("svg.timeseries")
+
+    if (!chart.empty()) {
+        aspect = chart.attr("width") / chart.attr("height") * 1
+        var targetWidth = $("#timeseriescontainer").width()
+        targetWidth = Math.min(1200, targetWidth)
+
+        chart.attr("width", targetWidth);
+        chart.attr("height", targetWidth / aspect);
+
+}
+
 
 }
 
@@ -34,7 +45,25 @@ var p1 = $.getJSON("static/world-110m.json")
 var p2 = $.ajax("static/countries.csv")
 var p3 = $.getJSON("selectboxdata.json")
 
-
+var port_colours = d3.scale.ordinal()
+    .range(["#1f77b4",
+"#aec7e8",
+"#ff7f0e",
+"#ffbb78",
+"#d62728",
+"#ff9896",
+"#9467bd",
+"#c5b0d5",
+"#8c564b",
+"#c49c94",
+"#e377c2",
+"#f7b6d2",
+"#7f7f7f",
+"#c7c7c7",
+"#bcbd22",
+"#dbdb8d",
+"#17becf",
+"#9edae5"]);
 
 $.when(p1,p2,p3).done(function(worlddata,countrydata, select_data) {
 
@@ -47,8 +76,18 @@ $.when(p1,p2,p3).done(function(worlddata,countrydata, select_data) {
     create_filters()
     get_new_imports_data()
 
+
+
+    $("#date").val("All").trigger("change") ;
+    $("#country").val("All").trigger("change") ;
+    $("#port").val("All").trigger("change") ;
+    $("#product").val("01012100").trigger("change") ;
+
     resize()
     d3.select(window).on('resize', resize);
+
+
+
 })
 
 
@@ -75,18 +114,6 @@ function draw_sankey(sankey_data, max_height) {
 
 
 
-    var cat10scale = d3.scale.category10();
-
-    var color = function(d) {
-
-        var c = cat10scale(d);
-
-        if (c == "#2ca02c") {
-            return "#c7c7c7"
-        } else {
-            return c
-        }
-    }
  
 
     total_width = width + margin.left + margin.right
@@ -174,7 +201,7 @@ function draw_sankey(sankey_data, max_height) {
             if (d.x < 300) {
                 return colour_scale(d.value / IMPORTAPP.max_consignments)
             } else {
-                return color(d.name.replace(/ .*/, ""));
+                return port_colours(d.name.replace(/  .*/, ""));
             }
         })
         .style("stroke", function(d) {
@@ -291,6 +318,8 @@ function get_new_imports_data() {
 }
 
 
+
+
 function create_stacked_bar(data) {
 
 
@@ -340,6 +369,7 @@ function create_stacked_bar(data) {
 
         })
         this_row["date"] = date
+        this_row["formatted_date"] = d3.time.format("%b %Y")(d3.time.format("%Y-%m-%d").parse(date))
         final_data.push(this_row)
     })
 
@@ -357,8 +387,6 @@ var x = d3.scale.ordinal()
 var y = d3.scale.linear()
     .rangeRound([height, 0]);
 
-var color = d3.scale.ordinal()
-    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
 var xAxis = d3.svg.axis()
     .scale(x)
@@ -367,29 +395,39 @@ var xAxis = d3.svg.axis()
 var yAxis = d3.svg.axis()
     .scale(y)
     .orient("left")
-    .tickFormat(d3.format(".2s"));
+    .tickFormat(function(d) {
+        return "£" + d3.format(".2s")(d)
+    });
 
-d3.selectAll("#timeseriescontainer svg").remove()
+d3.selectAll("svg.timeseries").remove()
+
+
+var total_width =  width + margin.left + margin.right
+var total_height =  height + margin.top + margin.bottom
+
 
 var svg = d3.select("#timeseriescontainer").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
+    .attr("viewBox", "0 0 " + total_width + " " + total_height)
+    .attr("class", "timeseries")
+        .attr("preserveAspectRatio", "xMidYMid")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+  var distinct_ports = d3.keys(data[0]).filter(function(key) { return key !== "date" & key !== "formatted_date"; })
 
 
-  color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
 
   data.forEach(function(d) {
     var y0 = 0;
-    d.ages = color.domain().map(function(name) { return {name: name, y0: y0, y1: y0 += +d[name]}; });
-    d.total = d.ages[d.ages.length - 1].y1;
+    d.ports = distinct_ports.map(function(name) { return {name: name, y0: y0, y1: y0 += +d[name]}; });
+    d.total = d.ports[d.ports.length - 1].y1;
   });
 
   data.sort(function(a, b) { return b.date - a.date; });
 
-  x.domain(data.map(function(d) { return d.date; }));
+  x.domain(data.map(function(d) { return d["formatted_date"]}));
   y.domain([0, d3.max(data, function(d) { return d.total; })]);
 
   svg.append("g")
@@ -405,24 +443,24 @@ var svg = d3.select("#timeseriescontainer").append("svg")
       .attr("y", 6)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("Population");
+      .text("Value of exports to UK");
 
   var state = svg.selectAll(".state")
       .data(data)
     .enter().append("g")
       .attr("class", "g")
-      .attr("transform", function(d) { return "translate(" + x(d.date) + ",0)"; });
+      .attr("transform", function(d) { return "translate(" + x(d.formatted_date) + ",0)"; });
 
   state.selectAll("rect")
-      .data(function(d) { return d.ages; })
+      .data(function(d) { return d.ports; })
     .enter().append("rect")
       .attr("width", x.rangeBand())
       .attr("y", function(d) { return y(d.y1); })
       .attr("height", function(d) { return y(d.y0) - y(d.y1); })
-      .style("fill", function(d) { return color(d.name); });
+      .style("fill", function(d) { return port_colours(d.name.replace(/  .*/, "")); });
 
   var legend = svg.selectAll(".legend")
-      .data(color.domain().slice().reverse())
+      .data(distinct_ports.slice().reverse())
     .enter().append("g")
       .attr("class", "legend")
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
@@ -431,7 +469,7 @@ var svg = d3.select("#timeseriescontainer").append("svg")
       .attr("x", width - 18)
       .attr("width", 18)
       .attr("height", 18)
-      .style("fill", color);
+      .style("fill", port_colours);
 
   legend.append("text")
       .attr("x", width - 24)
@@ -440,7 +478,7 @@ var svg = d3.select("#timeseriescontainer").append("svg")
       .style("text-anchor", "end")
       .text(function(d) { return d; });
 
-
+resize()
 
 }
 
@@ -573,26 +611,17 @@ function update_filters() {
         .text(function(d) {
             return d.substr(0,30)
         })
-        // .filter(function(d,i) {
-        //     return i==1
-        // })
-        // .attr("selected", "")
+
 
     $(".select_boxes").each(function(index) {
 
         $(this).select2()
-      // $(this).select2().on("change", function() {
-      //   alert("hi")
-      //   redraw()
-      // })
+
     })
 
     $(".select_boxes").on("change", function() {
             //Post data to form
 
-            // $.getJSON("/importsdata2.json") {
-
-            // }
 
 
             get_new_imports_data()

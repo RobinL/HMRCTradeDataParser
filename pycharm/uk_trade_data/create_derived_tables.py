@@ -56,3 +56,31 @@ sql = """
 
     order by select_box, value
     """
+
+
+sql_server = """
+    
+    select distinct  'product' as select_box, mk_comcode8 as my_key,mk_comcode8 + ' -  ' + mk_commodity_alpha_all as value
+    
+    into select_box_values 
+    from eightdigitcodes
+    where cast(substring(mk_comcode8,1,2) as integer) < 23 and mk_comcode8 in (select distinct maf_comcode8 from imports)
+
+    union 
+
+    select distinct  'port' as select_box, alpha_code my_key,port_name as value
+    from ports
+
+    union 
+
+    select distinct 'country' as select_box, alpha_code as my_key, country_name as value
+    from countries
+
+    union 
+
+    select distinct 'date' as select_box, maf_account_ccyy + ' ' + maf_account_mm as my_key, maf_account_ccyy + ' ' + maf_account_mm as value
+    from imports
+
+    order by select_box, value
+
+    """

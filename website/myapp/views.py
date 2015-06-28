@@ -14,12 +14,8 @@ logger = logging.getLogger(__name__)
 def get_selection_box_data():
 
     sql = """
-
-    select select_box, key, value 
+    select select_box, my_key, value 
     from select_box_values
-
-
-
     """
 
     result = db.session.execute(sql)
@@ -32,7 +28,7 @@ def get_selection_box_data():
 # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 def quotify(my_list):
-        return (', '.join('"' + item + '"' for item in my_list))
+        return (', '.join("'"" + item + "'"' for item in my_list))
 
 def check_injection(my_list):
     if len(my_list)>8:
@@ -238,12 +234,18 @@ def db_result_to_json_in_d3csv_format(dbresult):
     fa = dbresult.fetchall()
     k  = dbresult.keys()
 
+    fa = [[word.decode("windows-1252") for word in sets] for sets in fa]
+
+
+
     def to_dict(result_row):
         my_tuples = zip(k,result_row)
         my_dict = dict((x,y) for x,y in my_tuples)
         return my_dict
 
     final = map(to_dict,fa)
+
+
     return final
 
 
@@ -269,8 +271,6 @@ def imports_view():
 
 #All json routes are below
 from flask import jsonify
-
-
 
 @myapp.route('/importsdata2.json', methods=["GET","POST"])
 def get_imports_json2():
@@ -309,7 +309,7 @@ def get_select_box_json():
     result = db_result_to_json_in_d3csv_format(result)
 
 
-    resp = jsonify(csv_like_data = result)
+    resp = jsonify(csv_like_data = result, encoding="windows-1252")
     resp.status_code = 200
 
     return resp

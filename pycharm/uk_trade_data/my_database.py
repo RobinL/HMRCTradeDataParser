@@ -25,7 +25,7 @@ import urllib
 # engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
 #engine = create_engine('mssql+pyodbc://SQLEXPRESS/TRADEDATA;Trusted_Connection=Yes')
 
-p = r"C:\Users\Robin\Desktop\trade_data\trade_data_new.db"
+p = r"C:\Users\Robin\Desktop\trade_data\website\trade_data_new.db"
 engine = create_engine('sqlite:///' + p)
 
 # def connect():

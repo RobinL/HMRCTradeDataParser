@@ -1,6 +1,6 @@
 __author__ = 'Robin'
 
-MAX_URLS = 5
+MAX_URLS = 500
 
 # url  = "https://www.uktradeinfo.com/Statistics/Documents/Forms/AllItems.aspx?SortField=Modified&SortDir=Desc"
 #
