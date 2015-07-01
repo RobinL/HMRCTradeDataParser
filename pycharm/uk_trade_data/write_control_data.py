@@ -4,7 +4,7 @@ from utils import get_fields_df
 
 from my_models import EightDigitCode
 from my_database import session
-MAX_IMPORT_ROWS = 1000000000
+MAX_IMPORT_ROWS = 5000000000
 import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -12,6 +12,10 @@ logging.basicConfig(level=logging.DEBUG)
 def raw_control_data_to_database(zipfile,url_info, rawfile):
 
     filename = url_info["file_name"]
+
+    filename = zipfile.namelist()[0]
+
+    logger.info("reading file {} from the zipfile called {}".format(filename, url_info["file_name_zip"]))
 
     with zipfile.open(filename) as fh:
         lines = fh.readlines()

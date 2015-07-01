@@ -346,6 +346,9 @@ function create_stacked_bar(data) {
 
     //Get list of dates
     dates = _.uniq(data, function(d) { return d.date; })
+
+    
+
     //Get list of ports
     ports = _.uniq(data, function(d) { return d.port; })
 
@@ -375,9 +378,76 @@ function create_stacked_bar(data) {
 
     data = final_data
 
+    data = data.sort(function(a, b) { 
+
+    return d3.time.format("%Y-%m-%d").parse(a.date) - d3.time.format("%Y-%m-%d").parse(b.date)
+    });
+
+    //Now we need to insert records where we have missing months
+    dates_have = _.uniq(data, function(d) { return d.date; });
+    dates_have = _.map(data, function(d){return d.date});
+    max_date = dates_have[0]
+    min_date = dates_have.slice(-1)[0] 
+
+    //make list of all dates then filter
+
+    var all_dates = []
+    for (var year = 2005; year < 2020; year++) {
+            
+            for (var month = 1; month < 10; month++) {
+                var this_date = year + "-0" + month + "-01"
+                all_dates.push(this_date)
+            };
+            all_dates.push(year + "-10-01")
+            all_dates.push(year + "-11-01")
+            all_dates.push(year + "-12-01")
+        };    
 
 
-    var margin = {top: 20, right: 20, bottom: 30, left: 40},
+
+
+    //Now filter down
+    all_dates = _.filter(all_dates, function(d) {
+        return d3.time.format("%Y-%m-%d").parse(d) >= d3.time.format("%Y-%m-%d").parse(max_date) 
+    }) 
+
+    all_dates = _.filter(all_dates, function(d) {
+        return d3.time.format("%Y-%m-%d").parse(d) <= d3.time.format("%Y-%m-%d").parse(min_date) 
+    }) 
+
+
+    //Find dates that are not in data
+    new_dates = _.difference(all_dates, dates_have)
+   
+   
+
+    blank_record = data[0]
+
+    _.each(new_dates, function(d){
+
+        new_record = {}
+
+        _.each(_.keys(blank_record),function(k) {
+            new_record[k] = 0
+        } )
+
+        new_record["date"] = d
+        new_record["formatted_date"] = d3.time.format("%b %Y")(d3.time.format("%Y-%m-%d").parse(d))
+    
+        data.push(new_record)
+
+    })
+
+     data = data.sort(function(a, b) { 
+
+    return d3.time.format("%Y-%m-%d").parse(a.date) - d3.time.format("%Y-%m-%d").parse(b.date)
+    });
+
+       
+
+
+
+    var margin = {top: 20, right: 20, bottom: 60, left: 40},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
@@ -419,13 +489,13 @@ var svg = d3.select("#timeseriescontainer").append("svg")
 
 
 
+
   data.forEach(function(d) {
     var y0 = 0;
     d.ports = distinct_ports.map(function(name) { return {name: name, y0: y0, y1: y0 += +d[name]}; });
     d.total = d.ports[d.ports.length - 1].y1;
   });
 
-  data.sort(function(a, b) { return b.date - a.date; });
 
   x.domain(data.map(function(d) { return d["formatted_date"]}));
   y.domain([0, d3.max(data, function(d) { return d.total; })]);
@@ -433,7 +503,14 @@ var svg = d3.select("#timeseriescontainer").append("svg")
   svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
+      .call(xAxis)
+      .selectAll("text")  
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", function(d) {
+                return "rotate(-45)" 
+                });
 
   svg.append("g")
       .attr("class", "y axis")

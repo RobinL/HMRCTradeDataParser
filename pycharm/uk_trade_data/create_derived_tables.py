@@ -32,6 +32,43 @@ CREATE  INDEX ix_cppm_country_code ON country_products_port_month (country_code 
 
 """
 
+sql_server = """
+
+select  country_name as country, 
+c.alpha_code as country_code, 
+mk_commodity_alpha_all as product,
+e.mk_comcode8 as product_code,  
+port_name as port, 
+i.maf_port_alpha as port_code, 
+i.maf_account_mm as month, 
+i.maf_account_ccyy as year, 
+sum(cast(maf_value as integer)) as quantity
+
+into country_products_port_month  
+    from imports as i
+
+    left join eightdigitcodes as e
+    on i.maf_comcode8 = e.mk_comcode8
+
+    left join countries as c
+    on i.maf_coo_alpha = c.alpha_code
+
+    left join ports as p
+    on p.alpha_code = i.maf_port_alpha
+
+    where country_name is not null
+    and mk_commodity_alpha_all is not null
+    and port_name is not null
+    and maf_value is not null
+    and cast(substring(e.mk_comcode8,1,2) as integer) < 23
+
+    group by country_name, c.alpha_code, mk_commodity_alpha_all, e.mk_comcode8, port_name, i.maf_port_alpha, i.maf_account_mm , i.maf_account_ccyy;
+
+CREATE  INDEX ix_cppm_product_code ON country_products_port_month (product_code );
+CREATE  INDEX ix_cppm_port_code ON country_products_port_month (port_code );
+CREATE  INDEX ix_cppm_country_code ON country_products_port_month (country_code );
+"""
+
 
 sql = """
     create table  select_box_values as

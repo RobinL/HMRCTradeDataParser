@@ -25,7 +25,7 @@ import urllib
 # engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
 #engine = create_engine('mssql+pyodbc://SQLEXPRESS/TRADEDATA;Trusted_Connection=Yes')
 
-p = r"C:\Users\Robin\Desktop\trade_data\website\trade_data_new_3.db"
+p = r"C:\Users\Robin\Desktop\trade data working\HMRCTradeDataParser\trade_data_new_mega.db"
 engine = create_engine('sqlite:///' + p)
 
 # def connect():
@@ -40,14 +40,17 @@ Base = declarative_base()
 
 
 #Note this just creates the databse, it isn't needed if it already exists
-def init_db(remove=False):
+def init_db(remove=True):
     # import all modules here that might define models so that
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
 
     import os
-    if remove:
-        os.remove(p)
+    try:
+        if remove:
+            os.remove(p)
+    except:
+        pass
     import my_models
     Base.metadata.create_all(bind=engine)
 

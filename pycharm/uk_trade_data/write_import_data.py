@@ -2,7 +2,7 @@ __author__ = 'Robin'
 import pandas as pd
 from .utils import get_fields_df
 
-MAX_IMPORT_ROWS = 1000000000
+MAX_IMPORT_ROWS = 50000000000
 
 import logging
 logger = logging.getLogger(__name__)
