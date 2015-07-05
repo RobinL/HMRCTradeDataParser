@@ -156,7 +156,7 @@ def get_timeseries_data(countries_list,ports_list,products_list,dates_list,stack
 
 
     #Check html injection on stack_by:
-    if stack_by != "port" and stack_by != "country":
+    if stack_by not in ["port", "country", "product_code"]:
         return
 
     #You can't parametize the in keyword in sqlite which makes using parametized sql very hard for the queries i'm trying to run
@@ -212,23 +212,9 @@ def get_importers_data(countries_list,ports_list,products_list,dates_list):
     #We need some way of santizing the SQL.  Make sure that the length of all of the lists is right.  They're all short so this should be relatively secure.
 
 
-    query_dict = {
-    "products_list" : {"list": products_list, "sql" : "and e.comcode8 in ({products_list})" } ,
-    "months_list" : {"list": months_list, "sql" : "and month_of_import in ({months_list})" } ,
-    "years_list" : {"list": years_list, "sql" : "and year_of_import in ({years_list})" } 
-    }
 
 
-    queryconditions = ""
-    for key in query_dict:
-        check_injection(query_dict[key]["list"])
-        query_dict[key]["quotify"] = quotify(query_dict[key]["list"])
-        if "All" not in query_dict[key]["quotify"]:
-
-            queryconditions += " " + query_dict[key]["sql"]
-
-
-    sql = """
+        sql = """
     select top 50 * from importerseightdigitcodes as e
     left join importers as i
     on i.id = e.importer_id 
@@ -241,18 +227,18 @@ def get_importers_data(countries_list,ports_list,products_list,dates_list):
 
     """
 
+    sql_done = get_sql(sql, countries_list,ports_list,products_list,dates_list)
 
 
-    sql2 = sql.format(queryconditions=queryconditions)
 
-    format_dict = {k: query_dict[k]["quotify"] for k in query_dict}
 
-    sql3 = sql2.format(**format_dict)
+
+
 
 
     #Need to do more to protect against sql injection attack.
 
-    result = db.session.execute(sql3)
+    result = db.session.execute(sql_done)
 
     return result
 

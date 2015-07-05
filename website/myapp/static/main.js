@@ -195,7 +195,7 @@ function draw_sankey(sankey_data, max_height) {
             if (d.x < 300) {
                 return colour_scale(d.value / IMPORTAPP.max_consignments)
             } else {
-                return port_colours(d.name_text.replace(/  .*/, ""));
+                return port_colours(d.name_text);
             }
         })
         .style("stroke", function(d) {
@@ -1094,16 +1094,19 @@ function draw_map(world, names) {
         .data(countries)
 
     shapes
+        .on("mousemove", function(d) {
 
-    .on("mousemove", function(d) {
-
-        if (_.contains(IMPORTAPP.country_totals, d["name"] )) {
+            alpha_2 = IMPORTAPP.country_numericid_lookup[d["id"]]["alpha_2"]
+            d["alpha_2"] = alpha_2
+       
 
             tooltip.transition()
                 .duration(200)
                 .style("opacity", function() {
                     return 0.9
                 });
+
+                debugger;
 
 
             tooltip
@@ -1112,7 +1115,7 @@ function draw_map(world, names) {
                 })
                 .style("left", (d3.event.pageX + 15) + "px")
                 .style("top", (d3.event.pageY - 60) + "px");
-        }
+        
     })
         .on("mouseout", function(d) {
             tooltip.transition()
@@ -1125,6 +1128,7 @@ function draw_map(world, names) {
 
 function map_tooltip_html(d) {
 
+    
     var formatNumber = d3.format(",.0f"),
         format = function(d) {
             return "£" + formatNumber(d);
@@ -1135,11 +1139,14 @@ function map_tooltip_html(d) {
 
     var template = Handlebars.compile(source)
 
-
-    var quantity_exports = IMPORTAPP.country_totals[this_country]["quantity_exports"]
+     if (d["alpha_2"] in IMPORTAPP.country_totals) {
+    var quantity_exports = IMPORTAPP.country_totals[d["alpha_2"]]["quantity_exports"]
+    quantity_exports = format(quantity_exports)
+}
+    else {quantity_exports="None"}
 
     var html = template({
-        quantity_exports: format(quantity_exports),
+        quantity_exports: quantity_exports,
         this_country: this_country
     })
 

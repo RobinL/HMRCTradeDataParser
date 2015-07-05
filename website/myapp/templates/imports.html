@@ -38,13 +38,14 @@
 <form id="stack_type_radio_buttons">
 <input type="radio" name="stack_type" value="port" checked="checked">Stack by port
 <input type="radio" name="stack_type" value="country">Stack by country of origin
+<input type="radio" name="stack_type" value="product_code">Stack by product_code
 </form>
 
 </div>
 
 <div id="importerscontainer" class="main all_results">
 <img src= {{ url_for('static', filename = 'spinner.gif') }} class="spinner" alt="previous" title="Previous" border="0">
-	<p>These products were imported by:</p>
+	<p>These products were imported by (first 50 results only):</p>
 </div>
 
 <div class="tooltip"></div>
