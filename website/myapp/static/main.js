@@ -681,7 +681,6 @@ catch(err) {
 
                 tooltip
                     .html(function() {
-                        debugger;
                         return d["name"] + ": £" + d3.format(".2s")(d["y1"] - d["y0"]);
                     })
                     .style("left", (d3.event.pageX + 15) + "px")
@@ -748,13 +747,9 @@ function create_importers_table(table_data) {
         .html(function(d, i) {
 
 
-            if (d["key"] == "date") {
-
-                return d3.time.format("%b %Y")(d3.time.format("%Y-%m-%d").parse(d["value"]))
-
-            } else {
+         
                 return d["value"]
-            }
+            
         })
 }
 
@@ -1316,7 +1311,7 @@ function draw_map_key() {
     svg.append("g")
         .attr("transform", "translate(70,170) rotate(90)")
         .append("text")
-        .text("Value of exports (£)")
+        .text("Value of imports (£)")
         .style("font-weight", "bold")
         .style("font-size", "12px")
 

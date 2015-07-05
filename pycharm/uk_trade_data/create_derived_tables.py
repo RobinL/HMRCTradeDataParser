@@ -121,3 +121,30 @@ sql_server = """
     order by select_box, value
 
     """
+
+
+
+    sql = """
+    create table importers_for_web as
+
+select 
+ia_name, ia_addr_1, ia_addr_2, ia_addr_3,ia_addr_4, ia_addr_5, ia_pcode, month_of_import as month, year_of_import as year, 
+e.comcode8 as product_code
+
+ from importerseightdigitcodes as e
+    left join importers as i
+    on i.id = e.importer_id 
+    where e.importer_id is not null
+    and year_of_import >= '2014'
+    order by year_of_import desc, month_of_import desc
+    
+    limit 10;
+    
+  CREATE  INDEX ix_ifw_product_code ON importers_for_web (product_code );
+  CREATE  INDEX ix_ifw_month ON importers_for_web (month );
+   CREATE  INDEX ix_ifw_year ON importers_for_web (year );
+
+    
+ 
+
+"""

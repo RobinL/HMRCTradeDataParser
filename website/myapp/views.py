@@ -212,17 +212,21 @@ def get_importers_data(countries_list,ports_list,products_list,dates_list):
     #We need some way of santizing the SQL.  Make sure that the length of all of the lists is right.  They're all short so this should be relatively secure.
 
 
+    query_dict = {
+    "products_list" : {"list": products_list, "sql" : "and e.comcode8 in ({products_list})" } ,
+
+    }
 
 
-        sql = """
-    select top 50 * from importerseightdigitcodes as e
-    left join importers as i
-    on i.id = e.importer_id 
-    where e.importer_id is not null
+
+    sql = """
+    select top 500 * from importers_for_web
+    where 1 =1  
     
 
     {queryconditions}
 
+    order by year desc, month desc
 
 
     """
@@ -392,6 +396,8 @@ def get_timeseries_json():
     return resp
 
 import re
+import datetime
+
 @myapp.route('/importers.json', methods=["GET","POST"])
 def get_importers_json():
 
@@ -434,15 +440,51 @@ def get_importers_json():
             new_result["full_address"] = re.sub(r"\s{2,100}",r" ",new_result["full_address"])
             new_result["full_address"] = re.sub(r"(, ){2,100}",r", ",new_result["full_address"])
 
-            new_result["date"] = datetime.datetime(int(this_result["year_of_import"]), int(this_result["month_of_import"]), 1).date().isoformat()
-            new_result["product"] = this_result["comcode8"]
+            new_result["date"] = datetime.datetime(int(this_result["year"]), int(this_result["month"]), 1).date().isoformat()
+            new_result["product"] = this_result["product_code"]
 
             new_results.append(new_result)
         result = new_results
 
+        new_results = {}
+        for this_result in result:
+
+            f_a = this_result["full_address"]
+            pr = this_result["product"]
+            da = this_result["date"]
+            da = datetime.datetime.strptime(da,"%Y-%m-%d")
+            #da = datetime.datetime.strftime(da, "%b %Y")
 
 
+            if f_a not in new_results:
+                new_results[f_a] = {"products": {pr}, "dates": [da]}
+            else:
+                new_results[f_a]["products"].update([pr])
+                new_results[f_a]["dates"].append(da)
 
+
+        final_results = []
+
+        def date_string(dates_list):
+
+            dates_list.sort()
+            if len(dates_list) ==1:
+                return datetime.datetime.strftime(dates_list[0], "%b %Y")
+            else:
+                return "{} months between {} and {}".format(len(dates_list), datetime.datetime.strftime(dates_list[0], "%b %Y"),datetime.datetime.strftime(dates_list[-1], "%b %Y"))
+
+
+        for key in new_results:
+
+            this_result = new_results[key]
+
+            final_results.append({"full_address":key, "products": list(this_result["products"]), "dates": this_result["dates"]})
+
+
+        for this_result in final_results:
+            this_result["dates"] = date_string(this_result["dates"])
+
+        result = final_results
 
 
 
