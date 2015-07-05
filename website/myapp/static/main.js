@@ -1,8 +1,8 @@
-
-var IMPORTAPP = {csv_loaded:false}
+var IMPORTAPP = {
+    
+}
 
 function resize() {
-
 
     var chart = d3.select("svg.map")
     aspect = chart.attr("width") / chart.attr("height")
@@ -12,7 +12,6 @@ function resize() {
     chart.attr("height", targetWidth / aspect);
 
     var chart = d3.select("svg.sankey")
-
     if (!chart.empty()) {
         aspect = chart.attr("width") / chart.attr("height") * 1
         var targetWidth = $("#sankeycontainer").width()
@@ -21,10 +20,9 @@ function resize() {
         chart.attr("width", targetWidth);
         chart.attr("height", targetWidth / aspect);
 
-}
+    }
 
- var chart = d3.select("svg.timeseries")
-
+    var chart = d3.select("svg.timeseries")
     if (!chart.empty()) {
         aspect = chart.attr("width") / chart.attr("height") * 1
         var targetWidth = $("#timeseriescontainer").width()
@@ -33,13 +31,8 @@ function resize() {
         chart.attr("width", targetWidth);
         chart.attr("height", targetWidth / aspect);
 
+    }
 }
-
-
-}
-
-
-
 
 var p1 = $.getJSON("static/world-110m.json")
 var p2 = $.ajax("static/countries.csv")
@@ -47,44 +40,47 @@ var p3 = $.getJSON("selectboxdata.json")
 
 var port_colours = d3.scale.ordinal()
     .range(["#1f77b4",
-"#aec7e8",
-"#ff7f0e",
-"#ffbb78",
-"#d62728",
-"#ff9896",
-"#9467bd",
-"#c5b0d5",
-"#8c564b",
-"#c49c94",
-"#e377c2",
-"#f7b6d2",
-"#7f7f7f",
-"#c7c7c7",
-"#bcbd22",
-"#dbdb8d",
-"#17becf",
-"#9edae5"]);
+        "#aec7e8",
+        "#ff7f0e",
+        "#ffbb78",
+        "#d62728",
+        "#ff9896",
+        "#9467bd",
+        "#c5b0d5",
+        "#8c564b",
+        "#c49c94",
+        "#e377c2",
+        "#f7b6d2",
+        "#7f7f7f",
+        "#c7c7c7",
+        "#bcbd22",
+        "#dbdb8d",
+        "#17becf",
+        "#9edae5"
+    ]);
 
-$.when(p1,p2,p3).done(function(worlddata,countrydata, select_data) {
+$.when(p1, p2, p3).done(function(worlddata, countrydata, select_data) {
 
     IMPORTAPP.worlddata = worlddata[0]
     IMPORTAPP.countrydata = d3.csv.parse(countrydata[0])
     IMPORTAPP.select_box_data = select_data[0]["csv_like_data"]
 
+    //Go from  ISO 3166-1 numeric code to alpha_2 code
+    IMPORTAPP.country_numericid_lookup = {}
+    _.each(IMPORTAPP.countrydata, function(d){
+        IMPORTAPP.country_numericid_lookup[d["id"]] = {"alpha_2": d["alpha_2"], "name":d["name"]}
+    })
+
     draw_map()
     draw_map_key()
     create_filters()
+    
+
     get_new_imports_data()
 
-
-
-    $("#date").val("All").trigger("change") ;
-    $("#country").val("All").trigger("change") ;
-    $("#port").val("All").trigger("change") ;
-    $("#product").val("01012100").trigger("change") ;
-
-    resize()
+    
     d3.select(window).on('resize', resize);
+
 
 
 
@@ -109,12 +105,9 @@ function draw_sankey(sankey_data, max_height) {
 
     var formatNumber = d3.format(",.0f"),
         format = function(d) {
-            return "£" + formatNumber(d) ;
+            return "£" + formatNumber(d);
         }
 
-
-
- 
 
     total_width = width + margin.left + margin.right
     total_height = height + margin.top + margin.bottom
@@ -157,7 +150,9 @@ function draw_sankey(sankey_data, max_height) {
 
     link.append("title")
         .text(function(d) {
-            return d.source.name + " → " + d.target.name + "\n" + format(d.value);
+
+
+            return d.source.name_text + " → " + d.target.name_text + "\n" + format(d.value);
         });
 
 
@@ -174,7 +169,6 @@ function draw_sankey(sankey_data, max_height) {
                 return format(d.value);
             }
         })
-
 
     var node = svg.append("g").selectAll(".node")
         .data(sankey_data.nodes)
@@ -201,7 +195,7 @@ function draw_sankey(sankey_data, max_height) {
             if (d.x < 300) {
                 return colour_scale(d.value / IMPORTAPP.max_consignments)
             } else {
-                return port_colours(d.name.replace(/  .*/, ""));
+                return port_colours(d.name_text.replace(/  .*/, ""));
             }
         })
         .style("stroke", function(d) {
@@ -209,7 +203,7 @@ function draw_sankey(sankey_data, max_height) {
         })
         .append("title")
         .text(function(d) {
-            return d.name + "\n" + format(d.value);
+            return d.name_text + "\n" + format(d.value);
         });
 
     node.append("text")
@@ -220,7 +214,7 @@ function draw_sankey(sankey_data, max_height) {
         .attr("dy", ".35em")
         .attr("transform", null)
         .text(function(d) {
-            return d.name.substring(0, 65);
+            return d.name_text.substring(0, 65);
         })
         .attr("x", 6 + sankey.nodeWidth())
         .attr("text-anchor", "start");
@@ -240,10 +234,9 @@ function draw_sankey(sankey_data, max_height) {
 function get_sankey_height(data) {
     //We need to find the level with the most unique values and multiply by 30
 
-
     max_len = 0
 
-    var keys =  ["country", "product", "port", "quantity"]
+    var keys = ["country", "product", "port", "quantity"]
     for (var i = 0; i < 3; i++) {
 
         var filter_name = keys[i]
@@ -271,102 +264,118 @@ function get_new_imports_data() {
     countries = $("#country").val()
     products = $("#product").val()
     ports = $("#port").val()
+    stack_by = $('input[name=stack_type]:checked', '#stack_type_radio_buttons').val()
 
-    post_data =  {dates: dates,
-            countries: countries,
-            products: products,
-            ports: ports}
+    post_data = {
+        dates: dates,
+        countries: countries,
+        products: products,
+        ports: ports,
+        stack_by: stack_by
+    }
+
+
+
+    if (_.contains(dates,"All") & _.contains(countries,"All") & _.contains(products,"All") & _.contains(ports,"All")) {
+        $(".toomanyresults").hide()
+        $("#truncated").show()
+        return
+    }
+
 
 
     p1 = $.getJSON("importsdata2.json", post_data)
     p2 = $.getJSON("timeseries.json", post_data)
     p3 = $.getJSON("importers.json", post_data)
-    
-    
-    $.when(p1,p2,p3).done(function(imports_data, timeseries_data, importers_data) {
 
 
-
+    $.when(p1, p2, p3).done(function(imports_data, timeseries_data, importers_data) {
 
         IMPORTAPP.filtered_data = imports_data[0]["csv_like_data"]
         IMPORTAPP.timeseries_data = timeseries_data[0]["csv_like_data"]
         IMPORTAPP.importers_data = importers_data[0]["csv_like_data"]
 
-        if (IMPORTAPP.filtered_data.length>=0) {
-
-            get_consignments_by_country()
-            var sankey_data = csv_to_sankey_data(IMPORTAPP.filtered_data);
-            var max_height = get_sankey_height(IMPORTAPP.filtered_data)
-            draw_sankey(sankey_data, max_height);
-            map_colours()
-            key_colours()
-
+        if (IMPORTAPP.filtered_data.length>99) {
+            $(".toomanyresults").hide()
+            $("#truncated").show()
+            return
+        } else {
+              $(".toomanyresults").show()
+            $("#truncated").hide()
         }
 
-         if (IMPORTAPP.importers_data.length>=0) {
 
-          
-            create_importers_table(IMPORTAPP.importers_data);
-            create_stacked_bar(IMPORTAPP.timeseries_data)
-         
+        get_consignments_by_country()
+        var sankey_data = csv_to_sankey_data(IMPORTAPP.filtered_data);
+        var max_height = get_sankey_height(IMPORTAPP.filtered_data)
+        draw_sankey(sankey_data, max_height);
+        map_colours()
+        key_colours()
 
-        }
 
+        create_importers_table(IMPORTAPP.importers_data);
+        create_stacked_bar(IMPORTAPP.timeseries_data)
+
+        resize()
 
     })
 
 }
 
 
-
-
-function create_stacked_bar(data) {
+function stacked_bar_data(data) {
 
 
     // First we need to munge the data into the format specified in https://github.com/mbostock/d3/wiki/Stack-Layout
 
 
- // {
- //      "month": "01", 
- //      "port": "London Heathrow Airport", 
- //      "quantity": 284699, 
- //      "year": "2015"
- //    }, 
- //    {
- //      "month": "02", 
- //      "port": "London Heathrow Airport", 
- //      "quantity": 22119, 
- //      "year": "2015"
- //    }, 
+    // {
+    //      "month": "01", 
+    //      "port": "London Heathrow Airport", 
+    //      "quantity": 284699, 
+    //      "year": "2015"
+    //    }, 
+    //    {
+    //      "month": "02", 
+    //      "port": "London Heathrow Airport", 
+    //      "quantity": 22119, 
+    //      "year": "2015"
+    //    }, 
 
 
     //date  Felixstow  Stanstead  
     //11-Oct-13   41.62   22.36
 
 
+
+
     //Get list of dates
-    dates = _.uniq(data, function(d) { return d.date; })
+    dates = _.uniq(data, function(d) {
+        return d.date;
+    })
 
-    
 
-    //Get list of ports
-    ports = _.uniq(data, function(d) { return d.port; })
+
+    //Get list of ports or countries (depending on which is selected)
+    stack_by_units = _.uniq(data, function(d) {
+        return d.stack_by;
+    })
 
     final_data = []
 
-      
+
     _.each(dates, function(date) {
         date = date.date
         var this_row = {}
-        
-        _.each(ports, function(port) {
-            port = port.port
-            this_row[port] = 0
+
+        _.each(stack_by_units, function(stack_by_unit) {
+            stack_by_unit = stack_by_unit.stack_by
+            this_row[stack_by_unit] = 0
 
             _.each(data, function(d) {
-                if ((d["port"] == port) & (d["date"] == date)) {
-                    this_row[port] += d["quantity"]
-                } 
+                if ((d["stack_by"] == stack_by_unit) & (d["date"] == date)) {
+                    this_row[stack_by_unit] += d["quantity"]
+                }
 
             })
 
@@ -378,184 +387,278 @@ function create_stacked_bar(data) {
 
     data = final_data
 
-    data = data.sort(function(a, b) { 
+    data = data.sort(function(a, b) {
 
-    return d3.time.format("%Y-%m-%d").parse(a.date) - d3.time.format("%Y-%m-%d").parse(b.date)
+        return d3.time.format("%Y-%m-%d").parse(a.date) - d3.time.format("%Y-%m-%d").parse(b.date)
     });
 
     //Now we need to insert records where we have missing months
-    dates_have = _.uniq(data, function(d) { return d.date; });
-    dates_have = _.map(data, function(d){return d.date});
+    dates_have = _.uniq(data, function(d) {
+        return d.date;
+    });
+    dates_have = _.map(data, function(d) {
+        return d.date
+    });
     max_date = dates_have[0]
-    min_date = dates_have.slice(-1)[0] 
+    min_date = dates_have.slice(-1)[0]
 
     //make list of all dates then filter
 
     var all_dates = []
     for (var year = 2005; year < 2020; year++) {
-            
-            for (var month = 1; month < 10; month++) {
-                var this_date = year + "-0" + month + "-01"
-                all_dates.push(this_date)
-            };
-            all_dates.push(year + "-10-01")
-            all_dates.push(year + "-11-01")
-            all_dates.push(year + "-12-01")
-        };    
+
+        for (var month = 1; month < 10; month++) {
+            var this_date = year + "-0" + month + "-01"
+            all_dates.push(this_date)
+        };
+        all_dates.push(year + "-10-01")
+        all_dates.push(year + "-11-01")
+        all_dates.push(year + "-12-01")
+    };
 
 
 
 
     //Now filter down
     all_dates = _.filter(all_dates, function(d) {
-        return d3.time.format("%Y-%m-%d").parse(d) >= d3.time.format("%Y-%m-%d").parse(max_date) 
-    }) 
+        return d3.time.format("%Y-%m-%d").parse(d) >= d3.time.format("%Y-%m-%d").parse(max_date)
+    })
 
     all_dates = _.filter(all_dates, function(d) {
-        return d3.time.format("%Y-%m-%d").parse(d) <= d3.time.format("%Y-%m-%d").parse(min_date) 
-    }) 
+        return d3.time.format("%Y-%m-%d").parse(d) <= d3.time.format("%Y-%m-%d").parse(min_date)
+    })
 
 
     //Find dates that are not in data
     new_dates = _.difference(all_dates, dates_have)
-   
-   
+
+
 
     blank_record = data[0]
 
-    _.each(new_dates, function(d){
+    _.each(new_dates, function(d) {
 
         new_record = {}
 
-        _.each(_.keys(blank_record),function(k) {
+        _.each(_.keys(blank_record), function(k) {
             new_record[k] = 0
-        } )
+        })
 
         new_record["date"] = d
         new_record["formatted_date"] = d3.time.format("%b %Y")(d3.time.format("%Y-%m-%d").parse(d))
-    
+
         data.push(new_record)
 
     })
 
-     data = data.sort(function(a, b) { 
+    data = data.sort(function(a, b) {
 
-    return d3.time.format("%Y-%m-%d").parse(a.date) - d3.time.format("%Y-%m-%d").parse(b.date)
+        return d3.time.format("%Y-%m-%d").parse(a.date) - d3.time.format("%Y-%m-%d").parse(b.date)
     });
 
-       
+    return data
+
+
+}
 
 
 
-    var margin = {top: 20, right: 20, bottom: 60, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
-
-var x = d3.scale.ordinal()
-    .rangeRoundBands([0, width], .1);
-
-var y = d3.scale.linear()
-    .rangeRound([height, 0]);
+function create_stacked_bar(data) {
 
 
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom");
-
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left")
-    .tickFormat(function(d) {
-        return "£" + d3.format(".2s")(d)
-    });
-
-d3.selectAll("svg.timeseries").remove()
+    try {
+    data = stacked_bar_data(data);
+}
+catch(err) {
+    data = []
+}
 
 
-var total_width =  width + margin.left + margin.right
-var total_height =  height + margin.top + margin.bottom
+
+    var margin = {
+            top: 20,
+            right: 50,
+            bottom: 60,
+            left: 40
+        },
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+    var x = d3.scale.ordinal()
+        .rangeRoundBands([0, width], .1);
+
+    var y = d3.scale.linear()
+        .rangeRound([height, 0]);
 
 
-var svg = d3.select("#timeseriescontainer").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .attr("viewBox", "0 0 " + total_width + " " + total_height)
-    .attr("class", "timeseries")
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
+
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left")
+        .tickFormat(function(d) {
+            return "£" + d3.format(".2s")(d)
+        });
+
+    d3.selectAll("svg.timeseries").remove()
+
+
+
+
+    var total_width = width + margin.left + margin.right
+    var total_height = height + margin.top + margin.bottom
+
+
+    var svg = d3.select("#timeseriescontainer").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .attr("viewBox", "0 0 " + total_width + " " + total_height)
+        .attr("class", "timeseries")
         .attr("preserveAspectRatio", "xMidYMid")
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  var distinct_ports = d3.keys(data[0]).filter(function(key) { return key !== "date" & key !== "formatted_date"; })
-
-
-
-
-  data.forEach(function(d) {
-    var y0 = 0;
-    d.ports = distinct_ports.map(function(name) { return {name: name, y0: y0, y1: y0 += +d[name]}; });
-    d.total = d.ports[d.ports.length - 1].y1;
-  });
+    var distinct_stack_by_units = d3.keys(data[0]).filter(function(key) {
+        return key !== "date" & key !== "formatted_date";
+    })
 
 
-  x.domain(data.map(function(d) { return d["formatted_date"]}));
-  y.domain([0, d3.max(data, function(d) { return d.total; })]);
 
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis)
-      .selectAll("text")  
-            .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", ".15em")
-            .attr("transform", function(d) {
-                return "rotate(-45)" 
-                });
 
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Value of exports to UK");
+    data.forEach(function(d) {
+        var y0 = 0;
+        d.stack_by = distinct_stack_by_units.map(function(name) {
+            return {
+                name: name,
+                y0: y0,
+                y1: y0 += +d[name]
+            };
+        });
+        d.total = d.stack_by[d.stack_by.length - 1].y1;
+    });
 
-  var state = svg.selectAll(".state")
-      .data(data)
-    .enter().append("g")
-      .attr("class", "g")
-      .attr("transform", function(d) { return "translate(" + x(d.formatted_date) + ",0)"; });
 
-  state.selectAll("rect")
-      .data(function(d) { return d.ports; })
-    .enter().append("rect")
-      .attr("width", x.rangeBand())
-      .attr("y", function(d) { return y(d.y1); })
-      .attr("height", function(d) { return y(d.y0) - y(d.y1); })
-      .style("fill", function(d) { return port_colours(d.name.replace(/  .*/, "")); });
+    x.domain(data.map(function(d) {
+        return d["formatted_date"]
+    }));
 
-  var legend = svg.selectAll(".legend")
-      .data(distinct_ports.slice().reverse())
-    .enter().append("g")
-      .attr("class", "legend")
-      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
-  legend.append("rect")
-      .attr("x", width - 18)
-      .attr("width", 18)
-      .attr("height", 18)
-      .style("fill", port_colours);
 
-  legend.append("text")
-      .attr("x", width - 24)
-      .attr("y", 9)
-      .attr("dy", ".35em")
-      .style("text-anchor", "end")
-      .text(function(d) { return d; });
+    if (data.length > 50) {
+    xAxis.tickValues(data.map( function(d,i) { if (i % 3 == 0 ) {return d["formatted_date"]; } else {return ""}} ))
+}
 
-resize()
+
+
+    y.domain([0, d3.max(data, function(d) {
+        return d.total;
+    })]);
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", function(d) {
+            return "rotate(-45)"
+        });
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Value of imports into UK");
+
+    var stack_by = svg.selectAll(".stack_by")
+        .data(data)
+        .enter().append("g")
+        .attr("class", "g")
+        .attr("transform", function(d) {
+            return "translate(" + x(d.formatted_date) + ",0)";
+        });
+
+    stack_by.selectAll("rect")
+        .data(function(d) {
+            return d.stack_by;
+        })
+        .enter().append("rect")
+        .attr("width", x.rangeBand())
+        .attr("y", function(d) {
+            return y(d.y1);
+        })
+        .attr("height", function(d) {
+            return y(d.y0) - y(d.y1);
+        })
+        .style("fill", function(d) {
+            return port_colours(d.name.replace(/  .*/, ""));
+        });
+
+    var legend = svg.selectAll(".legend")
+        .data(distinct_stack_by_units.slice().reverse())
+        .enter().append("g")
+        .attr("class", "legend")
+        .attr("transform", function(d, i) {
+            return "translate(0," + i * 20 + ")";
+        });
+
+    legend.append("rect")
+        .attr("x", width + 8)
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", port_colours);
+
+    legend.append("text")
+        .attr("x", width + 2)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "end")
+        .text(function(d) {
+            return d;
+        });
+
+
+        var shapes = svg.selectAll("rect")
+     
+
+        shapes
+        .on("mousemove", function(d) {
+
+
+
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", function() {
+                        return 0.9
+                    });
+
+
+                tooltip
+                    .html(function() {
+                        debugger;
+                        return d["name"] + ": £" + d3.format(".2s")(d["y1"] - d["y0"]);
+                    })
+                    .style("left", (d3.event.pageX + 15) + "px")
+                    .style("top", (d3.event.pageY - 60) + "px");
+            
+        })
+            .on("mouseout", function(d) {
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+
+    
+
 
 }
 
@@ -566,183 +669,114 @@ function create_importers_table(table_data) {
 
     svgContainer = d3.select("#importerscontainer")
 
-        myTable = svgContainer.append("table")
-                    .attr("class","table table-striped table-bordered table-condensed smalltabletext")
-                    .attr("id", "importerstable")
-                    .append("tbody");
-
-     
-        
+    myTable = svgContainer.append("table")
+        .attr("class", "table table-striped table-bordered table-condensed smalltabletext")
+        .attr("id", "importerstable")
+        .append("tbody");
 
 
-        headers = _.keys(table_data[0])
+    headers = _.keys(table_data[0])
 
-        var th =myTable.append("tr")
+    var th = myTable.append("tr")
 
-        th.selectAll("th")
-            .data(headers)
-            .enter()
-            .append("th")
-            .html(function(d){return d})
-
-
-        var tr = myTable.selectAll("tr2").data(table_data).enter().append("tr")
-
-        var td = tr.selectAll("td").data(function(d) {
-
-                return_array = []
-
-                _.each(d, function(j,k) {
-                    return_array.push({value: j, key:k})
-                    
-                })
-
-              
-                return return_array
-
-                })
-                .enter()
-                .append("td")
-                .html(function(d,i) {
-                    
-                   
-                    if (d["key"]=="date") {
-
-                        return d3.time.format("%b %Y")(d3.time.format("%Y-%m-%d").parse(d["value"]))
-                    
-                    }
-                    else {
-                        return d["value"]
-                    }
-                })
-}
-
-
-function update_filters() {
-
-    d3.select("#filters").html("")
-    var data = IMPORTAPP.filtered_data
-    filters = []
-
-    var keys =  ["country", "product", "port", "quantity"]
-    for (var i = 0; i < 3; i++) {
-
-
-
-
-        var filter_name = keys[i]
-
-        var this_data = data.map(function(d) {
-            return d[filter_name]
-        })
-
-        var unique_options = _.uniq(this_data)
-        unique_options.unshift("All")
-
-        filters.push({
-            "filter_name": filter_name,
-            "unique_options": unique_options
-        })
-
-    };
-
-    output_area = d3.select("#filters")
-
-    select_divs = output_area
-        .selectAll("div")
-        .data(filters)
-
-    select_divs.enter().append("div").classed("select_divs", true)
-
-    select_boxes = select_divs.append("label").text(function(d) {
-        my_str = d["filter_name"]
-        my_str = my_str.charAt(0).toUpperCase() + my_str.slice(1);
-        return my_str
-    })
-
-    select_boxes = select_divs.append("select")
-        .attr("id", function(d) {
-            return d["filter_name"]
-        })
-        .attr("key", function(d) {
-            return d["filter_name"]
-        })
-        .attr("class", "select_boxes")
-        .attr("multiple", "")
-
-
-
-
-    options = select_boxes
-        .selectAll(".select_boxes")
-        .data(function(d) {
-            return d["unique_options"]
-        })
-
-    options
+    th.selectAll("th")
+        .data(headers)
         .enter()
-        .append("option")
-        .attr("value", function(d) {
+        .append("th")
+        .html(function(d) {
             return d
         })
-        .text(function(d) {
-            return d.substr(0,30)
+
+
+    var tr = myTable.selectAll("tr2").data(table_data).enter().append("tr")
+
+    var td = tr.selectAll("td").data(function(d) {
+
+            return_array = []
+
+            _.each(d, function(j, k) {
+                return_array.push({
+                    value: j,
+                    key: k
+                })
+
+            })
+
+
+            return return_array
+
         })
+        .enter()
+        .append("td")
+        .html(function(d, i) {
 
 
-    $(".select_boxes").each(function(index) {
+            if (d["key"] == "date") {
 
-        $(this).select2()
+                return d3.time.format("%b %Y")(d3.time.format("%Y-%m-%d").parse(d["value"]))
 
-    })
-
-    $(".select_boxes").on("change", function() {
-            //Post data to form
-
-
-
-            get_new_imports_data()
-        }
-
-    )
-
+            } else {
+                return d["value"]
+            }
+        })
 }
+
+
+
 
 function create_filters() {
 
     d3.select("#filters").html("")
-   
+
     filters_dict = {}
 
-    var keys =  ["date", "country", "product", "port"]
-    var sizes = [100,200,400,100]
-    
+    var keys = ["date", "country", "product", "port"]
+    var sizes = [100, 200, 400, 100]
+
 
     _.each(keys, function(d) {
-        filters_dict[d]=  []
+        filters_dict[d] = []
     })
 
     _.each(IMPORTAPP.select_box_data, function(d) {
 
-        filters_dict[d.select_box].push(d )
+        filters_dict[d.select_box].push(d)
     })
 
+
+    // _.each(filters_dict, function(d,k){
+        
+    //     var this_key = k
+
+    //     if (this_key != "date" ) {
+
+    //         IMPORTAPP[this_key + "_lookup"] = {}
+    //         _.each(d, function(d2,k2) {
+                
+    //             IMPORTAPP[this_key + "_lookup"][d2["my_key"]] = d2["value"]
+
+    //         })    
+    //     }
+    // })
+     
 
 
     filters = []
 
-    _.each(filters_dict, function(d,k,i){ 
+    _.each(filters_dict, function(d, k, i) {
 
-        
-            d.unshift({key: "All", value: "All"})
-        
+        d.unshift({
+            my_key: "All",
+            value: "All"
+        })
 
-        filters.push({filter_name: k, filter_options: d})
-        
 
+        filters.push({
+            filter_name: k,
+            filter_options: d
+        })
 
     })
-
 
 
 
@@ -782,22 +816,40 @@ function create_filters() {
         .enter()
         .append("option")
         .attr("value", function(d) {
-            return d["key"]
+            return d["my_key"]
         })
         .text(function(d) {
-            return d["value"].substr(0,60)
+            return d["value"].substr(0, 60)
         })
 
     $(".select_boxes").each(function(index) {
-        $(this).select2({width:sizes[index]})
+        $(this).select2({
+            width: sizes[index]
+        })
 
     })
+
+    // Select some initial values
+    $("#date").val("All").trigger("change");
+    $("#country").val("All").trigger("change");
+    $("#port").val("All").trigger("change");
+    
+
 
     $(".select_boxes").on("change", function() {
             get_new_imports_data()
         }
 
     )
+
+    $("#stack_type_radio_buttons input[type='radio']").on("change", function() {
+            get_new_imports_data()
+        }
+
+    )
+
+    $("#product").val("01012100").trigger("change");
+
 
 }
 
@@ -821,19 +873,22 @@ function get_multi_select_array(selection_box_d3_selection) {
 
 function csv_to_sankey_data() {
 
-    var data = IMPORTAPP.filtered_data
-    var keys =  ["country", "product", "port", "quantity"]
 
-    console.log(keys)
+    var data = IMPORTAPP.filtered_data
+    var keys = ["country_code", "product_code", "port_code", "quantity"]
+    var keys_text = ["country", "product", "port"]
+
 
     var nodes = []
 
     _.forEach(data, function(d) {
         d["level1"] = d[keys[0]]
+        d["level1text"] = d[keys_text[0]]
     })
 
     _.forEach(data, function(d) {
         d["level2"] = d[keys[1]]
+        d["level2text"] = d[keys_text[1]]
     })
 
     _.forEach(data, function(d) {
@@ -842,6 +897,7 @@ function csv_to_sankey_data() {
 
     _.forEach(data, function(d) {
         d["level3"] = d[keys[2]]
+        d["level3text"] = d[keys_text[2]]
     })
 
     _.forEach(data, function(d) {
@@ -860,7 +916,8 @@ function csv_to_sankey_data() {
 
         newnodes = newnodes.map(function(d) {
             return {
-                "name": d[level]
+                "name": d[level],
+                "name_text": d[level+"text"]
             }
         })
         nodes = nodes.concat(newnodes)
@@ -1000,28 +1057,26 @@ function draw_map(world, names) {
         .data(countries)
 
     shapes
-     
-        .on("mousemove", function(d) {
+
+    .on("mousemove", function(d) {
+
+        if (_.contains(IMPORTAPP.country_totals, d["name"] )) {
+
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", function() {
+                    return 0.9
+                });
 
 
-
-            if (d["name"] in IMPORTAPP.country_totals) {
-
-                tooltip.transition()
-                    .duration(200)
-                    .style("opacity", function() {
-                        return 0.9
-                    });
-
-
-                tooltip
-                    .html(function() {
-                        return map_tooltip_html(d)
-                    })
-                    .style("left", (d3.event.pageX + 15) + "px")
-                    .style("top", (d3.event.pageY - 60) + "px");
-            }
-        })
+            tooltip
+                .html(function() {
+                    return map_tooltip_html(d)
+                })
+                .style("left", (d3.event.pageX + 15) + "px")
+                .style("top", (d3.event.pageY - 60) + "px");
+        }
+    })
         .on("mouseout", function(d) {
             tooltip.transition()
                 .duration(500)
@@ -1035,7 +1090,7 @@ function map_tooltip_html(d) {
 
     var formatNumber = d3.format(",.0f"),
         format = function(d) {
-            return "£" + formatNumber(d) ;
+            return "£" + formatNumber(d);
         }
 
     this_country = d["name"]
@@ -1061,7 +1116,7 @@ function get_consignments_by_country() {
 
     var totals = d3.nest()
         .key(function(d) {
-            return d["country"];
+            return d["country_code"];
         })
         .rollup(function(d) {
 
@@ -1123,8 +1178,10 @@ function map_colours() {
 
     var countries = topojson.feature(world, world.objects.countries).features;
 
+
     countries = countries.filter(function(d) {
         return names.some(function(n) {
+
             if (d.id == n.id) return d.name = n.name;
         });
     }).sort(function(a, b) {
@@ -1134,10 +1191,14 @@ function map_colours() {
     var shapes = svg.selectAll(".countrypath")
         .data(countries)
 
+
     shapes
         .attr('fill', function(d, i) {
-            if (d["name"] in IMPORTAPP.country_totals) {
-                total = IMPORTAPP.country_totals[d["name"]]["proportion_of_max"]
+
+            alpha_2 = IMPORTAPP.country_numericid_lookup[d["id"]]["alpha_2"]
+
+            if (alpha_2 in IMPORTAPP.country_totals) {
+                total = IMPORTAPP.country_totals[alpha_2]["proportion_of_max"]
             } else {
                 total = 0
             }
@@ -1274,7 +1335,3 @@ function linky(d) {
         y1 = d.target.y + d.ty + d.dy / 2;
     return (y0 + y1) / 2
 }
-
-
-
-

@@ -135,3 +135,7 @@ label {display:block;}
   color: gray;
   display: inline;
 }
+
+#truncated {
+  display: none;
+}

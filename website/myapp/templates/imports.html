@@ -8,17 +8,34 @@
 
 
 </div>
-<div id="mapcontainer" class="main">
+
+<div id="truncated">
+	<h4>Too many results returned - please select a simpler query</h4>
+</div>
+
+
+
+<div id="mapcontainer" class="main toomanyresults" >
 	<p>Consignments received by product, country of origin, and DPE.  Click on countries to filter data.  Hover over countries to see further details.  Select item(s) from the boxes above to filter data.</p>
 </div>
 
-<div id="sankeycontainer" class="main">
+<div id="sankeycontainer" class="main toomanyresults">
   <p>Sankey diagram of consignments by country of origin, product, and DPE</p>
 </div>
 
-<div id="timeseriescontainer" class="main"></div>
+<div id="timeseriescontainer" class="main toomanyresults">
+	<p>Time series of value of imports</p>
 
-<div id="importerscontainer" class="main"></div>
+<form id="stack_type_radio_buttons">
+<input type="radio" name="stack_type" value="port" checked="checked">Stack by port
+<input type="radio" name="stack_type" value="country">Stack by country of origin
+</form>
+
+</div>
+
+<div id="importerscontainer" class="main toomanyresults">
+	<p>These products were imported by:</p>
+</div>
 
 <div class="tooltip"></div>
 

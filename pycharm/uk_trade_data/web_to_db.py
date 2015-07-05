@@ -133,9 +133,9 @@ def find_new_files_and_add_to_database():
 
 
     #2015 records onwards
-    get_and_iterate_urls("SMKA12", raw_control_data_to_database)
-    get_and_iterate_urls("SIAI11", raw_importer_data_to_database)
-    get_and_iterate_urls("SMKI19", raw_import_data_to_database)
+    #get_and_iterate_urls("SMKA12", raw_control_data_to_database)
+    #get_and_iterate_urls("SIAI11", raw_importer_data_to_database)
+    #get_and_iterate_urls("SMKI19", raw_import_data_to_database)
 
 
     def get_and_iterate_historical(specific_url_part, add_to_database_function):
@@ -209,8 +209,8 @@ def find_new_files_and_add_to_database():
 
 
 
-    get_and_iterate_historical("SMKA12", raw_control_data_to_database)
-    get_and_iterate_historical("SIAI11", raw_importer_data_to_database)
+    #get_and_iterate_historical("SMKA12", raw_control_data_to_database)
+    #get_and_iterate_historical("SIAI11", raw_importer_data_to_database)
     get_and_iterate_historical("SMKI19", raw_import_data_to_database)
 
 

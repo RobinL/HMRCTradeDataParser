@@ -34,7 +34,7 @@ CREATE  INDEX ix_cppm_country_code ON country_products_port_month (country_code 
 
 sql_server = """
 
-select  country_name as country, 
+select  top 5 country_name as country,
 c.alpha_code as country_code, 
 mk_commodity_alpha_all as product,
 e.mk_comcode8 as product_code,  
@@ -72,23 +72,23 @@ CREATE  INDEX ix_cppm_country_code ON country_products_port_month (country_code 
 
 sql = """
     create table  select_box_values as
-    select distinct  'product' as select_box, mk_comcode8 as key,mk_comcode8 || " -  " || mk_commodity_alpha_all as value
+    select distinct  'product' as select_box, mk_comcode8 as my_key,mk_comcode8 || " -  " || mk_commodity_alpha_all as value
     from eightdigitcodes
     where cast(substr(mk_comcode8,1,2) as integer) < 23 and mk_comcode8 in (select distinct maf_comcode8 from imports)
 
     union all
 
-    select distinct  'port' as select_box, alpha_code key,port_name as value
+    select distinct  'port' as select_box, alpha_code my_key,port_name as value
     from ports
 
     union all
 
-    select distinct 'country' as select_box, alpha_code as key, country_name as value
+    select distinct 'country' as select_box, alpha_code as my_key, country_name as value
     from countries
 
     union all
 
-    select distinct 'date' as select_box, maf_account_ccyy || " " || maf_account_mm as key, maf_account_ccyy || " " || maf_account_mm as value
+    select distinct 'date' as select_box, maf_account_ccyy || " " || maf_account_mm as my_key, maf_account_ccyy || " " || maf_account_mm as value
     from imports
 
     order by select_box, value
