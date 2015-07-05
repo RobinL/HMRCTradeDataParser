@@ -5,25 +5,34 @@
 
 <div id="filters" class="main">
 
+</div>
 
+<div id="spinnerdiv">
+	<img src= {{ url_for('static', filename = 'spinner.gif') }} class="spinner" alt="previous" title="Previous" border="0">
 
 </div>
 
-<div id="truncated">
+<div id="too_many">
 	<h4>Too many results returned - please select a simpler query</h4>
 </div>
 
+<div id="no_results">
+	<h4>No results were returned for your query</h4>
+</div>
 
 
-<div id="mapcontainer" class="main toomanyresults" >
+<div id="mapcontainer" class="main all_results" >
+<img src= {{ url_for('static', filename = 'spinner.gif') }} class="spinner" alt="previous" title="Previous" border="0">
 	<p>Consignments received by product, country of origin, and DPE.  Click on countries to filter data.  Hover over countries to see further details.  Select item(s) from the boxes above to filter data.</p>
 </div>
 
-<div id="sankeycontainer" class="main toomanyresults">
+<div id="sankeycontainer" class="main all_results">
+<img src= {{ url_for('static', filename = 'spinner.gif') }} class="spinner" alt="previous" title="Previous" border="0">
   <p>Sankey diagram of consignments by country of origin, product, and DPE</p>
 </div>
 
-<div id="timeseriescontainer" class="main toomanyresults">
+<div id="timeseriescontainer" class="main all_results">
+<img src= {{ url_for('static', filename = 'spinner.gif') }} class="spinner" alt="previous" title="Previous" border="0">
 	<p>Time series of value of imports</p>
 
 <form id="stack_type_radio_buttons">
@@ -33,7 +42,8 @@
 
 </div>
 
-<div id="importerscontainer" class="main toomanyresults">
+<div id="importerscontainer" class="main all_results">
+<img src= {{ url_for('static', filename = 'spinner.gif') }} class="spinner" alt="previous" title="Previous" border="0">
 	<p>These products were imported by:</p>
 </div>
 

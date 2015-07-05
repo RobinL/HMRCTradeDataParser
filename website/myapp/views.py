@@ -109,9 +109,6 @@ def get_sql(sql, countries_list,ports_list,products_list,dates_list):
 
 def get_imports_data2(countries_list,ports_list,products_list,dates_list):
 
-
-
-
     #You can't parametize the in keyword in sqlite which makes using parametized sql very hard for the queries i'm trying to run
     #http://stackoverflow.com/questions/14512228/sqlalchemy-raw-sql-parameter-substitution-with-an-in-clause
 
@@ -128,6 +125,18 @@ def get_imports_data2(countries_list,ports_list,products_list,dates_list):
 
     group by country, country_code, product, product_code, port, port_code
     limit 100
+    """
+
+    sql = """
+    select top 100 country, country_code, product, product_code, port, port_code, sum(quantity) as quantity from
+    country_products_port_month
+    where country is not null
+    and year > '2007'
+
+    {queryconditions}
+
+    group by country, country_code, product, product_code, port, port_code
+
     """
 
     sql_done = get_sql(sql, countries_list,ports_list,products_list,dates_list)
@@ -150,15 +159,12 @@ def get_timeseries_data(countries_list,ports_list,products_list,dates_list,stack
     if stack_by != "port" and stack_by != "country":
         return
 
-
-
-
     #You can't parametize the in keyword in sqlite which makes using parametized sql very hard for the queries i'm trying to run
     #http://stackoverflow.com/questions/14512228/sqlalchemy-raw-sql-parameter-substitution-with-an-in-clause
 
     #We need some way of santizing the SQL.  Make sure that the length of all of the lists is right.  They're all short so this should be relatively secure.
     sql = """
-    select month, year, {stack_by} as stack_by, sum(quantity) as quantity from 
+    select month, year, {stack_by} as stack_by, sum(quantity) as quantity from
     country_products_port_month
     where country is not null
     and year > '2007'
@@ -169,11 +175,21 @@ def get_timeseries_data(countries_list,ports_list,products_list,dates_list,stack
     limit 500
     """
 
+    sql = """
+    select top 500 month, year, {stack_by} as stack_by, sum(quantity) as quantity from
+    country_products_port_month
+    where country is not null
+    and year > '2007'
+
+    {{queryconditions}}
+
+    group by {stack_by}, month, year
+
+    """
+
     sql2 = sql.format(stack_by=stack_by)
 
     sql_done = get_sql(sql2, countries_list,ports_list,products_list,dates_list)
-
-
 
     #Need to do more to protect against sql injection attack.
 
@@ -213,7 +229,7 @@ def get_importers_data(countries_list,ports_list,products_list,dates_list):
 
 
     sql = """
-    select * from importerseightdigitcodes as e
+    select top 50 * from importerseightdigitcodes as e
     left join importers as i
     on i.id = e.importer_id 
     where e.importer_id is not null
@@ -222,7 +238,7 @@ def get_importers_data(countries_list,ports_list,products_list,dates_list):
     {queryconditions}
 
 
-    limit 500
+
     """
 
 
@@ -248,7 +264,14 @@ def db_result_to_json_in_d3csv_format(dbresult):
     fa = dbresult.fetchall()
     k  = dbresult.keys()
 
-    # fa = [[word.decode("windows-1252") for word in sets] for sets in fa]
+    def decode_if_str(word):
+        if type(word)==str:
+            return word.decode("windows-1252")
+        else:
+            return word
+
+
+    fa = [[decode_if_str(word) for word in sets] for sets in fa]
 
 
 
@@ -378,7 +401,7 @@ def get_timeseries_json():
     resp = jsonify(csv_like_data = result)
     resp.status_code = 200
 
-    print resp
+
 
     return resp
 

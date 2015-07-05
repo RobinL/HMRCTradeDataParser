@@ -257,7 +257,20 @@ function get_sankey_height(data) {
 }
 
 
+function activate_all_spinners() {
+    $(".spinner").show()
+}
+
 function get_new_imports_data() {
+
+    $("#spinnerdiv .spinner").show()
+    $("#sankeycontainer .spinner").show()
+
+    $("#mapcontainer .spinner").show()
+
+    $("#timeseriescontainer .spinner").show()
+
+        $("#importerscontainer .spinner").show()
 
 
     dates = $("#date").val()
@@ -277,8 +290,8 @@ function get_new_imports_data() {
 
 
     if (_.contains(dates,"All") & _.contains(countries,"All") & _.contains(products,"All") & _.contains(ports,"All")) {
-        $(".toomanyresults").hide()
-        $("#truncated").show()
+        $(".all_results").hide()
+        $("#too_many").show()
         return
     }
 
@@ -286,37 +299,61 @@ function get_new_imports_data() {
 
     p1 = $.getJSON("importsdata2.json", post_data)
     p2 = $.getJSON("timeseries.json", post_data)
-    p3 = $.getJSON("importers.json", post_data)
+    
 
 
-    $.when(p1, p2, p3).done(function(imports_data, timeseries_data, importers_data) {
+    $.when(p1, p2, p3).done(function(imports_data, timeseries_data) {
 
         IMPORTAPP.filtered_data = imports_data[0]["csv_like_data"]
         IMPORTAPP.timeseries_data = timeseries_data[0]["csv_like_data"]
-        IMPORTAPP.importers_data = importers_data[0]["csv_like_data"]
+        
 
         if (IMPORTAPP.filtered_data.length>99) {
-            $(".toomanyresults").hide()
-            $("#truncated").show()
+            $(".all_results").hide()
+            $("#no_results").hide()
+            $("#too_many").show()
+            $("#spinnerdiv .spinner").hide()
             return
-        } else {
-              $(".toomanyresults").show()
-            $("#truncated").hide()
+        } else if (IMPORTAPP.filtered_data.length==0) {
+            $(".all_results").hide()
+            $("#too_many").hide()
+            $("#no_results").show()
+            $("#spinnerdiv .spinner").hide()
+            return
         }
+        else{
+            $(".all_results").show()
+            $("#too_many").hide()
+            $("#no_results").hide()
+        }
+
+        $("#spinnerdiv .spinner").hide()
 
 
         get_consignments_by_country()
         var sankey_data = csv_to_sankey_data(IMPORTAPP.filtered_data);
         var max_height = get_sankey_height(IMPORTAPP.filtered_data)
         draw_sankey(sankey_data, max_height);
+        $("#sankeycontainer .spinner").hide()
+        
+
         map_colours()
         key_colours()
+        $("#mapcontainer .spinner").hide()
 
-
-        create_importers_table(IMPORTAPP.importers_data);
+        
         create_stacked_bar(IMPORTAPP.timeseries_data)
+        $("#timeseriescontainer .spinner").hide()
 
-        resize()
+       $.getJSON("importers.json", post_data, function(importers_data) {
+
+        IMPORTAPP.importers_data = importers_data["csv_like_data"]
+            create_importers_table(IMPORTAPP.importers_data);
+            $("#importerscontainer .spinner").hide()
+            resize()
+        }) 
+
+        
 
     })
 

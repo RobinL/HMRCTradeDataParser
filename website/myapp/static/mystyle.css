@@ -136,6 +136,13 @@ label {display:block;}
   display: inline;
 }
 
-#truncated {
+#too_many, #no_results {
   display: none;
+}
+
+.spinner {
+      display: block;
+    margin-left: auto;
+    margin-right: auto;
+
 }

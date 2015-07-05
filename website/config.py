@@ -17,8 +17,7 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join((basedir), 'trade_data_new.db')
-    #SQLALCHEMY_DATABASE_URI = os.environ.get('CONNECTION_STRING_SQLALCHEMY_WINDOWS')
-    print SQLALCHEMY_DATABASE_URI
+    SQLALCHEMY_DATABASE_URI = os.environ.get('CONNECTION_STRING_SQLALCHEMY_WINDOWS')
 
 class AzureConfig(Config):
     DEBUG = False
