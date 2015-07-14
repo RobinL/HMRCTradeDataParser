@@ -822,6 +822,9 @@ function create_filters() {
 
     select_boxes = select_divs.append("label").text(function(d) {
         my_str = d["filter_name"]
+        if (my_str == "country") {
+        my_str = "Non EU Country"
+    }
         my_str = my_str.charAt(0).toUpperCase() + my_str.slice(1);
         return my_str
     })
@@ -1101,7 +1104,6 @@ function draw_map(world, names) {
                     return 0.9
                 });
 
-                debugger;
 
 
             tooltip

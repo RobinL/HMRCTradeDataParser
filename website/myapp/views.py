@@ -220,7 +220,7 @@ def get_importers_data(countries_list,ports_list,products_list,dates_list):
 
 
     sql = """
-    select top 500 * from importers_for_web
+    select top 100 * from importers_for_web
     where 1 =1  
     
 
