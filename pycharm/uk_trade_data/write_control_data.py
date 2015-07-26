@@ -181,13 +181,15 @@ def write_xls_heirarchy_to_otherdigitcodes():
         r = row[1]
 
         c = CombinedNomenclature()
-        c.combined_nomenclature_2 = r["combined_nomenclature_2"]
+        c.combined_nomenclature_1 = r["combined_nomenclature_1"]
+        c.combined_nomenclature_1_desc = r["combined_nomenclature_1_desc"]
+        c.combined_nomenclature_2 = "{0:02d}".format(r["combined_nomenclature_2"])
         c.combined_nomenclature_2_desc = r["combined_nomenclature_2_desc"]
-        c.combined_nomenclature_4 = r["combined_nomenclature_4"]
+        c.combined_nomenclature_4 = "{0:04d}".format(r["combined_nomenclature_4"])
         c.combined_nomenclature_4_desc = r["combined_nomenclature_4_desc"]
-        c.combined_nomenclature_6 = r["combined_nomenclature_6"]
+        c.combined_nomenclature_6 = "{0:06d}".format(r["combined_nomenclature_6"])
         c.combined_nomenclature_6_desc = r["combined_nomenclature_6_desc"]
-        c.commodity_code_8 = r["commodity_code_8"]
+        c.commodity_code_8 = "{0:08d}".format(r["commodity_code_8"])
         c.commodity_code_8_desc = r["commodity_code_8_desc"]
 
         session.add(c)

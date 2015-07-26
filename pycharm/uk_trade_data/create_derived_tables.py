@@ -32,6 +32,39 @@ CREATE  INDEX ix_cppm_country_code ON country_products_port_month (country_code 
 
 """
 
+sql = """
+drop table if exists country_products_port_month_1;
+create table country_products_port_month_1 as
+select  country_name as country, c.alpha_code as country_code, combined_nomenclature_1_desc as product,cn.combined_nomenclature_1 as product_code,  port_name as port, i.maf_port_alpha as port_code, i.maf_account_mm as month, i.maf_account_ccyy as year, sum(cast(maf_value as integer)) as quantity
+    from imports as i
+
+    left join eightdigitcodes as e
+    on i.maf_comcode8 = e.mk_comcode8
+
+    left join combined_nomenclature as cn
+
+    on e.mk_comcode8 = cn.commodity_code_8
+
+    left join countries as c
+    on i.maf_coo_alpha = c.alpha_code
+
+    left join ports as p
+    on p.alpha_code = i.maf_port_alpha
+
+    where country_name is not null
+    and mk_commodity_alpha_all is not null
+    and port_name is not null
+    and maf_value is not null
+
+
+
+
+    group by country_name, combined_nomenclature_1_desc, port_name, i.maf_account_mm , i.maf_account_ccyy;
+CREATE  INDEX ix_cppm_product_code_1 ON country_products_port_month (product_code );
+CREATE  INDEX ix_cppm_port_code_1 ON country_products_port_month (port_code );
+CREATE  INDEX ix_cppm_country_code_1 ON country_products_port_month (country_code );
+"""
+
 sql_server = """
 
 select  top 5 country_name as country,

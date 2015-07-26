@@ -77,7 +77,7 @@ def unzip_url(url):
 from write_country_data import download_and_insert_country_data, download_and_insert_port_data
 
 
-from write_control_data import raw_control_data_to_database
+from write_control_data import raw_control_data_to_database, write_xls_heirarchy_to_otherdigitcodes
 from write_importer_data import raw_importer_data_to_database
 from write_import_data import raw_import_data_to_database
 from write_meta_data import write_meta_data_to_db
@@ -87,7 +87,7 @@ from zipfile import BadZipfile
 def find_new_files_and_add_to_database():
 
     write_meta_data_to_db()
-
+    write_xls_heirarchy_to_otherdigitcodes()
     download_and_insert_country_data()
     download_and_insert_port_data()
 
@@ -133,9 +133,9 @@ def find_new_files_and_add_to_database():
 
 
     #2015 records onwards
-    #get_and_iterate_urls("SMKA12", raw_control_data_to_database)
-    #get_and_iterate_urls("SIAI11", raw_importer_data_to_database)
-    #get_and_iterate_urls("SMKI19", raw_import_data_to_database)
+    get_and_iterate_urls("SMKA12", raw_control_data_to_database)
+    get_and_iterate_urls("SIAI11", raw_importer_data_to_database)
+    get_and_iterate_urls("SMKI19", raw_import_data_to_database)
 
 
     def get_and_iterate_historical(specific_url_part, add_to_database_function):
@@ -211,7 +211,7 @@ def find_new_files_and_add_to_database():
 
     #get_and_iterate_historical("SMKA12", raw_control_data_to_database)
     #get_and_iterate_historical("SIAI11", raw_importer_data_to_database)
-    get_and_iterate_historical("SMKI19", raw_import_data_to_database)
+    #get_and_iterate_historical("SMKI19", raw_import_data_to_database)
 
 
     #historical records

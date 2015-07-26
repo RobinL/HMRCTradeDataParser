@@ -129,6 +129,8 @@ class CombinedNomenclature(Base):
     combined_nomenclature_4_desc = Column(String(2000))
     combined_nomenclature_2 = Column(String(2))
     combined_nomenclature_2_desc = Column(String(2000))
+    combined_nomenclature_1 = Column(String(2))
+    combined_nomenclature_1_desc = Column(String(2000))
 
 
 class ImporterHeader(Base):
