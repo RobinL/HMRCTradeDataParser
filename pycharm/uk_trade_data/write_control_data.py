@@ -2,7 +2,7 @@ __author__ = 'Robin'
 import pandas as pd
 from utils import get_fields_df
 
-from my_models import EightDigitCode
+from my_models import EightDigitCode, CombinedNomenclature
 from my_database import session
 MAX_IMPORT_ROWS = 5000000000
 import logging
@@ -171,6 +171,30 @@ def write_header_record_to_db(df):
 
         session.add(edh)
     session.commit()
+
+
+def write_xls_heirarchy_to_otherdigitcodes():
+
+    df = pd.read_excel("code_heirarchy.xlsx")
+
+    for row in df.iterrows():
+        r = row[1]
+
+        c = CombinedNomenclature()
+        c.combined_nomenclature_2 = r["combined_nomenclature_2"]
+        c.combined_nomenclature_2_desc = r["combined_nomenclature_2_desc"]
+        c.combined_nomenclature_4 = r["combined_nomenclature_4"]
+        c.combined_nomenclature_4_desc = r["combined_nomenclature_4_desc"]
+        c.combined_nomenclature_6 = r["combined_nomenclature_6"]
+        c.combined_nomenclature_6_desc = r["combined_nomenclature_6_desc"]
+        c.commodity_code_8 = r["commodity_code_8"]
+        c.commodity_code_8_desc = r["commodity_code_8_desc"]
+
+        session.add(c)
+
+    session.commit()
+
+
 
 
 

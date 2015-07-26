@@ -117,10 +117,19 @@ class EightDigitCode(Base):
     #importers = relationship("ImporterEightDigitCodes")
 
 
-class OtherDigitCodes(Base):
-    __tablename__ = "otherdigitcodes"
+class CombinedNomenclature(Base):
+    __tablename__ = "combined_nomenclature"
 
     id = Column(Integer, primary_key=True)
+    commodity_code_8 = Column(String(8),index=True,unique=True)
+    commodity_code_8_desc = Column(String(2000))
+    combined_nomenclature_6 = Column(String(6))
+    combined_nomenclature_6_desc = Column(String(2000))
+    combined_nomenclature_4 = Column(String(4))
+    combined_nomenclature_4_desc = Column(String(2000))
+    combined_nomenclature_2 = Column(String(2))
+    combined_nomenclature_2_desc = Column(String(2000))
+
 
 class ImporterHeader(Base):
     __tablename__ = "importersheaders"

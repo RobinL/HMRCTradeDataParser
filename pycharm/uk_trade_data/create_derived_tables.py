@@ -124,7 +124,7 @@ sql_server = """
 
 
 
-    sql = """
+sql = """
     create table importers_for_web as
 
 select 
