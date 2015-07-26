@@ -59,6 +59,8 @@ var port_colours = d3.scale.ordinal()
         "#9edae5"
     ]);
 
+
+$(function() {
 $.when(p1, p2, p3).done(function(worlddata, countrydata, select_data) {
 
     IMPORTAPP.worlddata = worlddata[0]
@@ -73,7 +75,7 @@ $.when(p1, p2, p3).done(function(worlddata, countrydata, select_data) {
 
     draw_map()
     draw_map_key()
-    create_filters()
+    create_filters(8)
     
 
     get_new_imports_data()
@@ -82,15 +84,40 @@ $.when(p1, p2, p3).done(function(worlddata, countrydata, select_data) {
     d3.select(window).on('resize', resize);
 
 
+    $("#product").select2({data:[{id:"a", text:"aa"}]});
 
 
 })
 
+})
+
+$(function() {
+    //The following code deals with what happens when you click the 'level of detail' commodity codes
+    $(".btn-group > .btn").click(function(){
+        $(".btn-group > .btn").removeClass("active");
+        $(this).addClass("active");
+
+        //Change options in the product filter
+        
+        create_filters($(".btn.btn-default.active").attr("pval"))
+
+
+    });
+
+
+});
 
 
 
-function draw_sankey(sankey_data, max_height) {
 
+
+
+
+function draw_sankey(sankey_data) {
+
+    //First of all calculate the height the diagram will be, the size of the padding, etc.
+    var sankey_height_dict = get_sankey_height_dict(sankey_data)
+    var max_height = sankey_height_dict["total_height"]
 
     d3.select("svg.sankey").remove()
 
@@ -123,7 +150,7 @@ function draw_sankey(sankey_data, max_height) {
 
     var sankey = d3.sankey()
         .nodeWidth(15)
-        .nodePadding(18)
+        .nodePadding(sankey_height_dict["padding"])
         .size([width, height]);
 
 
@@ -231,9 +258,63 @@ function draw_sankey(sankey_data, max_height) {
 }
 
 
-function get_sankey_height(data) {
+
+function get_sankey_height_dict(sankey_data) {
+
+    debugger;
+    var num_elements = get_sankey_num_elements()
+    var num_elements = IMPORTAPP.sankey_num_elements
+
+    var padding_target = 20
+    var height_target = 40
+
+    var total_per_element = padding_target + height_target
+    var total_height_pre_normalisation = (total_per_element * num_elements) - padding_target
+
+
+    if (total_height_pre_normalisation <= 1000) {
+        return { 
+            total_height:  total_height_pre_normalisation,
+            padding: padding_target,
+            height: height_target
+            }
+    }
+
+    //If we exceed the max height of 1000, shrink everything
+
+    var max_height_per_element_inc_padding = 1000/num_elements
+
+    var constraint_factor = max_height_per_element_inc_padding/total_per_element
+
+    var constraint_factor_padding = Math.pow(constraint_factor,0.5)
+
+    var new_height_before_normalise = height_target* constraint_factor
+
+    var new_padding_before_normalise = padding_target* constraint_factor_padding
+
+    var normalise = ((new_height_before_normalise + new_padding_before_normalise)*num_elements - new_padding_before_normalise)/1000
+
+    var final_height =new_height_before_normalise * normalise
+
+    var final_padding = new_padding_before_normalise * normalise
+
+    return { 
+            total_height:  1000,
+            padding: final_padding,
+            height: final_height
+            }
+
+
+
+
+
+
+}
+
+function get_sankey_num_elements() {
     //We need to find the level with the most unique values and multiply by 30
 
+    var data = IMPORTAPP.filtered_data
     max_len = 0
 
     var keys = ["country", "product", "port", "quantity"]
@@ -252,7 +333,7 @@ function get_sankey_height(data) {
 
     };
 
-    return max_len * 40
+    return max_len
 
 }
 
@@ -265,12 +346,9 @@ function get_new_imports_data() {
 
     $("#spinnerdiv .spinner").show()
     $("#sankeycontainer .spinner").show()
-
     $("#mapcontainer .spinner").show()
-
     $("#timeseriescontainer .spinner").show()
-
-        $("#importerscontainer .spinner").show()
+    $("#importerscontainer .spinner").show()
 
 
     dates = $("#date").val()
@@ -278,13 +356,15 @@ function get_new_imports_data() {
     products = $("#product").val()
     ports = $("#port").val()
     stack_by = $('input[name=stack_type]:checked', '#stack_type_radio_buttons').val()
+    cn_code_length = $(".btn.btn-default.active").attr("pval")
 
     post_data = {
         dates: dates,
         countries: countries,
         products: products,
         ports: ports,
-        stack_by: stack_by
+        stack_by: stack_by,
+        cn_code_length: cn_code_length
     }
 
 
@@ -308,7 +388,7 @@ function get_new_imports_data() {
         IMPORTAPP.timeseries_data = timeseries_data[0]["csv_like_data"]
         
 
-        if (IMPORTAPP.filtered_data.length>99) {
+        if (IMPORTAPP.filtered_data.length>999) {
             $(".all_results").hide()
             $("#no_results").hide()
             $("#too_many").show()
@@ -332,8 +412,8 @@ function get_new_imports_data() {
 
         get_consignments_by_country()
         var sankey_data = csv_to_sankey_data(IMPORTAPP.filtered_data);
-        var max_height = get_sankey_height(IMPORTAPP.filtered_data)
-        draw_sankey(sankey_data, max_height);
+        
+        draw_sankey(sankey_data);
         $("#sankeycontainer .spinner").hide()
         
 
@@ -756,7 +836,7 @@ function create_importers_table(table_data) {
 
 
 
-function create_filters() {
+function create_filters(cn_code_length) {
 
     d3.select("#filters").html("")
 
@@ -765,32 +845,38 @@ function create_filters() {
     var keys = ["date", "country", "product", "port"]
     var sizes = [100, 200, 400, 100]
 
+    //Use whatever digit codes chosen to convert select_box_data
+
+  
+
+    var filtered_select_box_data = []
+
+    _.each(IMPORTAPP.select_box_data, function(d) {
+        d = $.extend({}, d)
+
+        if (d.select_box.indexOf("product") > -1){
+
+            if (d.select_box.indexOf(cn_code_length) > -1){
+                d.select_box = "product"
+                filtered_select_box_data.push(d)
+            }
+        }
+        else {
+            filtered_select_box_data.push(d)    
+
+        }
+        
+    })
 
     _.each(keys, function(d) {
         filters_dict[d] = []
     })
 
-    _.each(IMPORTAPP.select_box_data, function(d) {
+    _.each(filtered_select_box_data, function(d) {
 
         filters_dict[d.select_box].push(d)
     })
 
-
-    // _.each(filters_dict, function(d,k){
-        
-    //     var this_key = k
-
-    //     if (this_key != "date" ) {
-
-    //         IMPORTAPP[this_key + "_lookup"] = {}
-    //         _.each(d, function(d2,k2) {
-                
-    //             IMPORTAPP[this_key + "_lookup"][d2["my_key"]] = d2["value"]
-
-    //         })    
-    //     }
-    // })
-     
 
 
     filters = []
@@ -883,7 +969,10 @@ function create_filters() {
 
     )
 
-    $("#product").val("01012100").trigger("change");
+    $("#product").val(filters_dict.product[1].my_key).trigger("change");
+
+
+
 
 
 }
@@ -913,12 +1002,53 @@ function csv_to_sankey_data() {
     var keys = ["country_code", "product_code", "port_code", "quantity"]
     var keys_text = ["country", "product", "port"]
 
+    var total = _.reduce(data, function(memo, d){ return d["quantity"] + memo; }, 0);
+
+    var one_percent_total = total/200
+
+    //Need a list of countries and ports which account for less than 1%
+
+    var country_totals = {}
+    var port_totals = {}
+    _.forEach(data, function(d){
+        var key = d["country_code"]
+        country_totals[key] = (country_totals[key] || 0) + d["quantity"];
+
+        var key = d["port_code"]
+        port_totals[key] = (port_totals[key] || 0) + d["quantity"];
+    })
+
+
+    var country_removes = []
+    _.forEach(country_totals, function(v,k) {
+        if (v < one_percent_total) {
+            country_removes.push(k)
+        } 
+    })
+
+    var port_removes = []
+    _.forEach(port_totals, function(v,k) {
+        if (v < one_percent_total) {
+            port_removes.push(k)
+        } 
+    })
+
+    
+    IMPORTAPP.sankey_num_elements = Math.max(_.size(country_totals) - country_removes.length,_.size(port_totals) - port_removes.length)
+
+ 
 
     var nodes = []
 
     _.forEach(data, function(d) {
-        d["level1"] = d[keys[0]]
-        d["level1text"] = d[keys_text[0]]
+        if (_.contains(country_removes, d["country_code"] )) {
+            d["level1"] = "Other_country"
+            d["level1text"] = "All other countries"
+        }
+        else {
+            d["level1"] = d[keys[0]]
+            d["level1text"] = d[keys_text[0]]
+        }
     })
 
     _.forEach(data, function(d) {
@@ -927,16 +1057,31 @@ function csv_to_sankey_data() {
     })
 
     _.forEach(data, function(d) {
+        if (_.contains(country_removes, d["country_code"] )) {
+            d["level2link"] = "Other_country" + d[keys[1]]
+        } else {
         d["level2link"] = d[keys[0]] + d[keys[1]]
+        }
     })
 
     _.forEach(data, function(d) {
+        if (_.contains(port_removes, d["port_code"] )){
+            d["level3"] = "Other_port"
+            d["level3text"] = "All other ports"
+        } else {
         d["level3"] = d[keys[2]]
         d["level3text"] = d[keys_text[2]]
+
+        }
     })
 
     _.forEach(data, function(d) {
+        if (_.contains(port_removes, d["port_code"] )) {
+            d["level3link"] = d[keys[1]] + "Other_port"
+        } else {
         d["level3link"] = d[keys[1]] + d[keys[2]]
+
+        }
     })
 
     var levelList = ["level1", "level2", "level3"]

@@ -107,7 +107,7 @@ def get_sql(sql, countries_list,ports_list,products_list,dates_list):
 
 
 
-def get_imports_data2(countries_list,ports_list,products_list,dates_list):
+def get_imports_data2(countries_list,ports_list,products_list,dates_list,cn_code_length):
 
     #You can't parametize the in keyword in sqlite which makes using parametized sql very hard for the queries i'm trying to run
     #http://stackoverflow.com/questions/14512228/sqlalchemy-raw-sql-parameter-substitution-with-an-in-clause
@@ -117,28 +117,30 @@ def get_imports_data2(countries_list,ports_list,products_list,dates_list):
 
     sql = """
     select country, country_code, product, product_code, port, port_code, sum(quantity) as quantity from
-    country_products_port_month
+    country_products_port_month_{cn_code_length}
     where country is not null
     and year > '2007'
 
-    {queryconditions}
+    {{queryconditions}}
 
     group by country, country_code, product, product_code, port, port_code
-    limit 100
+    limit 1000
     """
 
-    sql = """
-    select top 100 country, country_code, product, product_code, port, port_code, sum(quantity) as quantity from
-    country_products_port_month
-    where country is not null
-    and year > '2007'
+    # sql = """
+    # select top 100 country, country_code, product, product_code, port, port_code, sum(quantity) as quantity from
+    # country_products_port_month_8
+    # where country is not null
+    # and year > '2007'
 
-    {queryconditions}
+    # {queryconditions}
 
-    group by country, country_code, product, product_code, port, port_code
+    # group by country, country_code, product, product_code, port, port_code
 
-    """
+    # """
 
+    sql = sql.format(cn_code_length=cn_code_length)
+    print sql
     sql_done = get_sql(sql, countries_list,ports_list,products_list,dates_list)
 
 
@@ -152,7 +154,7 @@ def get_imports_data2(countries_list,ports_list,products_list,dates_list):
     return result
 
 
-def get_timeseries_data(countries_list,ports_list,products_list,dates_list,stack_by):
+def get_timeseries_data(countries_list,ports_list,products_list,dates_list,stack_by,cn_code_length):
 
 
     #Check html injection on stack_by:
@@ -165,7 +167,7 @@ def get_timeseries_data(countries_list,ports_list,products_list,dates_list,stack
     #We need some way of santizing the SQL.  Make sure that the length of all of the lists is right.  They're all short so this should be relatively secure.
     sql = """
     select month, year, {stack_by} as stack_by, sum(quantity) as quantity from
-    country_products_port_month
+    country_products_port_month_{cn_code_length}
     where country is not null
     and year > '2007'
 
@@ -175,19 +177,20 @@ def get_timeseries_data(countries_list,ports_list,products_list,dates_list,stack
     limit 500
     """
 
-    sql = """
-    select top 500 month, year, {stack_by} as stack_by, sum(quantity) as quantity from
-    country_products_port_month
-    where country is not null
-    and year > '2007'
+    # sql = """
+    # select top 500 month, year, {stack_by} as stack_by, sum(quantity) as quantity from
+    # country_products_port_month_8
+    # where country is not null
+    # and year > '2007'
 
-    {{queryconditions}}
+    # {{queryconditions}}
 
-    group by {stack_by}, month, year
+    # group by {stack_by}, month, year
 
-    """
+    # """
 
-    sql2 = sql.format(stack_by=stack_by)
+    print cn_code_length
+    sql2 = sql.format(stack_by=stack_by, cn_code_length=cn_code_length)
 
     sql_done = get_sql(sql2, countries_list,ports_list,products_list,dates_list)
 
@@ -221,21 +224,21 @@ def get_importers_data(countries_list,ports_list,products_list,dates_list):
 
     sql = """
     select top 100 * from importers_for_web
-    where 1 =1  
-    
-
+    where 1 =1 
     {queryconditions}
-
     order by year desc, month desc
-
 
     """
 
+    sql = """
+    select  * from importers_for_web
+    where 1 =1 
+    {queryconditions}
+    order by year desc, month desc
+    limit 100
+    """
+
     sql_done = get_sql(sql, countries_list,ports_list,products_list,dates_list)
-
-
-
-
 
 
 
@@ -316,8 +319,9 @@ def get_imports_json2():
         ports_list = arguments.getlist("ports[]")
         products_list = arguments.getlist("products[]")
         dates_list = arguments.getlist("dates[]")
+        cn_code_length = arguments["cn_code_length"]
 
-        result = get_imports_data2(countries_list,ports_list,products_list,dates_list)
+        result = get_imports_data2(countries_list,ports_list,products_list,dates_list,cn_code_length)
         result = db_result_to_json_in_d3csv_format(result)
 
     else:
@@ -364,8 +368,9 @@ def get_timeseries_json():
         products_list = arguments.getlist("products[]")
         dates_list = arguments.getlist("dates[]")
         stack_by = arguments["stack_by"]
+        cn_code_length = arguments["cn_code_length"]
 
-        result = get_timeseries_data(countries_list,ports_list,products_list,dates_list, stack_by)
+        result = get_timeseries_data(countries_list,ports_list,products_list,dates_list, stack_by,cn_code_length)
         result = db_result_to_json_in_d3csv_format(result)
 
         new_results = []

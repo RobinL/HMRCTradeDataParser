@@ -1,9 +1,9 @@
 
 
 sql = """
-drop table if exists country_products_port_month;
+drop table if exists country_products_port_month_8;
 
-create table country_products_port_month as 
+create table country_products_port_month_8 as 
 select  country_name as country, c.alpha_code as country_code, mk_commodity_alpha_all as product,e.mk_comcode8 as product_code,  port_name as port, i.maf_port_alpha as port_code, i.maf_account_mm as month, i.maf_account_ccyy as year, sum(cast(maf_value as integer)) as quantity
     from imports as i
 
@@ -32,10 +32,14 @@ CREATE  INDEX ix_cppm_country_code ON country_products_port_month (country_code 
 
 """
 
+
 sql = """
-drop table if exists country_products_port_month_1;
-create table country_products_port_month_1 as
-select  country_name as country, c.alpha_code as country_code, combined_nomenclature_1_desc as product,cn.combined_nomenclature_1 as product_code,  port_name as port, i.maf_port_alpha as port_code, i.maf_account_mm as month, i.maf_account_ccyy as year, sum(cast(maf_value as integer)) as quantity
+drop table if exists country_products_port_month_2;
+
+create table country_products_port_month_8 as 
+
+
+select  country_name as country, c.alpha_code as country_code, combined_nomenclature_2_desc as product,cn.combined_nomenclature_2 as product_code,  port_name as port, i.maf_port_alpha as port_code, i.maf_account_mm as month, i.maf_account_ccyy as year, sum(cast(maf_value as integer)) as quantity
     from imports as i
 
     left join eightdigitcodes as e
@@ -55,15 +59,20 @@ select  country_name as country, c.alpha_code as country_code, combined_nomencla
     and mk_commodity_alpha_all is not null
     and port_name is not null
     and maf_value is not null
+    and cast(substr(e.mk_comcode8,1,2) as integer) < 23
 
 
 
+    group by country_name, mk_commodity_alpha_all, port_name, i.maf_account_mm , i.maf_account_ccyy;
 
-    group by country_name, combined_nomenclature_1_desc, port_name, i.maf_account_mm , i.maf_account_ccyy;
-CREATE  INDEX ix_cppm_product_code_1 ON country_products_port_month (product_code );
-CREATE  INDEX ix_cppm_port_code_1 ON country_products_port_month (port_code );
-CREATE  INDEX ix_cppm_country_code_1 ON country_products_port_month (country_code );
+CREATE  INDEX ix_cppm_product_code ON country_products_port_month (product_code );
+CREATE  INDEX ix_cppm_port_code ON country_products_port_month (port_code );
+CREATE  INDEX ix_cppm_country_code ON country_products_port_month (country_code );
+
 """
+
+
+
 
 sql_server = """
 
