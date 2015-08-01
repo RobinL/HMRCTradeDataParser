@@ -6,5 +6,6 @@ pycharm/data
 .env
 website/.env
 website/*.env
+ukpostcodes.csv
 
 *.db-journal
