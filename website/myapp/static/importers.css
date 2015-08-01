@@ -1,0 +1,26 @@
+#map { height: 800px; }
+
+
+
+
+
+.main {
+  margin:10px;
+  padding:10px;
+  border: 1px solid #B4B4B4;
+
+}
+
+
+
+
+
+label {display:block;}
+
+.select_divs {
+  display: block;
+  margin-left:1%;
+  padding:1px;
+  margin: 1px;
+
+}

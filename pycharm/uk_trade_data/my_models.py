@@ -226,6 +226,14 @@ class RawFileLog(Base):
     url = Column(String(120))
     processing_completed = Column(Boolean)
 
+class Postcode(Base):
+    __tablename__ = "postcodes"
+
+    id = Column(Integer, primary_key=True)
+    postcode = Column(String(8), index=True)
+    lat = Column(Float())
+    lng = Column(Float())
+
 
 
 

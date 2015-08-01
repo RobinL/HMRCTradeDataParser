@@ -261,7 +261,6 @@ function draw_sankey(sankey_data) {
 
 function get_sankey_height_dict(sankey_data) {
 
-    debugger;
     var num_elements = get_sankey_num_elements()
     var num_elements = IMPORTAPP.sankey_num_elements
 

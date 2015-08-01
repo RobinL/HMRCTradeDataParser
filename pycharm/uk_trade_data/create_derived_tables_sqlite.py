@@ -134,6 +134,77 @@ def create_derived_importers_for_web():
     for my_sql in sql_list:
         session.execute(my_sql)
 
+
+
+
+def create_derived_importers_for_web():
+    sql = """
+   create table importers_for_web as
+
+    select
+    ia_name, ia_addr_1, ia_addr_2, ia_addr_3,ia_addr_4, ia_addr_5, ia_pcode, month_of_import as month, year_of_import as year,
+    e.comcode8 as product_code
+
+     from importerseightdigitcodes as e
+        left join importers as i
+        on i.id = e.importer_id
+        where e.importer_id is not null
+        and year_of_import >= '2014'
+        order by year_of_import desc, month_of_import desc
+
+        ;
+
+      CREATE  INDEX ix_ifw_product_code ON importers_for_web (product_code );
+      CREATE  INDEX ix_ifw_month ON importers_for_web (month );
+       CREATE  INDEX ix_ifw_year ON importers_for_web (year );
+    """
+
+    sql_list = sql.split(";")
+    for my_sql in sql_list:
+        session.execute(my_sql)
+
+if __name__ == "__main__":
+
+    #create_derived_select_box()
+    create_derived_country_products_month()
+    #create_derived_importers_for_web()
+
+
+def create_derived_importers_for_web2():
+    sql = """
+   create table importers_for_web2 as
+
+    select
+    ia_name, ia_addr_1, ia_addr_2, ia_addr_3,ia_addr_4, ia_addr_5, ia_pcode, month_of_import as month, year_of_import as year,
+    e.comcode8 as product_code, lat, lng
+    replace("ia_pcode"," ", "") as nospace 
+
+
+     from importerseightdigitcodes as e
+        left join importers as i
+        on i.id = e.importer_id
+
+    left join 
+        postcodes as pc
+
+        on nospace =pc.postcode
+
+
+        where e.importer_id is not null
+        and year_of_import >= '2014'
+        order by year_of_import desc, month_of_import desc
+
+        ;
+
+      CREATE  INDEX ix_ifw_product_code ON importers_for_web2 (product_code );
+      CREATE  INDEX ix_ifw_month ON importers_for_web2 (month );
+       CREATE  INDEX ix_ifw_year ON importers_for_web2 (year );
+    """
+
+    sql_list = sql.split(";")
+    for my_sql in sql_list:
+        session.execute(my_sql)
+
 if __name__ == "__main__":
 
     #create_derived_select_box()

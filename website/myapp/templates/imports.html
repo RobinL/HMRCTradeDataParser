@@ -5,13 +5,14 @@
 
 <div class="container">
 
-<div class="btn-group main" role="group" aria-label="...">
-<p>Choose level of detail of commodity codes</p>
+<div class="main">
+<div class="btn-group" role="group" aria-label="...">
   <button type="button" class="btn btn-default active" pval = "8">8 digit commodity codes</button>
   <button type="button" class="btn btn-default" pval = "6">6 digit combined nomenclature</button>
   <button type="button" class="btn btn-default" pval = "4">4 digit combined nomenclature</button>
   <button type="button" class="btn btn-default" pval = "2">2 digit sections</button>
   <button type="button" class="btn btn-default" pval = "1">2 digit chapters</button>
+</div>
 </div>
 
 <div id="filters" class="main">
@@ -100,6 +101,6 @@
 {%- block styles %}
 {{super()}}
 
-<link href="{{ url_for('static', filename='mystyle.css') }}" rel="stylesheet" media="screen">
 <link href="{{ url_for('static', filename='select2.min.css') }}" rel="stylesheet" media="screen">
+<link href="{{ url_for('static', filename='mystyle.css') }}" rel="stylesheet" media="screen">
 {%- endblock styles %}

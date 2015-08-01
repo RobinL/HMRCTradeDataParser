@@ -11,14 +11,20 @@ import traceback
 logger = logging.getLogger(__name__)
 
 
-def get_selection_box_data():
+def get_selection_box_data(type = ""):
 
     sql = """
     select select_box, my_key, value
     from select_box_values
+    {where}
     """
 
-    result = db.session.execute(sql)
+    if type != "":
+        where = "where select_box = '{}'".format(type)
+    else:
+        where = ""
+
+    result = db.session.execute(sql.format(where=where))
 
     return result
 
@@ -295,7 +301,10 @@ def imports_view():
     return render_template('imports.html')
 
 
+@myapp.route('/importers', methods=["GET","POST"])
+def importers_view():
 
+    return render_template('importers.html')
 
 
 
@@ -336,7 +345,15 @@ def get_imports_json2():
 
 @myapp.route('/selectboxdata.json', methods=["GET","POST"])
 def get_select_box_json():
-    result = get_selection_box_data()
+    arguments = request.args
+
+
+    try:
+        type= arguments["type"]
+    except:
+        type = ""
+
+    result = get_selection_box_data(type)
     result = db_result_to_json_in_d3csv_format(result)
 
 
@@ -487,6 +504,137 @@ def get_importers_json():
 
 
         for this_result in final_results:
+            this_result["dates"] = date_string(this_result["dates"])
+
+        result = final_results
+
+
+
+
+    else:
+        result =  []
+
+
+    resp = jsonify(csv_like_data = result)
+    resp.status_code = 200
+
+    return resp
+
+
+
+
+def get_importers_data2():
+
+    arguments = request.args
+    
+
+    codes = arguments.getlist("codes[]")
+
+    codes = ["product_code = '{}'".format(c) for c in codes]
+
+    sql = """
+    select  * from importers_for_web2
+    where {}
+    limit 1000
+    """
+
+    wherecondition = " or ".join(codes) 
+
+    sql_done = sql.format(wherecondition)
+
+    
+ 
+
+
+    #Need to do more to protect against sql injection attack.
+
+    result = db.session.execute(sql_done)
+
+    return result
+
+@myapp.route('/importers2.json', methods=["GET","POST"])
+def get_importers_json2():
+
+    
+
+
+
+    if True:
+
+      
+        result = get_importers_data2()
+        result = db_result_to_json_in_d3csv_format(result)
+
+        fields_list = ["ia_name",
+        "ia_addr_1",
+        "ia_addr_2",
+        "ia_addr_3",
+        "ia_addr_4",
+        "ia_addr_5"]
+
+
+        new_results = []
+    
+        for this_result in result:
+
+            new_result = {}
+            new_result["full_address"] = ", ".join([this_result[a].strip().title() for a in fields_list])
+            new_result["full_address"]  = new_result["full_address"] + ", " + this_result["ia_pcode"].strip()
+
+            new_result["full_address"] = re.sub(r"\s{2,100}",r" ",new_result["full_address"])
+            new_result["full_address"] = re.sub(r"(, ){2,100}",r", ",new_result["full_address"])
+
+            new_result["date"] = datetime.datetime(int(this_result["year"]), int(this_result["month"]), 1).date().isoformat()
+            new_result["product"] = this_result["product_code"]
+
+
+            new_result["lat"] = this_result["lat"]
+            new_result["lng"] = this_result["lng"]
+
+            new_results.append(new_result)
+        result = new_results
+
+        new_results = {}
+        for this_result in result:
+
+            f_a = this_result["full_address"]
+            pr = this_result["product"]
+            da = this_result["date"]
+            da = datetime.datetime.strptime(da,"%Y-%m-%d")
+
+            lat = this_result["lat"]
+            lng = this_result["lng"]
+
+            #da = datetime.datetime.strftime(da, "%b %Y")
+
+
+            if f_a not in new_results:
+                new_results[f_a] = {"products": {pr}, "dates": [da], "lat": lat, "lng":lng }
+            else:
+                new_results[f_a]["products"].update([pr])
+                new_results[f_a]["dates"].append(da)
+
+
+        final_results = []
+
+        def date_string(dates_list):
+
+            dates_list.sort()
+            if len(dates_list) ==1:
+                return datetime.datetime.strftime(dates_list[0], "%b %Y")
+            else:
+                return "{} months between {} and {}".format(len(dates_list), datetime.datetime.strftime(dates_list[0], "%b %Y"),datetime.datetime.strftime(dates_list[-1], "%b %Y"))
+
+
+        for key in new_results:
+
+            this_result = new_results[key]
+
+            final_results.append({"full_address":key, "products": list(this_result["products"]), "dates": this_result["dates"], "lat":this_result["lat"],"lng": this_result["lng"]})
+
+
+        for this_result in final_results:
+            this_result["date_count"] = len(this_result["dates"])
             this_result["dates"] = date_string(this_result["dates"])
 
         result = final_results
