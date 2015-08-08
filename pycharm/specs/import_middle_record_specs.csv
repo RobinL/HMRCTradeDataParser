@@ -53,3 +53,4 @@ Ref,From,To,Level,Item Name,Type,Size,Algn,Picture,Occurs,Value Range
 53,115,128,10,MAF-QUANTITY-1,D,14.0,,S9(13),,Leading Sign+13 digits
 54,129,129,10,DELIMITER,D,1.0,,X,,|
 55,130,143,10,MAF-QUANTITY-2,D,14.0,,S9(13),,Leading Sign+13 digits
+56,1,8,,COMCODE8,,,,,,

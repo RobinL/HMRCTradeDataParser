@@ -1,81 +1,29 @@
 __author__ = 'Robin'
 import pandas as pd
-from utils import get_fields_df
-
+from .utils import get_fields_df, get_zipped_file_contents, get_specs_dict, build_from_spec
 from my_models import EightDigitCode, CombinedNomenclature
 from my_database import session
-MAX_IMPORT_ROWS = 5000000000
+import trade_data_config
 import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-def raw_control_data_to_database(zipfile,url_info, rawfile):
-
-    filename = url_info["file_name"]
-
-    filename = zipfile.namelist()[0]
-
-    logger.info("reading file {} from the zipfile called {}".format(filename, url_info["file_name_zip"]))
-
-    with zipfile.open(filename) as fh:
-        lines = fh.readlines()
-        header_record = lines[0].decode("windows-1252")
-        middle_records = [l.decode("windows-1252") for l in lines[1:-1]]
-        tail_record = lines[-1].decode("windows-1252")
-
-    #Write the control record to the database
-    header_record_specs = pd.read_csv("specs/control_file_header_specs.csv")
-
-    header_record_specs = get_fields_df(header_record_specs)
-
-    header_record_specs = header_record_specs[header_record_specs["Item Name"].isin(["MK-FILENAME","MK-MONTH", "MK-YEAR"])]
-
-    header_record_dict = {}
-    for row in header_record_specs.iterrows():
-        r = row[1]
-        key = r["Item Name"]
-        value = header_record[r["From"]-1:r["To"]].strip()
-        header_record_dict[key] = value
-    hr_df = pd.DataFrame([header_record_dict])
-
-    #Turn into columns for database
-    my_cols = list(hr_df.columns)
-    my_cols = [c.lower().replace("-","_") for c in my_cols]
-    hr_df.columns = my_cols
-
-    write_header_record_to_db(hr_df)
 
 
+def raw_control_data_to_database(zipfile, url_info,rawfile):
 
 
+    #Get dict of the contents of the file - including header record, filename etc
+    contents = get_zipped_file_contents(zipfile)
+    middle_records_specs_dict = get_specs_dict("specs/control_file_middle_specs.csv")
+    middle_records_df = build_from_spec(contents["middle_records"], middle_records_specs_dict)
 
-    #Write the main data to the database
-    middle_record_specs = pd.read_csv("specs/control_file_middle_specs.csv")
-    middle_record_specs = get_fields_df(middle_record_specs)
-    middle_record_specs_dict = middle_record_specs.to_dict(orient="records")
-
-    #Add in the 8 digit comcode - this isn't in the spec
-    middle_record_specs_dict.append({'To': 8L, 'Item Name': 'MK-COMCODE8', 'From': 1L})
-
-
-    middle_records_df = pd.DataFrame(middle_records,columns=["all"])
-
-    for col in middle_record_specs_dict:
-        middle_records_df[col["Item Name"]] = middle_records_df["all"].str.slice(col["From"]-1,col["To"])
-
-    middle_records_df = middle_records_df.drop(["all"],axis=1)
-
-    my_cols = list(middle_records_df.columns)
-    my_cols = [c.lower().replace("-","_") for c in my_cols]
-    middle_records_df.columns = my_cols
-
-    middle_records_df["mk_commodity_alpha_all"] = middle_records_df["mk_commodity_alpha_all"].str.strip()
+    rawfile.actual_file_name_in_child_zip = contents["actual_file_name_in_child_zip"]
 
     write_middle_records_to_db(middle_records_df,rawfile)
 
     rows = session.query(EightDigitCode).count()
-    logger.debug("there are now {} records in the eightdigitcodes table".format(rows))
-
+    logger.debug("there are now {} records in the eightdigitcode table".format(rows))
 
 
 
@@ -94,21 +42,17 @@ def write_middle_records_to_db(df,rawfile):
     codes_set = set([c[0] for c in existing_codes])
 
 
-    for row in df[:MAX_IMPORT_ROWS].iterrows():
+    for row in df[:trade_data_config.MAX_IMPORT_ROWS].iterrows():
 
         counter +=1
         if counter % 500 ==0:
             logger.debug("done {} rows".format(counter))
-            session.commit()
+            session.flush()
 
         r = row[1]
 
-        if r["mk_comcode8"] in codes_set:
+        if r["comcode8"] in codes_set:
             continue
-
-
-        #This code is right for the initial database build.  However, when we get new records we will want to check each record to see whether we want to update it
-
 
         ed = EightDigitCode()
 
@@ -144,33 +88,20 @@ def write_middle_records_to_db(df,rawfile):
         ed.mk_qty2_alpha = r["mk_qty2_alpha"]
         ed.mk_commodity_alpha_1 = r["mk_commodity_alpha_1"]
         ed.mk_commodity_alpha_2 = r["mk_commodity_alpha_2"]
-        ed.mk_commodity_alpha_all = r["mk_commodity_alpha_all"]
+        ed.mk_commodity_alpha_all = r["mk_commodity_alpha_all"].strip()
 
-        ed.mk_comcode8 = r["mk_comcode8"]
+        ed.mk_comcode8 = r["comcode8"]
 
         ed.rawfile = rawfile
 
         session.add(ed)
 
-        codes_set = codes_set.union(r["mk_comcode8"])
+        codes_set = codes_set.union(r["comcode8"])
 
 
     session.commit()
 
-from my_models import EightDigitCodeHeader
-def write_header_record_to_db(df):
 
-    for row in df.iterrows():
-        r = row[1]
-
-        edh = EightDigitCodeHeader()
-
-        edh.mk_filename = r["mk_filename"]
-        edh.mk_month = r["mk_month"]
-        edh.mk_year = r["mk_year"]
-
-        session.add(edh)
-    session.commit()
 
 
 def write_xls_heirarchy_to_otherdigitcodes():

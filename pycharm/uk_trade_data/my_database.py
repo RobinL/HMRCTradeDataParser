@@ -3,41 +3,13 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import pyodbc
 
-
-#get connection string from .env
-import os
-env_path = r".env"
-if os.path.exists(env_path):
-    for line in open(env_path):
-        var = line.strip().split('=',1)
-        if len(var) == 2:
-            os.environ[var[0]] = var[1]
-
-CONNECTION_STRING = os.environ.get('CONNECTION_STRING')
-
-
-
-
-import urllib
-
-#params = urllib.quote_plus('DRIVER={SQL Server};SERVER=.\SQLEXPRESS;DATABASE=TRADEDATA;Trusted_Connection=Yes')
-# params = urllib.quote_plus(CONNECTION_STRING)
-# engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
-#engine = create_engine('mssql+pyodbc://SQLEXPRESS/TRADEDATA;Trusted_Connection=Yes')
-
-p = r"C:\Users\Robin\Desktop\trade data working\HMRCTradeDataParser\trade_data.db"
+p = r"trade_data.db"
 engine = create_engine('sqlite:///' + p)
-
-# def connect():
-#     return pyodbc.connect(CONNECTION_STRING)
-# engine = sqlalchemy.create_engine('mssql://', creator=connect)
-
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 Base = declarative_base()
-
 
 #Note this just creates the databse, it isn't needed if it already exists
 def init_db(remove=True):
@@ -54,6 +26,11 @@ def init_db(remove=True):
     import my_models
     Base.metadata.create_all(bind=engine)
 
+from sqlalchemy.engine import Engine
+from sqlalchemy import event
 
-
-
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()

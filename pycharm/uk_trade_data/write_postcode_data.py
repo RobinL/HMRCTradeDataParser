@@ -3,27 +3,16 @@ __author__ = 'Robin'
 import pandas as pd
 from my_models import Postcode
 from my_database import session
+from my_database import engine
+import trade_data_config
 
 def write_postcode_data_to_db():
 
-    postcode_data = pd.read_csv("specs/ukpostcodes.csv", encoding="utf8")
+    postcode_data = pd.read_csv("specs/ukpostcodes.csv", encoding="utf8", nrows=trade_data_config.POSTCODE_ROWS)
+    postcode_data.columns = ["id","postcode", "lat","lng"]
+    rows_dict = postcode_data[:trade_data_config.MAX_IMPORT_ROWS].to_dict(orient="records")
 
-    session.query(Postcode).delete()
-    session.commit()
-
-    counter = 0
-    for row in postcode_data.iterrows():
-
-        counter +=1
-        r = row[1]
-        p = Postcode()
-
-        p.postcode = r["postcode"]
-        p.lat = r["latitude"]
-        p.lng = r["longitude"]
-
-        session.add(p)
-
-        if counter % 50000 ==0:
-            print counter*1.0/len(postcode_data)
-            session.commit()
+    engine.execute(
+        Postcode.__table__.insert(),
+        rows_dict
+    )

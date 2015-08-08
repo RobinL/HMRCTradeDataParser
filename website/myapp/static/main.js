@@ -424,14 +424,7 @@ function get_new_imports_data() {
         create_stacked_bar(IMPORTAPP.timeseries_data)
         $("#timeseriescontainer .spinner").hide()
 
-       $.getJSON("importers.json", post_data, function(importers_data) {
-
-        IMPORTAPP.importers_data = importers_data["csv_like_data"]
-            create_importers_table(IMPORTAPP.importers_data);
-            $("#importerscontainer .spinner").hide()
-            resize()
-        }) 
-
+      
         
 
     })
@@ -778,59 +771,6 @@ catch(err) {
 }
 
 
-function create_importers_table(table_data) {
-
-    d3.select("#importerstable").remove()
-
-    svgContainer = d3.select("#importerscontainer")
-
-    myTable = svgContainer.append("table")
-        .attr("class", "table table-striped table-bordered table-condensed smalltabletext")
-        .attr("id", "importerstable")
-        .append("tbody");
-
-
-    headers = _.keys(table_data[0])
-
-    var th = myTable.append("tr")
-
-    th.selectAll("th")
-        .data(headers)
-        .enter()
-        .append("th")
-        .html(function(d) {
-            return d
-        })
-
-
-    var tr = myTable.selectAll("tr2").data(table_data).enter().append("tr")
-
-    var td = tr.selectAll("td").data(function(d) {
-
-            return_array = []
-
-            _.each(d, function(j, k) {
-                return_array.push({
-                    value: j,
-                    key: k
-                })
-
-            })
-
-
-            return return_array
-
-        })
-        .enter()
-        .append("td")
-        .html(function(d, i) {
-
-
-         
-                return d["value"]
-            
-        })
-}
 
 
 

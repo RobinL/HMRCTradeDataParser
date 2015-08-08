@@ -63,3 +63,4 @@ Ref,From,To,Level,Item Name,Type,Size,Algn,Picture,Occurs,Value Range
 70,156,156,10,DELIMITER,D,1.0,,X,,|
 71,157,204,10,MK-COMMODITY-ALPHA-2,D,48.0,,X(48),,48 characters
 71,95,5000,10,MK-COMMODITY-ALPHA-ALL,D,48.0,,X(48),,48 characters
+72,1,8,,COMCODE8,,,,,,

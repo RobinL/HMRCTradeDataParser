@@ -1,23 +1,19 @@
 __author__ = 'Robin'
 
-from uk_trade_data.write_importer_data import  raw_importer_data_to_database
-from uk_trade_data.write_import_data import raw_import_data_to_database
-from uk_trade_data.write_control_data import raw_control_data_to_database
-from uk_trade_data.write_meta_data import write_meta_data_to_db
-from uk_trade_data.write_country_data import download_and_insert_country_data, download_and_insert_port_data
-from uk_trade_data.write_postcode_data import write_postcode_data_to_db
+from uk_trade_data.web_to_db import check_for_updates
 
-from uk_trade_data.my_database import init_db
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
-init_db(remove=False)
-#
-# download_and_insert_country_data()
-# download_and_insert_port_data()
-#
-# write_meta_data_to_db()
-# raw_importer_data_to_database(r"data/SIAI111504")
-# raw_import_data_to_database(r"data/SMKI191504")
-# raw_control_data_to_database(r"data/SMKA121504")
+from uk_trade_data.my_database import init_db, session
+init_db(remove=True)
 
-write_postcode_data_to_db()
+check_for_updates()
 
+#Check the cascade deletes work
+# from uk_trade_data.my_models import Import, RawFileLog
+#Check the cascade deletion works
+# rawfile = session.query(RawFileLog).filter(RawFileLog.id == 1).delete()
+#session.commit()
+#print session.query(Import).count()

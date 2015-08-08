@@ -32,6 +32,8 @@ $(function(){
 
 	$.when(p1).done(function(selectboxdata) {
 		create_filters(selectboxdata["csv_like_data"])
+
+		$("#importerscontainer .spinner").hide()
 	})
 
 
@@ -118,7 +120,7 @@ function create_filters(data) {
 
 		$.when(p2).done(function(importersdata) {
 
-
+			d3.select("#importerstable").remove()
 			importersdata = importersdata["csv_like_data"]
 			var markerArray = [];
 
@@ -169,9 +171,73 @@ function create_filters(data) {
 			IMPORTERSAPP.layer = this_layer
 		    IMPORTERSAPP.map.fitBounds(this_layer.getBounds())
 
+		    create_importers_table(importersdata)
+
 
 		})
 
 
 
 	}
+
+
+function create_importers_table(table_data) {
+
+	_.forEach(table_data, function(d) {
+
+		delete d["lat"]
+		delete d["lng"]
+		delete d["date_count"]
+	})
+
+    
+
+    svgContainer = d3.select("#importerscontainer")
+
+    myTable = svgContainer.append("table")
+        .attr("class", "table table-striped table-bordered table-condensed smalltabletext")
+        .attr("id", "importerstable")
+        .append("tbody");
+
+
+    headers = _.keys(table_data[0])
+
+    var th = myTable.append("tr")
+
+    th.selectAll("th")
+        .data(headers)
+        .enter()
+        .append("th")
+        .html(function(d) {
+            return d
+        })
+
+
+    var tr = myTable.selectAll("tr2").data(table_data).enter().append("tr")
+
+    var td = tr.selectAll("td").data(function(d) {
+
+            return_array = []
+
+            _.each(d, function(j, k) {
+                return_array.push({
+                    value: j,
+                    key: k
+                })
+
+            })
+
+
+            return return_array
+
+        })
+        .enter()
+        .append("td")
+        .html(function(d, i) {
+
+
+         
+                return d["value"]
+            
+        })
+}

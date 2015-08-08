@@ -530,6 +530,9 @@ def get_importers_data2():
 
     codes = arguments.getlist("codes[]")
 
+    if len(codes) ==0:
+        return []
+
     codes = ["product_code = '{}'".format(c) for c in codes]
 
     sql = """
@@ -556,10 +559,11 @@ def get_importers_data2():
 def get_importers_json2():
 
     
+    arguments = request.args
+    codes = arguments.getlist("codes[]")
 
 
-
-    if True:
+    if len(codes):
 
       
         result = get_importers_data2()
@@ -625,6 +629,12 @@ def get_importers_json2():
             else:
                 return "{} months between {} and {}".format(len(dates_list), datetime.datetime.strftime(dates_list[0], "%b %Y"),datetime.datetime.strftime(dates_list[-1], "%b %Y"))
 
+        def lat_exists(lat):
+            if lat:
+                return True
+            else:
+                return False
+
 
         for key in new_results:
 
@@ -635,11 +645,16 @@ def get_importers_json2():
 
         for this_result in final_results:
             this_result["date_count"] = len(this_result["dates"])
+            this_result["latest_date"] = max(this_result["dates"])
             this_result["dates"] = date_string(this_result["dates"])
+            this_result["on_map"] = lat_exists(this_result["lat"])
 
-        result = final_results
 
 
+        result = sorted(final_results,key = lambda x: (x["lat"], datetime.datetime.now() - x["latest_date"]))
+
+        for d in result:
+            del d['latest_date']
 
 
     else:
