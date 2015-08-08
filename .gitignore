@@ -9,3 +9,4 @@ website/*.env
 ukpostcodes.csv
 
 *.db-journal
+*.exe

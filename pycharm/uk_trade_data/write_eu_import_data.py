@@ -23,7 +23,7 @@ def raw_eu_import_data_to_database(zipfile, url_info,rawfile):
     write_middle_records_to_db(middle_records_df,rawfile, middle_records_specs_dict)
 
     rows = session.query(Import_EU).count()
-    logger.debug("there are now {} records in the import table".format(rows))
+    logger.debug("there are now {} records in the eu_import table".format(rows))
 
 
 from my_models import Import_EU

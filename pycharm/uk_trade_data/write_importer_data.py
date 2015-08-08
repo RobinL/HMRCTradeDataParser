@@ -18,14 +18,14 @@ def raw_importer_data_to_database(zipfile, url_info,rawfile):
     
     #Get dict of the contents of the file - including header record, filename etc
     contents = get_zipped_file_contents(zipfile)
-    middle_records_specs_dict = get_specs_dict("specs/importer_middle_record_specs.csv")
+    middle_records_specs_dict = get_specs_dict("specs/importers_middle_record_specs.csv")
     middle_records_df = build_from_spec(contents["middle_records"], middle_records_specs_dict)
     rawfile.actual_file_name_in_child_zip = contents["actual_file_name_in_child_zip"]
 
-    write_middle_records_to_db(middle_records_df,rawfile, middle_records_specs_dict)
+    write_middle_records_to_db(middle_records_df, url_info["month"], url_info["year"], rawfile)
 
     rows = session.query(Importer).count()
-    logger.debug("there are now {} records in the import table".format(rows))
+    logger.debug("there are now {} records in the importer table".format(rows))
 
 
 def write_middle_records_to_db(df,month, year,rawfile):
@@ -77,11 +77,14 @@ def write_middle_records_to_db(df,month, year,rawfile):
             i.ia_addr_5 = r["ia_addr_5"]
             i.ia_pcode = r["ia_pcode"]
 
+            i.postcode_nospace = r["ia_pcode"].strip().replace(' ','')
+
             i.importer_hash = this_hash
 
             i.rawfile = rawfile
 
             session.add(i)
+            session.flush()
             importer_id = i.id
             hashes_dict[this_hash] = importer_id
 

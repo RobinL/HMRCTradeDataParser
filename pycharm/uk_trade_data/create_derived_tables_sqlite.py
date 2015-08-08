@@ -1,21 +1,24 @@
 from my_database import  session
 
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 def create_derived_country_products_month():
     sql = """
-    drop table if exists {import_or_export}_country_products_port_month_{code_detail};
-    create table {import_or_export}_country_products_port_month_{code_detail} as
+    drop table if exists der_{import_or_export}_country_products_port_month_{code_detail};
+    create table der_{import_or_export}_country_products_port_month_{code_detail} as
     select  
             country_name as country, 
             c.alpha_code as country_code, 
-            {desc_column_name}{code_detail}_desc as product,c
-            n.{desc_column_name}{code_detail} as product_code, 
+            {desc_column_name}{code_detail}_desc as product,
+            {desc_column_name}{code_detail} as product_code, 
             port_name as port, 
-            i.maf_port_alpha as port_code, 
-            i.maf_account_mm as month, 
-            i.maf_account_ccyy as year, 
-            sum(cast(maf_value as integer)) as quantity
+            i_or_e.maf_port_alpha as port_code, 
+            i_or_e.maf_account_mm as month, 
+            i_or_e.maf_account_ccyy as year, 
+            sum(maf_value_int) as quantity
 
     from {import_or_export} as i_or_e
 
@@ -30,18 +33,18 @@ def create_derived_country_products_month():
     on i_or_e.maf_{coo_or_cod}_alpha = c.alpha_code
 
     left join ports as p
-    on p.alpha_code = i.maf_port_alpha
+    on p.alpha_code = i_or_e.maf_port_alpha
 
     where country_name is not null
     and mk_commodity_alpha_all is not null
     and port_name is not null
-    and maf_value is not null
+    and maf_value_int is not null
 
-    group by country_name, {desc_column_name}{code_detail}_desc, port_name, i.maf_account_mm , i.maf_account_ccyy;
+    group by country_name, {desc_column_name}{code_detail}_desc, port_name, i_or_e.maf_account_mm , i_or_e.maf_account_ccyy;
 
-    CREATE  INDEX ix_{import_or_export}_cppm_product_code_{code_detail} ON country_products_port_month_{code_detail} (product_code );
-    CREATE  INDEX ix_{import_or_export}_cppm_port_code_{code_detail} ON country_products_port_month_{code_detail} (port_code );
-    CREATE  INDEX ix_{import_or_export}_cppm_country_code_{code_detail} ON country_products_port_month_{code_detail} (country_code );
+    CREATE  INDEX ix_{import_or_export}_cppm_product_code_{code_detail} ON der_{import_or_export}_country_products_port_month_{code_detail} (product_code );
+    CREATE  INDEX ix_{import_or_export}_cppm_port_code_{code_detail} ON der_{import_or_export}_country_products_port_month_{code_detail} (port_code );
+    CREATE  INDEX ix_{import_or_export}_cppm_country_code_{code_detail} ON der_{import_or_export}_country_products_port_month_{code_detail} (country_code );
 
     """
 
@@ -53,7 +56,7 @@ def create_derived_country_products_month():
                                     code_detail = code_detail,
                                     desc_column_name = "combined_nomenclature_",
                                     coo_or_cod = imp_exp[0])
-
+                
                 sql_list = sql2.split(";")
                 for my_sql in sql_list:
                     session.execute(my_sql)
@@ -66,17 +69,18 @@ def create_derived_country_products_month():
 
         sql_list = sql2.split(";")
         for my_sql in sql_list:
+            logger.debug(my_sql.replace("\n","")[:100])
             session.execute(my_sql)
 
 
 def create_derived_select_box():
 
     sql = """
-
-    create table  select_box_values as
+    drop table if exists der_select_box_values;
+    create table der_select_box_values as
     select distinct  'product_8' as select_box, mk_comcode8 as my_key,mk_comcode8 || " -  " || mk_commodity_alpha_all as value
     from eightdigitcodes
-    where cast(substr(mk_comcode8,1,2) as integer) < 23 and mk_comcode8 in (select distinct maf_comcode8 from imports)
+    where cast(substr(mk_comcode8,1,2) as integer) < 23 and mk_comcode8 in (select distinct comcode8 from imports)
 
     union all
 
@@ -120,75 +124,14 @@ def create_derived_select_box():
     """
     sql_list = sql.split(";")
     for my_sql in sql_list:
+        logger.debug(my_sql.replace("\n","")[:100])
         session.execute(my_sql)
-
 
 
 def create_derived_importers_for_web():
     sql = """
-   create table importers_for_web as
-
-    select
-    ia_name, ia_addr_1, ia_addr_2, ia_addr_3,ia_addr_4, ia_addr_5, ia_pcode, month_of_import as month, year_of_import as year,
-    e.comcode8 as product_code
-
-     from importerseightdigitcodes as e
-        left join importers as i
-        on i.id = e.importer_id
-        where e.importer_id is not null
-        and year_of_import >= '2014'
-        order by year_of_import desc, month_of_import desc
-
-        ;
-
-      CREATE  INDEX ix_ifw_product_code ON importers_for_web (product_code );
-      CREATE  INDEX ix_ifw_month ON importers_for_web (month );
-       CREATE  INDEX ix_ifw_year ON importers_for_web (year );
-    """
-
-    sql_list = sql.split(";")
-    for my_sql in sql_list:
-        session.execute(my_sql)
-
-
-
-
-def create_derived_importers_for_web():
-    sql = """
-   create table importers_for_web as
-
-    select
-    ia_name, ia_addr_1, ia_addr_2, ia_addr_3,ia_addr_4, ia_addr_5, ia_pcode, month_of_import as month, year_of_import as year,
-    e.comcode8 as product_code
-
-     from importerseightdigitcodes as e
-        left join importers as i
-        on i.id = e.importer_id
-        where e.importer_id is not null
-        and year_of_import >= '2014'
-        order by year_of_import desc, month_of_import desc
-
-        ;
-
-      CREATE  INDEX ix_ifw_product_code ON importers_for_web (product_code );
-      CREATE  INDEX ix_ifw_month ON importers_for_web (month );
-       CREATE  INDEX ix_ifw_year ON importers_for_web (year );
-    """
-
-    sql_list = sql.split(";")
-    for my_sql in sql_list:
-        session.execute(my_sql)
-
-if __name__ == "__main__":
-
-    #create_derived_select_box()
-    create_derived_country_products_month()
-    #create_derived_importers_for_web()
-
-
-def create_derived_importers_for_web2():
-    sql = """
-   create table importers_for_web2 as
+    drop table if exists der_importers_for_web; 
+   create table der_importers_for_web as
 
     select
     ia_name, ia_addr_1, ia_addr_2, ia_addr_3,ia_addr_4, ia_addr_5, ia_pcode, month_of_import as month, year_of_import as year,
@@ -212,13 +155,14 @@ def create_derived_importers_for_web2():
 
         ;
 
-      CREATE  INDEX ix_ifw_product_code ON importers_for_web2 (product_code );
-      CREATE  INDEX ix_ifw_month ON importers_for_web2 (month );
-       CREATE  INDEX ix_ifw_year ON importers_for_web2 (year );
+      CREATE  INDEX ix_ifw_product_code ON der_importers_for_web (product_code );
+      CREATE  INDEX ix_ifw_month ON der_importers_for_web (month );
+       CREATE  INDEX ix_ifw_year ON der_importers_for_web (year );
     """
 
     sql_list = sql.split(";")
     for my_sql in sql_list:
+        logger.debug(my_sql.replace("\n","")[:100])
         session.execute(my_sql)
 
 
@@ -227,10 +171,10 @@ def create_derived_importers_for_web2():
 
 def create_derived_country_products_month_eu():
     sql = """
-    drop table if exists country_products_month_eu_{0};
-    create table country_products_month_eu_{0} as
+    drop table if exists der_{import_or_export}_country_products_month_eu_{code_detail};
+    create table der_{import_or_export}_country_products_month_eu_{code_detail} as
 
-    select  c.alpha_code as country_code, cn.{1}{0} as product_code,  i.smk_period_reference_month as month, i.smk_period_reference_year as year, sum(maf_value_int) as quantity
+    select  c.alpha_code as country_code, cn.{desc_column_name}{code_detail} as product_code,  i.smk_period_reference_month as month, i.smk_period_reference_year as year, sum(smk_stat_value_int) as quantity
    
         from eu_imports as i
 
@@ -242,39 +186,56 @@ def create_derived_country_products_month_eu():
         on e.mk_comcode8 = cn.commodity_code_8
 
         left join countries as c
-        on i.maf_coo_alpha = c.alpha_code
+        on i.smk_cod_alpha = c.alpha_code
 
 
 
         where country_name is not null
         and mk_commodity_alpha_all is not null
-        and port_name is not null
-        and maf_value is not null
+ 
+        and smk_stat_value_int is not null
 
 
 
 
-        group by country_name, {1}{0}_desc,  i.smk_period_reference_month, i.smk_period_reference_year;
+        group by country_name, {desc_column_name}{code_detail}_desc,  i.smk_period_reference_month, i.smk_period_reference_year;
 
-    CREATE  INDEX ix_cppm_eu_product_code_{0} ON country_products_port_month_{0} (product_code );
-    CREATE  INDEX ix_cppm_eu_country_code_{0} ON country_products_port_month_{0} (country_code );
-    CREATE  INDEX ix_cppm_eu_month{0} ON country_products_port_month_{0} (month );
-    CREATE  INDEX ix_cppm_eu_year{0} ON country_products_port_month_{0} (year );
+    CREATE  INDEX ix_{import_or_export}_cppm_eu_product_code_{code_detail} ON der_{import_or_export}_country_products_month_eu_{code_detail} (product_code );
+    CREATE  INDEX ix_{import_or_export}_cppm_eu_country_code_{code_detail} ON der_{import_or_export}_country_products_month_eu_{code_detail} (country_code );
+    CREATE  INDEX ix_{import_or_export}_cppm_eu_month{code_detail} ON der_{import_or_export}_country_products_month_eu_{code_detail} (month );
+    CREATE  INDEX ix_{import_or_export}_cppm_eu_year{code_detail} ON der_{import_or_export}_country_products_month_eu_{code_detail} (year );
 
     """
 
 
-    for i in ["1","2","4","6"]:
 
-        sql2 = sql.format(i, "combined_nomenclature_")
+    for imp_exp in ["imports","exports"]:
+
+        for code_detail in ["1","2","4","6"]:
+
+                sql2 = sql.format(import_or_export = imp_exp,
+                                    code_detail = code_detail,
+                                    desc_column_name = "combined_nomenclature_",
+                                    coo_or_cod = imp_exp)
+
+                
+                sql_list = sql2.split(";")
+                for my_sql in sql_list:
+                    session.execute(my_sql)
+
+        
+        sql2 = sql.format(import_or_export = imp_exp,
+                            code_detail = 8,
+                            desc_column_name = "commodity_code_",
+                            coo_or_cod = imp_exp)
+
+
         sql_list = sql2.split(";")
         for my_sql in sql_list:
+            logger.debug(my_sql.replace("\n","")[:100])
             session.execute(my_sql)
 
-    sql2 = sql.format("8", "commodity_code_")
-    sql_list = sql2.split(";")
-    for my_sql in sql_list:
-        session.execute(my_sql)
+
 
 
 if __name__ == "__main__":

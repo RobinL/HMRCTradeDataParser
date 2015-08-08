@@ -24,7 +24,7 @@ def raw_export_data_to_database(zipfile, url_info,rawfile):
     write_middle_records_to_db(middle_records_df,rawfile, middle_records_specs_dict)
 
     rows = session.query(Export).count()
-    logger.debug('there are now {} records in the import table'.format(rows))
+    logger.debug('there are now {} records in the export table'.format(rows))
 
 
 def write_middle_records_to_db(df,rawfile, specs_dict):

@@ -81,13 +81,13 @@ def specific_url_part_to_type(specific_url_part):
 
 
 def unzip_url(url):
-    #url = urlopen(url)
-    #zipfile = ZipFile(StringIO(url.read()))
-    zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\smkx461506.zip")
-    zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\smkm461506.zip")
-    zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\SMKI191506.zip")
-    zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\SMKA121506.zip")
-    zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\SMKE191506.zip")
+    url = urlopen(url)
+    zipfile = ZipFile(StringIO(url.read()))
+    #zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\smkx461506.zip")
+    #zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\smkm461506.zip")
+    #zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\SMKI191506.zip")
+    #zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\SMKA121506.zip")
+    #zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\SMKE191506.zip")
     
 
     return zipfile
@@ -238,12 +238,12 @@ def build_full_dataset():
 
 
 def check_for_updates():
-    # get_and_iterate_urls("SMKA12", raw_control_data_to_database)
-    # get_and_iterate_urls("SIAI11", raw_importer_data_to_database)
-    #get_and_iterate_urls("SMKI19", raw_import_data_to_database)
+    get_and_iterate_urls("SMKA12", raw_control_data_to_database)
+    get_and_iterate_urls("SIAI11", raw_importer_data_to_database)
+    get_and_iterate_urls("SMKI19", raw_import_data_to_database)
     get_and_iterate_urls("SMKE19", raw_export_data_to_database)
-    # get_and_iterate_urls("SMKX46", raw_eu_export_data_to_database)
-    # get_and_iterate_urls("SMKM46", raw_eu_import_data_to_database)
+    get_and_iterate_urls("SMKX46", raw_eu_export_data_to_database)
+    get_and_iterate_urls("SMKM46", raw_eu_import_data_to_database)
 
 
 def build_historical_data():

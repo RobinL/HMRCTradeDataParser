@@ -15,7 +15,7 @@ def get_selection_box_data(type = ""):
 
     sql = """
     select select_box, my_key, value
-    from select_box_values
+    from der_select_box_values
     {where}
     """
 
@@ -123,7 +123,7 @@ def get_imports_data2(countries_list,ports_list,products_list,dates_list,cn_code
 
     sql = """
     select country, country_code, product, product_code, port, port_code, sum(quantity) as quantity from
-    country_products_port_month_{cn_code_length}
+    der_imports_country_products_port_month_{cn_code_length}
     where country is not null
     and year > '2007'
 
@@ -133,17 +133,6 @@ def get_imports_data2(countries_list,ports_list,products_list,dates_list,cn_code
     limit 1000
     """
 
-    # sql = """
-    # select top 100 country, country_code, product, product_code, port, port_code, sum(quantity) as quantity from
-    # country_products_port_month_8
-    # where country is not null
-    # and year > '2007'
-
-    # {queryconditions}
-
-    # group by country, country_code, product, product_code, port, port_code
-
-    # """
 
     sql = sql.format(cn_code_length=cn_code_length)
     print sql
@@ -173,7 +162,7 @@ def get_timeseries_data(countries_list,ports_list,products_list,dates_list,stack
     #We need some way of santizing the SQL.  Make sure that the length of all of the lists is right.  They're all short so this should be relatively secure.
     sql = """
     select month, year, {stack_by} as stack_by, sum(quantity) as quantity from
-    country_products_port_month_{cn_code_length}
+    der_imports_country_products_port_month_{cn_code_length}
     where country is not null
     and year > '2007'
 
@@ -229,7 +218,7 @@ def get_importers_data(countries_list,ports_list,products_list,dates_list):
 
 
     sql = """
-    select top 100 * from importers_for_web
+    select top 100 * from der_importers_for_web
     where 1 =1 
     {queryconditions}
     order by year desc, month desc
@@ -237,7 +226,7 @@ def get_importers_data(countries_list,ports_list,products_list,dates_list):
     """
 
     sql = """
-    select  * from importers_for_web
+    select  * from der_importers_for_web
     where 1 =1 
     {queryconditions}
     order by year desc, month desc
@@ -536,7 +525,7 @@ def get_importers_data2():
     codes = ["product_code = '{}'".format(c) for c in codes]
 
     sql = """
-    select  * from importers_for_web2
+    select  * from der_importers_for_web
     where {}
     limit 1000
     """
