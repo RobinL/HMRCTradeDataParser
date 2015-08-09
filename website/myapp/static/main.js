@@ -261,8 +261,9 @@ function draw_sankey(sankey_data) {
 
 function get_sankey_height_dict(sankey_data) {
 
-    var num_elements = get_sankey_num_elements()
-    var num_elements = IMPORTAPP.sankey_num_elements
+    //var num_elements = get_sankey_num_elements()
+    num_elements = IMPORTAPP.sankey_num_elements 
+
 
     var padding_target = 20
     var height_target = 40
@@ -317,7 +318,7 @@ function get_sankey_num_elements() {
     max_len = 0
 
     var keys = ["country", "product", "port", "quantity"]
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < 4; i++) {
 
         var filter_name = keys[i]
 
@@ -363,10 +364,9 @@ function get_new_imports_data() {
         products: products,
         ports: ports,
         stack_by: stack_by,
-        cn_code_length: cn_code_length
+        cn_code_length: cn_code_length,
+
     }
-
-
 
     if (_.contains(dates,"All") & _.contains(countries,"All") & _.contains(products,"All") & _.contains(ports,"All")) {
         $(".all_results").hide()
@@ -374,12 +374,8 @@ function get_new_imports_data() {
         return
     }
 
-
-
-    p1 = $.getJSON("importsdata2.json", post_data)
-    p2 = $.getJSON("timeseries.json", post_data)
-    
-
+    p1 = $.getJSON("non_eu_imports.json", post_data)
+    p2 = $.getJSON("timeseries_imports.json", post_data)  
 
     $.when(p1, p2, p3).done(function(imports_data, timeseries_data) {
 
@@ -949,12 +945,17 @@ function csv_to_sankey_data() {
 
     var country_totals = {}
     var port_totals = {}
+    var product_totals = {}
+
     _.forEach(data, function(d){
         var key = d["country_code"]
         country_totals[key] = (country_totals[key] || 0) + d["quantity"];
 
         var key = d["port_code"]
         port_totals[key] = (port_totals[key] || 0) + d["quantity"];
+
+        var key = d["product_code"]
+        product_totals[key] = (product_totals[key] || 0) + d["quantity"];
     })
 
 
@@ -972,17 +973,28 @@ function csv_to_sankey_data() {
         } 
     })
 
+    var product_removes = []
+    _.forEach(product_totals, function(v,k) {
+        if (v < one_percent_total) {
+            product_removes.push(k)
+        } 
+    })
+
     
-    IMPORTAPP.sankey_num_elements = Math.max(_.size(country_totals) - country_removes.length,_.size(port_totals) - port_removes.length)
+    IMPORTAPP.sankey_num_elements = Math.max(_.size(country_totals) - country_removes.length,_.size(port_totals) - port_removes.length,_.size(product_totals) - product_removes.length)
 
  
 
     var nodes = []
 
+
+    // Initial nodes
     _.forEach(data, function(d) {
         if (_.contains(country_removes, d["country_code"] )) {
             d["level1"] = "Other_country"
             d["level1text"] = "All other countries"
+            d[keys[0]] = d["level1"]
+            d[keys_text[0]] = d["level1text"] 
         }
         else {
             d["level1"] = d[keys[0]]
@@ -990,17 +1002,30 @@ function csv_to_sankey_data() {
         }
     })
 
+
+    // Middle nodes
     _.forEach(data, function(d) {
-        d["level2"] = d[keys[1]]
-        d["level2text"] = d[keys_text[1]]
+
+        if (_.contains(product_removes, d["product_code"] )) {
+            d["level2"] = "Other_product"
+            d["level2text"] = "All other products"
+            d[keys[1]] = d["level2"]
+            d[keys_text[1]] = d["level2text"]
+        }
+        else {
+            d["level2"] = d[keys[1]]
+            d["level2text"] = d[keys_text[1]]
+        }
+
+
+
     })
 
+    //Links between level 1 and level 2 
     _.forEach(data, function(d) {
-        if (_.contains(country_removes, d["country_code"] )) {
-            d["level2link"] = "Other_country" + d[keys[1]]
-        } else {
+     
         d["level2link"] = d[keys[0]] + d[keys[1]]
-        }
+    
     })
 
     _.forEach(data, function(d) {

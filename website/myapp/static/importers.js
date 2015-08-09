@@ -116,7 +116,7 @@ function create_filters(data) {
 		
 
 		post_data = {codes: $("#code_selection_box").val()}
-		var p2 = $.getJSON("importers2.json", post_data)
+		var p2 = $.getJSON("importers.json", post_data)
 
 		$.when(p2).done(function(importersdata) {
 

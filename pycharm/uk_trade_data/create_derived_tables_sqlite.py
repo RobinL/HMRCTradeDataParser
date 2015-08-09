@@ -39,6 +39,7 @@ def create_derived_country_products_month():
     and mk_commodity_alpha_all is not null
     and port_name is not null
     and maf_value_int is not null
+    and cast(substr(mk_comcode8,1,2) as integer) < 23
 
     group by country_name, {desc_column_name}{code_detail}_desc, port_name, i_or_e.maf_account_mm , i_or_e.maf_account_ccyy;
 
@@ -194,6 +195,7 @@ def create_derived_country_products_month_eu():
         and mk_commodity_alpha_all is not null
  
         and smk_stat_value_int is not null
+        and cast(substr(mk_comcode8,1,2) as integer) < 23
 
 
 
