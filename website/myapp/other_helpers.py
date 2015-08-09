@@ -44,10 +44,10 @@ def get_join_info_products(cn_code_length):
 
     lookup = {
         "8": {"join_table": "eightdigitcodes", "product_name_field": "mk_commodity_alpha_all", "join_column": "mk_comcode8"},
-        "6": {"join_table": "combined_nomenclature", "product_name_field": "combined_nomenclature_6_desc", "join_column": "combined_nomenclature_6"},
-        "4": {"join_table": "combined_nomenclature", "product_name_field": "combined_nomenclature_4_desc", "join_column": "combined_nomenclature_4"},
-        "2": {"join_table": "combined_nomenclature", "product_name_field": "combined_nomenclature_2_desc", "join_column": "combined_nomenclature_2"},
-        "1": {"join_table": "combined_nomenclature", "product_name_field": "combined_nomenclature_1_desc", "join_column": "combined_nomenclature_1"},
+        "6": {"join_table": "lookup_codes_6", "product_name_field": "desc", "join_column": "code"},
+        "4": {"join_table": "lookup_codes_4", "product_name_field": "desc", "join_column": "code"},
+        "2": {"join_table": "lookup_codes_2", "product_name_field": "desc", "join_column": "code"},
+        "1": {"join_table": "lookup_codes_1", "product_name_field": "desc", "join_column": "code"},
     }
 
     return lookup[cn_code_length]

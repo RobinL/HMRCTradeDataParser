@@ -58,5 +58,14 @@ def download_and_insert_port_data(overwrite = True):
 
         session.add(p)
 
+
+    p = Port()
+    p.port_name = "Inland clearance"
+    p.alpha_code = "ZLC"
+    p.sequence_code = "9999"
+
+    session.add(p)
+
+
     session.commit()
 

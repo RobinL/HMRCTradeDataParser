@@ -128,6 +128,19 @@ def write_xls_heirarchy_to_otherdigitcodes():
     session.commit()
 
 
+    sql = """
+    create table lookup_codes_{i} as
+    select distinct combined_nomenclature_{i} as code, combined_nomenclature_{i}_desc as desc
+    from combined_nomenclature
+    """
+
+    for i in ["1","2","4","6"]:
+        sql2 = sql.format(i=i)
+        session.execute(sql2)
+
+
+
+
 
 
 

@@ -90,11 +90,40 @@ def get_non_eu_data(arguments,importexport):
     dates_list = arguments.getlist("dates[]")
     cn_code_length = arguments["cn_code_length"]
 
+    #Depending on the whether it's an 8,6,4,2,or 1 ditit code, we will need to do different joins
+    join_info_products = get_join_info_products(cn_code_length)
+    product_desc_field = join_info_products["product_name_field"]
+    product_join_field = join_info_products["join_column"]
+    product_join_table = join_info_products["join_table"]
+
 
     sql = """
-    select country, country_code, product, product_code, port, port_code, sum(quantity) as quantity from
-    der_{imports_or_exports}_country_products_port_month_{cn_code_length}
+    select c.country_name as country,
+    country_code,
+    pjt.{product_desc_field} as product,
+    pjt.{product_join_field} as product_code,
+    p.port_name as port,
+    port_code,
+    sum(quantity) as quantity
+
+    from
+
+    der_{imports_or_exports}_country_products_port_month_{cn_code_length} as main
+
+    left join {product_join_table} as pjt
+    on
+    main.product_code = pjt.{product_join_field}
+
+
+    left join countries as c on
+    main.country_code = c.alpha_code
+
+    left join ports as p on
+    main.port_code = p.alpha_code
+
+
     where country is not null
+    and port is not null
     and year > '2007'
 
     {{queryconditions}}
@@ -103,10 +132,31 @@ def get_non_eu_data(arguments,importexport):
     limit 1000
     """
 
+    # sql = """
+    # select country, country_code, product, product_code, port, port_code, sum(quantity) as quantity from
+    # der_{imports_or_exports}_country_products_port_month_{cn_code_length}
+    # where country is not null
+    # and year > '2007'
+    #
+    # {{queryconditions}}
+    #
+    # group by country, country_code, product, product_code, port, port_code
+    # limit 1000
+    # """
 
-    sql = sql.format(cn_code_length=cn_code_length,imports_or_exports=importexport)
+
+    sql = sql.format(cn_code_length=cn_code_length,
+                     imports_or_exports=importexport,
+                     product_desc_field = product_desc_field,
+                     product_join_field = product_join_field,
+                     product_join_table=product_join_table)
+
+
+
     queryconditions = get_where_query_part(countries_list,ports_list,products_list,dates_list)
     sql = sql.format(queryconditions=queryconditions)
+
+    print sql
 
     #Need to do more to protect against sql injection attack.
 
@@ -128,13 +178,25 @@ def get_non_eu_timeseries_data(arguments,importexport):
     if stack_by not in ["port", "country", "product_code"]:
         return
 
+    stack_by_lookup = {"port":"p.port_name",
+                       "country": "c.country_name",
+                       "product_code":"product_code"}
+
     #You can't parametize the in keyword in sqlite which makes using parametized sql very hard for the queries i'm trying to run
     #http://stackoverflow.com/questions/14512228/sqlalchemy-raw-sql-parameter-substitution-with-an-in-clause
 
     sql = """
     select month, year, {stack_by} as stack_by, sum(quantity) as quantity from
-    der_{importexport}_country_products_port_month_{cn_code_length}
-    where country is not null
+    der_{importexport}_country_products_port_month_{cn_code_length} as main
+
+
+    left join countries as c on
+    main.country_code = c.alpha_code
+
+    left join ports as p on
+    main.port_code = p.alpha_code
+
+    where country_code is not null
     and year > '2007'
 
     {{queryconditions}}
@@ -143,7 +205,7 @@ def get_non_eu_timeseries_data(arguments,importexport):
     limit 500
     """
 
-    sql = sql.format(stack_by=stack_by, cn_code_length=cn_code_length, importexport=importexport)
+    sql = sql.format(stack_by=stack_by_lookup[stack_by], cn_code_length=cn_code_length, importexport=importexport)
 
     queryconditions = get_where_query_part(countries_list,ports_list,products_list,dates_list)
 
