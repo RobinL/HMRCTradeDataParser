@@ -18,6 +18,10 @@ def imports_view():
     return render_template('imports.html')
 
 
+@myapp.route('/exports', methods=["GET","POST"])
+def exports_view():
+    return render_template('exports.html')
+
 @myapp.route('/importers', methods=["GET","POST"])
 def importers_view():
     return render_template('importers.html')
@@ -35,7 +39,7 @@ def get_eu_imports_json():
 
 
     if all_arguments_populated(arguments):
-        result = get_eu_data(arguments, "imports")
+        result = get_eu_data(arguments)
         result = db_result_to_json_in_d3csv_format(result)
 
     else:
@@ -46,13 +50,13 @@ def get_eu_imports_json():
 
     return resp
 
-@myapp.route('/non_eu_imports.json', methods=["GET","POST"])
+@myapp.route('/non_eu.json', methods=["GET","POST"])
 def get_non_eu_imports_json():
 
     arguments = request.args
 
     if all_arguments_populated(arguments):
-        result = get_non_eu_data(arguments, "imports")
+        result = get_non_eu_data(arguments)
         result = db_result_to_json_in_d3csv_format(result)
 
     else:
@@ -63,22 +67,6 @@ def get_non_eu_imports_json():
 
     return resp
 
-@myapp.route('/non_eu_exports.json', methods=["GET","POST"])
-def get_non_eu_exports_json():
-
-    arguments = request.args
-
-    if all_arguments_populated(arguments):
-        result = get_non_eu_data(arguments, "exports")
-        result = db_result_to_json_in_d3csv_format(result)
-
-    else:
-        result =  []
-
-    resp = jsonify(csv_like_data = result)
-    resp.status_code = 200
-
-    return resp
 
 
 from results import get_selection_box_data
@@ -102,13 +90,13 @@ def get_select_box_json():
 
 
 from results import get_non_eu_timeseries_data
-@myapp.route('/timeseries_imports.json', methods=["GET","POST"])
+@myapp.route('/timeseries_non_eu.json', methods=["GET","POST"])
 def get_timeseries_json():
 
     arguments = request.args
 
     if all_arguments_populated(arguments):
-        result = get_non_eu_timeseries_data(arguments, "imports")
+        result = get_non_eu_timeseries_data(arguments)
     else:
         result =  {}
 

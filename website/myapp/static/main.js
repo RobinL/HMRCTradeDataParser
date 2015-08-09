@@ -94,23 +94,28 @@ $.when(p1, p2, p3).done(function(worlddata, countrydata, select_data) {
 $(function() {
     //The following code deals with what happens when you click the 'level of detail' commodity codes
     $(".btn-group > .btn").click(function(){
-        $(".btn-group > .btn").removeClass("active");
+
+        $(this).parent().parent().find(".btn-group > .btn").removeClass("active");
+        
         $(this).addClass("active");
 
         //Change options in the product filter
         
-        create_filters($(".btn.btn-default.active").attr("pval"))
+    
+    });
+
+    $("#digitcode_btn").click(function(){
 
 
+        create_filters($("#digitcode_btn > .btn.btn-default.active").attr("pval"))
+        
+    
     });
 
 
+
+
 });
-
-
-
-
-
 
 
 function draw_sankey(sankey_data) {
@@ -219,11 +224,27 @@ function draw_sankey(sankey_data) {
         })
         .attr("width", sankey.nodeWidth())
         .style("fill", function(d) {
-            if (d.x < 300) {
+
+
+            
+           
+         
+
+
+            if (d.x < 300 & IMPORTAPP.importexport == "imports") {
+
+                return colour_scale(d.value / IMPORTAPP.max_consignments)
+            }
+
+            else if (d.x > 600 & IMPORTAPP.importexport == "exports") {
                 return colour_scale(d.value / IMPORTAPP.max_consignments)
             } else {
                 return port_colours(d.name_text);
             }
+
+           
+
+
         })
         .style("stroke", function(d) {
             return d3.rgb(d.color).darker(2);
@@ -355,8 +376,9 @@ function get_new_imports_data() {
     countries = $("#country").val()
     products = $("#product").val()
     ports = $("#port").val()
-    stack_by = $('input[name=stack_type]:checked', '#stack_type_radio_buttons').val()
-    cn_code_length = $(".btn.btn-default.active").attr("pval")
+    cn_code_length = $("#digitcode_btn > .btn.btn-default.active").attr("pval")
+
+    stack_by = $("#stack_by_btn > .btn.btn-default.active").attr("pval")
 
     post_data = {
         dates: dates,
@@ -365,6 +387,7 @@ function get_new_imports_data() {
         ports: ports,
         stack_by: stack_by,
         cn_code_length: cn_code_length,
+        importexport: IMPORTAPP.importexport
 
     }
 
@@ -374,8 +397,8 @@ function get_new_imports_data() {
         return
     }
 
-    p1 = $.getJSON("non_eu_imports.json", post_data)
-    p2 = $.getJSON("timeseries_imports.json", post_data)  
+    p1 = $.getJSON("non_eu.json", post_data)
+    p2 = $.getJSON("timeseries_non_eu.json", post_data)  
 
     $.when(p1, p2, p3).done(function(imports_data, timeseries_data) {
 
@@ -573,10 +596,10 @@ function create_stacked_bar(data) {
 
     try {
     data = stacked_bar_data(data);
-}
-catch(err) {
-    data = []
-}
+    }
+    catch(err) {
+        data = []
+    }
 
 
 
@@ -654,7 +677,7 @@ catch(err) {
 
     if (data.length > 50) {
     xAxis.tickValues(data.map( function(d,i) { if (i % 3 == 0 ) {return d["formatted_date"]; } else {return ""}} ))
-}
+    }
 
 
 
@@ -933,122 +956,117 @@ function get_multi_select_array(selection_box_d3_selection) {
 function csv_to_sankey_data() {
 
 
-    var data = IMPORTAPP.filtered_data
+    var data = $.extend([],IMPORTAPP.filtered_data)
     var keys = ["country_code", "product_code", "port_code", "quantity"]
     var keys_text = ["country", "product", "port"]
+
+    var keys = ["port_code", "product_code", "country_code", "quantity"]
+    var keys_text = ["port", "product", "country"]
+
 
     var total = _.reduce(data, function(memo, d){ return d["quantity"] + memo; }, 0);
 
     var one_percent_total = total/200
 
-    //Need a list of countries and ports which account for less than 1%
 
-    var country_totals = {}
-    var port_totals = {}
-    var product_totals = {}
-
-    _.forEach(data, function(d){
-        var key = d["country_code"]
-        country_totals[key] = (country_totals[key] || 0) + d["quantity"];
-
-        var key = d["port_code"]
-        port_totals[key] = (port_totals[key] || 0) + d["quantity"];
-
-        var key = d["product_code"]
-        product_totals[key] = (product_totals[key] || 0) + d["quantity"];
-    })
-
-
-    var country_removes = []
-    _.forEach(country_totals, function(v,k) {
-        if (v < one_percent_total) {
-            country_removes.push(k)
-        } 
-    })
-
-    var port_removes = []
-    _.forEach(port_totals, function(v,k) {
-        if (v < one_percent_total) {
-            port_removes.push(k)
-        } 
-    })
-
-    var product_removes = []
-    _.forEach(product_totals, function(v,k) {
-        if (v < one_percent_total) {
-            product_removes.push(k)
-        } 
-    })
-
-    
-    IMPORTAPP.sankey_num_elements = Math.max(_.size(country_totals) - country_removes.length,_.size(port_totals) - port_removes.length,_.size(product_totals) - product_removes.length)
 
  
+    replace_keys = {"port_code": {"key":"Other_port", "text":"All other ports", "text_key":"port"},
+"product_code": {"key":"Other_product", "text":"All other products", "text_key":"product"},
+"country_code": {"key":"Other_country", "text":"All other countries", "text_key": "country"},}
+
+
+    var dict_of_totals = {}
+    _.forEach(keys.slice(0,3), function(this_key){
+        dict_of_totals[this_key] = {}
+        _.forEach(data, function(d) {
+
+            var this_value = d[this_key]
+            dict_of_totals[this_key][this_value] = (dict_of_totals[this_key][this_value] || 0) + d["quantity"] 
+
+        });
+    });
+
+
+    _.forEach(data, function(d) {
+       _.forEach(keys.slice(0,3), function(this_key){
+    
+        //Look in this datapoint, and see whether 
+
+   
+        this_item = d[this_key]  //e.g. if this_key = "port code" this_item will be "ZLC" 
+        if (dict_of_totals[this_key][this_item] < one_percent_total) {
+       
+            d[this_key] =replace_keys[this_key]["key"]
+            d[replace_keys[this_key]["text_key"]] = replace_keys[this_key]["text"]
+
+        }
+
+        })
+    })
+
+
+
+    var dict_of_totals = {}
+    _.forEach(keys.slice(0,3), function(this_key){
+        dict_of_totals[this_key] = {}
+        _.forEach(data, function(d) {
+
+            var this_value = d[this_key]
+            dict_of_totals[this_key][this_value] = (dict_of_totals[this_key][this_value] || 0) + d["quantity"] 
+
+        });
+    });
+
+    var most_elems = 0
+  
+
+
+    _.forEach(_.keys(dict_of_totals), function(k) {
+         
+        most_elems = Math.max(_.size(dict_of_totals[k]),most_elems)
+        
+        
+    })
+      
+
+    IMPORTAPP.sankey_num_elements = most_elems
+
+    
 
     var nodes = []
 
 
     // Initial nodes
     _.forEach(data, function(d) {
-        if (_.contains(country_removes, d["country_code"] )) {
-            d["level1"] = "Other_country"
-            d["level1text"] = "All other countries"
-            d[keys[0]] = d["level1"]
-            d[keys_text[0]] = d["level1text"] 
-        }
-        else {
             d["level1"] = d[keys[0]]
             d["level1text"] = d[keys_text[0]]
-        }
     })
 
 
     // Middle nodes
     _.forEach(data, function(d) {
-
-        if (_.contains(product_removes, d["product_code"] )) {
-            d["level2"] = "Other_product"
-            d["level2text"] = "All other products"
-            d[keys[1]] = d["level2"]
-            d[keys_text[1]] = d["level2text"]
-        }
-        else {
             d["level2"] = d[keys[1]]
             d["level2text"] = d[keys_text[1]]
-        }
-
-
-
     })
 
     //Links between level 1 and level 2 
     _.forEach(data, function(d) {
-     
         d["level2link"] = d[keys[0]] + d[keys[1]]
-    
     })
 
     _.forEach(data, function(d) {
-        if (_.contains(port_removes, d["port_code"] )){
-            d["level3"] = "Other_port"
-            d["level3text"] = "All other ports"
-        } else {
         d["level3"] = d[keys[2]]
         d["level3text"] = d[keys_text[2]]
-
-        }
     })
 
     _.forEach(data, function(d) {
-        if (_.contains(port_removes, d["port_code"] )) {
-            d["level3link"] = d[keys[1]] + "Other_port"
-        } else {
         d["level3link"] = d[keys[1]] + d[keys[2]]
-
-        }
     })
 
     var levelList = ["level1", "level2", "level3"]
+
+
 
     //Get unique nodes
     //and a name index lookup
@@ -1112,7 +1130,7 @@ function csv_to_sankey_data() {
 
     links = links.concat(links2)
 
-
+      debugger;
 
     var links = links.map(function(d) {
         return d["values"]

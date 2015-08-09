@@ -24,7 +24,7 @@ def get_selection_box_data(type = ""):
     return result
 
 from other_helpers import get_join_info_products
-def get_eu_data(arguments,importexport):
+def get_eu_data(arguments):
 
     countries_list = arguments.getlist("countries[]")
     products_list = arguments.getlist("products[]")
@@ -77,7 +77,7 @@ def get_eu_data(arguments,importexport):
 
     return result
 
-def get_non_eu_data(arguments,importexport):
+def get_non_eu_data(arguments):
 
     #You can't parametize the in keyword in sqlite which makes using parametized sql very hard for the queries i'm trying to run
     #http://stackoverflow.com/questions/14512228/sqlalchemy-raw-sql-parameter-substitution-with-an-in-clause
@@ -89,6 +89,7 @@ def get_non_eu_data(arguments,importexport):
     products_list = arguments.getlist("products[]")
     dates_list = arguments.getlist("dates[]")
     cn_code_length = arguments["cn_code_length"]
+    importexport = arguments["importexport"]
 
     #Depending on the whether it's an 8,6,4,2,or 1 ditit code, we will need to do different joins
     join_info_products = get_join_info_products(cn_code_length)
@@ -165,7 +166,7 @@ def get_non_eu_data(arguments,importexport):
     return result
 
 
-def get_non_eu_timeseries_data(arguments,importexport):
+def get_non_eu_timeseries_data(arguments):
 
     countries_list = arguments.getlist("countries[]")
     ports_list = arguments.getlist("ports[]")
@@ -173,6 +174,7 @@ def get_non_eu_timeseries_data(arguments,importexport):
     dates_list = arguments.getlist("dates[]")
     stack_by = arguments["stack_by"]
     cn_code_length = arguments["cn_code_length"]
+    importexport = arguments["importexport"]
 
     #Check html injection on stack_by:
     if stack_by not in ["port", "country", "product_code"]:
