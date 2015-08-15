@@ -12,7 +12,7 @@ import hashlib
 
 import logging
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+
 
 def raw_importer_data_to_database(zipfile, url_info,rawfile):
     

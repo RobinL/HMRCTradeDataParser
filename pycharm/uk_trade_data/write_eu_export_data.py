@@ -9,7 +9,7 @@ from my_database import session
 import trade_data_config
 import logging
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+
 
 
 def raw_eu_export_data_to_database(zipfile, url_info,rawfile):

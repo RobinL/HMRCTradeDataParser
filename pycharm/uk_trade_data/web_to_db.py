@@ -7,7 +7,6 @@ import datetime
 
 import logging
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
 
 from my_models import RawFileLog
 from my_database import session
@@ -83,7 +82,7 @@ def specific_url_part_to_type(specific_url_part):
 def unzip_url(url):
     url = urlopen(url)
     zipfile = ZipFile(StringIO(url.read()))
-    #zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\smkx461506.zip")
+    #zipfile = ZipFile(r"C:\Users\Robin\Downloads\smkx461406.zip")
     #zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\smkm461506.zip")
     #zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\SMKI191506.zip")
     #zipfile = ZipFile(r"C:\Users\rlinacre\Downloads\SMKA121506.zip")
@@ -91,6 +90,15 @@ def unzip_url(url):
     
 
     return zipfile
+
+
+
+def unzip_file(file_path):
+    zipfile = ZipFile(file_path)
+    
+
+    return zipfile
+
 
 
 
@@ -146,7 +154,7 @@ def get_urls_historical(specific_url_part):
 
 
     urls = [r"https://www.uktradeinfo.com/Statistics/Documents/{}_{}archive.zip" \
-            .format(specific_url_part, y) for y in range(2014,2007,-1)]
+            .format(specific_url_part, y) for y in range(2014,2012,-1)]
 
     #one of the archives has the wrong url - do a find and replace
     replace_this = r"https://www.uktradeinfo.com/Statistics/Documents/SIAI11_2011archive.zip"
@@ -174,14 +182,8 @@ def get_and_iterate_historical(specific_url_part, add_to_database_function):
         final_files = []
 
 
-        for f in file_list:
-            this_f = {}
-            this_f["file_name"] = f.replace(".zip", "")
-            this_f["file_name_zip"] = f
-            this_f["year"] = "20" + f[-8:-6]
-            this_f["month"] = f[-6:-4]
-            this_f["url_full"] = url
-            final_files.append(this_f)
+        # for f in file_list:
+
 
         try:
             final_files.sort(key=lambda x: int(x["month"]), reverse=True)
@@ -191,7 +193,7 @@ def get_and_iterate_historical(specific_url_part, add_to_database_function):
 
         for file_info in final_files:
             logger.debug("Processing file: {}".format(file_info["file_name_zip"]))
-            
+
 
             try:
                 r = session.query(RawFileLog).filter(RawFileLog.expected_file_name_in_child_zip == file_info["file_name"]).one()
@@ -219,7 +221,7 @@ def get_and_iterate_historical(specific_url_part, add_to_database_function):
 
                 session.add(r)
                 session.commit()
-                
+
                 try:
                     add_to_database_function(zip_file2, file_info,r)
                     r.processing_completed = True
@@ -230,6 +232,68 @@ def get_and_iterate_historical(specific_url_part, add_to_database_function):
                 session.commit()
             except MultipleResultsFound:
                 logger.debug("The file {} seems to have been added to the database multiple times".format(file_info["url_full"]))
+
+
+import os 
+def rebuild_from_file(specific_url_part=None,path_to_replacement_zip=None, file_type=None,month=None,year=None, add_to_database_function=None):
+
+    try:
+        rawfile = session.query(RawFileLog).filter(RawFileLog.file_type == file_type).filter(RawFileLog.month == month).filter(RawFileLog.year == year).delete()
+        session.commit()
+    except:
+        logger.debug("data not currently in database")
+        return
+
+
+
+
+    try:
+        zip_file = unzip_file(path_to_replacement_zip)
+    except BadZipfile:
+        logger.info("File from {} was a bad zip file".format(path_to_replacement_zip))
+
+
+    head, tail = os.path.split(path_to_replacement_zip)
+
+    this_f = {}
+    this_f["file_name"] =  tail
+    this_f["file_name_zip"] = tail.replace(".zip","")
+    if year:
+       this_f["year"] = year
+    else:
+        this_f["year"] = "20" + tail[-8:-6]
+
+    if month:
+        this_f["month"] = month
+    else:
+        this_f["month"] = tail[-6:-4]
+
+    this_f["url_full"] = path_to_replacement_zip
+
+
+    r = RawFileLog()
+    r.parent_zip_file = "No parent - manual addition after failure"
+    r.child_zip_file =  tail
+    r.expected_file_name_in_child_zip = tail.replace(".zip","")
+    r.url = path_to_replacement_zip
+    r.processing_completed = False
+    r.timestamp = datetime.datetime.now()
+    r.file_type = specific_url_part_to_type(specific_url_part)
+    r.month = this_f["month"]
+    r.year = this_f["year"]
+    session.add(r)
+    session.commit()
+    
+
+    add_to_database_function(zip_file, this_f,r)
+
+    r.processing_completed = True
+
+    session.add(r)
+    session.commit()
+
+
+
 
 def build_full_dataset():
     build_lookups()
@@ -247,9 +311,11 @@ def check_for_updates():
 
 
 def build_historical_data():
+
     get_and_iterate_historical("SMKA12", raw_control_data_to_database)
     get_and_iterate_historical("SIAI11", raw_importer_data_to_database)
     get_and_iterate_historical("SMKI19", raw_import_data_to_database)
+    get_and_iterate_historical("SMKE19", raw_export_data_to_database)
     get_and_iterate_historical("SMKM46", raw_eu_import_data_to_database)
     get_and_iterate_historical("SMKX46", raw_eu_export_data_to_database)
 

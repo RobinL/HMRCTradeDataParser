@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+
+
+
+{% block content %}
+
+{% block page_header %}
+{%- endblock page_header %}
+
+<div class="container">
+
+
+{% include 'digitcodebuttons.html' %}
+
+<div id="filters" class="main">
+
+
+</div>
+
+<div id="spinnerdiv">
+{% include 'spinner.html' %}
+
+</div>
+
+<div id="too_many">
+	<h4>Too many results returned - please select a simpler query</h4>
+</div>
+
+<div id="no_results">
+	<h4>No results were returned for your query</h4>
+</div>
+
+
+<div id="mapcontainer" class="main all_results" >
+{% include 'spinner.html' %}
+	<h4 class="text-center">Imports received by product, country of origin, and port.  </h4>
+	<p> Hover over countries to see further details.  Select item(s) from the boxes above to filter data.</p>
+</div>
+
+
+<div id="timeseriescontainer" class="main all_results">
+{% include 'spinner.html' %}
+	
+{% include 'stack_by_eu.html' %}
+<h4 class="text-center">Time series of value of imports</h4>
+</div>
+
+
+
+<div class="tooltip"></div>
+
+
+</div>
+
+
+
+{% endblock %}
+
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('static', filename='jquery-2.1.4.min.js') }}"></script>
+<script src="{{url_for('static', filename='select2.min.js') }}"></script>
+<script src="{{url_for('static', filename='handlebars-v3.0.0.js') }}"></script>
+<script src="{{url_for('static', filename='underscore-min.js') }}"></script>
+<script src="{{url_for('static', filename='d3.v3.min.js') }}"></script>
+<script src="{{url_for('static', filename='topojson.v1.min.js') }}"></script>
+<script src="{{url_for('static', filename='queue.v1.min.js') }}"></script>
+<script src="{{url_for('static', filename='sankey.js') }}"></script>
+<script src="{{url_for('static', filename='eu.js') }}"></script>
+
+
+{% raw %}
+
+<script id="map-tooltip-template" type="text/x-handlebars-template">
+<p><strong>Country: </strong>{{this_country}}</p>
+<p><strong>Total value of exports to the UK: </strong>{{quantity_exports}}</p>
+</script>
+
+
+{% endraw %}
+
+
+{% endblock %}
+
+{%- block styles %}
+{{super()}}
+
+<link href="{{ url_for('static', filename='select2.min.css') }}" rel="stylesheet" media="screen">
+<link href="{{ url_for('static', filename='mystyle.css') }}" rel="stylesheet" media="screen">
+{%- endblock styles %}

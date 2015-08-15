@@ -1,0 +1,17 @@
+{% extends "eu.html" %}
+
+
+{% block page_header %}
+<div class="container">
+
+<h2 class="page-header">Exports from the UK to non-EU countries</h2>		
+</div>	
+{%- endblock page_header %}
+
+{% block scripts %}
+{{super()}}
+<script type="text/javascript">
+	IMPORTAPP.importexport="imports"
+</script>
+{% endblock %}
+

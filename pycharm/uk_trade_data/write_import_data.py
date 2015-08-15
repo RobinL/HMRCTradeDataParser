@@ -6,7 +6,8 @@ import trade_data_config
 
 import logging
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+
+
 from .utils import get_fields_df, get_zipped_file_contents, get_specs_dict, build_from_spec
 from my_database import engine
 from my_models import Import

@@ -27,13 +27,21 @@ def importers_view():
     return render_template('importers.html')
 
 
+@myapp.route('/eu_exports', methods=["GET","POST"])
+def eu_exports_view():
+    return render_template('eu_exports.html')
+
+@myapp.route('/eu_imports', methods=["GET","POST"])
+def eu_imports_view():
+    return render_template('eu_imports.html')
+
 
 #All json routes are below
 from flask import jsonify
 
 from results import get_eu_data
-@myapp.route('/eu_imports.json', methods=["GET","POST"])
-def get_eu_imports_json():
+@myapp.route('/eu.json', methods=["GET","POST"])
+def get_eu_json():
 
     arguments = request.args
 
@@ -91,12 +99,29 @@ def get_select_box_json():
 
 from results import get_non_eu_timeseries_data
 @myapp.route('/timeseries_non_eu.json', methods=["GET","POST"])
-def get_timeseries_json():
+def get_non_eu_timeseries_json():
 
     arguments = request.args
 
     if all_arguments_populated(arguments):
         result = get_non_eu_timeseries_data(arguments)
+    else:
+        result =  {}
+
+    resp = jsonify(csv_like_data = result)
+    resp.status_code = 200
+
+    return resp
+
+
+from results import get_eu_timeseries_data
+@myapp.route('/timeseries_eu.json', methods=["GET","POST"])
+def get_eu_timeseries_json():
+
+    arguments = request.args
+
+    if all_arguments_populated(arguments):
+        result = get_eu_timeseries_data(arguments)
     else:
         result =  {}
 

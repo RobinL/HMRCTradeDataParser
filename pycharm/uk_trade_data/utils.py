@@ -3,7 +3,6 @@ import pandas as pd
 
 import logging
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
 
 def get_fields_df(df, column_name = "Item Name"):
     df = df[~df[column_name].str.upper().str.contains("DELIMITER")]

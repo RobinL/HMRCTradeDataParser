@@ -6,7 +6,7 @@ from my_database import session
 import trade_data_config
 import logging
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+
 
 
 

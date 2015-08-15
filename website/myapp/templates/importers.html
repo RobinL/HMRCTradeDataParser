@@ -1,2 +1,65 @@
-{% extends "non_eu.html" %}
+{% extends "base.html" %}
 
+
+
+{% block content %}
+
+
+<div class="container">
+
+<div id="filters" class="main">
+</div>
+
+
+
+<div id="map" class="main">
+
+
+</div>
+
+<div id="importerscontainer" class="main all_results">
+<img src= {{ url_for('static', filename = 'spinner.gif') }} class="spinner" alt="previous" title="Previous" border="0">
+<p>Since 2014, these products have been imported by (this list is not exhaustive):</p>
+</div>
+
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('static', filename='jquery-2.1.4.min.js') }}"></script>
+<script src="{{url_for('static', filename='select2.min.js') }}"></script>
+<script src="{{url_for('static', filename='leaflet.js') }}"></script>
+<script src="{{url_for('static', filename='handlebars-v3.0.0.js') }}"></script>
+<script src="{{url_for('static', filename='underscore-min.js') }}"></script>
+<script src="{{url_for('static', filename='d3.v3.min.js') }}"></script>
+
+
+<script src="{{url_for('static', filename='importers.js') }}"></script>
+
+
+{% raw %}
+
+<script id="map-tooltip-template" type="text/x-handlebars-template">
+<p><strong>Importer: </strong>{{full_address}}</p>
+<p><strong>Dates: </strong>{{dates}}</p>
+<p><strong>Products: </strong>{{products}}</p>
+
+</script>
+
+
+{% endraw %}
+
+
+{% endblock %}
+
+{%- block styles %}
+
+{{super()}}
+<link href="{{ url_for('static', filename='importers.css') }}" rel="stylesheet" media="screen">
+<link href="{{ url_for('static', filename='select2.min.css') }}" rel="stylesheet" media="screen">
+<link href="{{ url_for('static', filename='leaflet.css') }}" rel="stylesheet" media="screen">
+{%- endblock styles %}

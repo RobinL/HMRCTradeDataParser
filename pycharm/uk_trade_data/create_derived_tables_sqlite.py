@@ -4,6 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
+# and cast(substr(i_or_e.comcode8,1,2) as integer) < 23
 def create_derived_country_products_month():
     sql = """
     drop table if exists der_{import_or_export}_country_products_port_month_{code_detail};
@@ -20,7 +21,7 @@ def create_derived_country_products_month():
 
         where
         maf_value_int is not null
-        and cast(substr(i_or_e.comcode8,1,2) as integer) < 23
+
         and product_code is not null
         and country_code is not null
 
@@ -157,7 +158,7 @@ def create_derived_importers_for_web():
 
 
 
-
+#       and cast(substr(comcode8,1,2) as integer) < 23
 def create_derived_country_products_month_eu():
     sql = """
     drop table if exists der_{import_or_export}_country_products_month_eu_{code_detail};
@@ -174,9 +175,10 @@ def create_derived_country_products_month_eu():
  
         where
         smk_stat_value_int is not null
-        and cast(substr(comcode8,1,2) as integer) < 23
+ 
         and product_code is not null
         and country_code is not null
+        and smk_nature_of_transaction != "000"
 
 
 
