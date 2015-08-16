@@ -921,12 +921,11 @@ function create_filters(cn_code_length) {
 
     )
 
-    $("#stack_type_radio_buttons input[type='radio']").on("change", function() {
+   $("#stack_by_btn").on("click", function() {
             get_new_imports_data()
         }
 
     )
-
     $("#product").val(filters_dict.product[1].my_key).trigger("change");
 
 
@@ -960,8 +959,10 @@ function csv_to_sankey_data() {
     var keys = ["country_code", "product_code", "port_code", "quantity"]
     var keys_text = ["country", "product", "port"]
 
+    if (IMPORTAPP.importexport == "exports") {
     var keys = ["port_code", "product_code", "country_code", "quantity"]
     var keys_text = ["port", "product", "country"]
+}
 
 
     var total = _.reduce(data, function(memo, d){ return d["quantity"] + memo; }, 0);

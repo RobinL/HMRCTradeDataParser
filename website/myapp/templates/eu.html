@@ -34,7 +34,7 @@
 
 <div id="mapcontainer" class="main all_results" >
 {% include 'spinner.html' %}
-	<h4 class="text-center">Imports received by product, country of origin, and port.  </h4>
+	<h4 class="text-center">{{impexp}} received by product, country of origin, and port.  </h4>
 	<p> Hover over countries to see further details.  Select item(s) from the boxes above to filter data.</p>
 </div>
 
@@ -43,7 +43,7 @@
 {% include 'spinner.html' %}
 	
 {% include 'stack_by_eu.html' %}
-<h4 class="text-center">Time series of value of imports</h4>
+<h4 class="text-center">Time series of value of {{impexp}}</h4>
 </div>
 
 
