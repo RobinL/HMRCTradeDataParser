@@ -1,6 +1,3 @@
-var IMPORTAPP = {
-    
-}
 
 function resize() {
 
@@ -589,211 +586,6 @@ function stacked_bar_data(data) {
 
 }
 
-
-
-function create_stacked_bar(data) {
-
-
-    try {
-    data = stacked_bar_data(data);
-    }
-    catch(err) {
-        data = []
-    }
-
-
-
-    var margin = {
-            top: 20,
-            right: 50,
-            bottom: 60,
-            left: 40
-        },
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
-
-    var x = d3.scale.ordinal()
-        .rangeRoundBands([0, width], .1);
-
-    var y = d3.scale.linear()
-        .rangeRound([height, 0]);
-
-
-    var xAxis = d3.svg.axis()
-        .scale(x)
-        .orient("bottom");
-
-
-    var yAxis = d3.svg.axis()
-        .scale(y)
-        .orient("left")
-        .tickFormat(function(d) {
-            return "£" + d3.format(".2s")(d)
-        });
-
-    d3.selectAll("svg.timeseries").remove()
-
-
-
-
-    var total_width = width + margin.left + margin.right
-    var total_height = height + margin.top + margin.bottom
-
-
-    var svg = d3.select("#timeseriescontainer").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .attr("viewBox", "0 0 " + total_width + " " + total_height)
-        .attr("class", "timeseries")
-        .attr("preserveAspectRatio", "xMidYMid")
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    var distinct_stack_by_units = d3.keys(data[0]).filter(function(key) {
-        return key !== "date" & key !== "formatted_date";
-    })
-
-
-
-
-    data.forEach(function(d) {
-        var y0 = 0;
-        d.stack_by = distinct_stack_by_units.map(function(name) {
-            return {
-                name: name,
-                y0: y0,
-                y1: y0 += +d[name]
-            };
-        });
-        d.total = d.stack_by[d.stack_by.length - 1].y1;
-    });
-
-
-    x.domain(data.map(function(d) {
-        return d["formatted_date"]
-    }));
-
-
-
-    if (data.length > 50) {
-    xAxis.tickValues(data.map( function(d,i) { if (i % 3 == 0 ) {return d["formatted_date"]; } else {return ""}} ))
-    }
-
-
-
-    y.domain([0, d3.max(data, function(d) {
-        return d.total;
-    })]);
-
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis)
-        .selectAll("text")
-        .style("text-anchor", "end")
-        .attr("dx", "-.8em")
-        .attr("dy", ".15em")
-        .attr("transform", function(d) {
-            return "rotate(-45)"
-        });
-
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis)
-        .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", ".71em")
-        .style("text-anchor", "end")
-        .text("Value of imports into UK");
-
-    var stack_by = svg.selectAll(".stack_by")
-        .data(data)
-        .enter().append("g")
-        .attr("class", "g")
-        .attr("transform", function(d) {
-            return "translate(" + x(d.formatted_date) + ",0)";
-        });
-
-    stack_by.selectAll("rect")
-        .data(function(d) {
-            return d.stack_by;
-        })
-        .enter().append("rect")
-        .attr("width", x.rangeBand())
-        .attr("y", function(d) {
-            return y(d.y1);
-        })
-        .attr("height", function(d) {
-            return y(d.y0) - y(d.y1);
-        })
-        .style("fill", function(d) {
-            return port_colours(d.name.replace(/  .*/, ""));
-        });
-
-    var legend = svg.selectAll(".legend")
-        .data(distinct_stack_by_units.slice().reverse())
-        .enter().append("g")
-        .attr("class", "legend")
-        .attr("transform", function(d, i) {
-            return "translate(0," + i * 20 + ")";
-        });
-
-    legend.append("rect")
-        .attr("x", width + 8)
-        .attr("width", 18)
-        .attr("height", 18)
-        .style("fill", port_colours);
-
-    legend.append("text")
-        .attr("x", width + 2)
-        .attr("y", 9)
-        .attr("dy", ".35em")
-        .style("text-anchor", "end")
-        .text(function(d) {
-            return d;
-        });
-
-
-        var shapes = svg.selectAll("rect")
-     
-
-        shapes
-        .on("mousemove", function(d) {
-
-
-
-                tooltip.transition()
-                    .duration(200)
-                    .style("opacity", function() {
-                        return 0.9
-                    });
-
-
-                tooltip
-                    .html(function() {
-                        return d["name"] + ": £" + d3.format(".4s")(d["y1"] - d["y0"]);
-                    })
-                    .style("left", (d3.event.pageX + 15) + "px")
-                    .style("top", (d3.event.pageY - 60) + "px");
-            
-        })
-            .on("mouseout", function(d) {
-                tooltip.transition()
-                    .duration(500)
-                    .style("opacity", 0);
-            });
-
-    
-
-
-}
-
-
-
-
-
-
 function create_filters(cn_code_length) {
 
     d3.select("#filters").html("")
@@ -1197,7 +989,7 @@ function draw_map(world, names) {
         .data(countries)
 
 
-    tooltip = d3.select(".tooltip")
+    var tooltip = d3.select(".tooltip")
 
     shapes.enter().append("path")
         .attr("class", function(d) {
@@ -1251,32 +1043,8 @@ function draw_map(world, names) {
 }
 
 
-function map_tooltip_html(d) {
 
-    
-    var formatNumber = d3.format(",.0f"),
-        format = function(d) {
-            return "£" + formatNumber(d);
-        }
 
-    this_country = d["name"]
-    var source = d3.select("#map-tooltip-template").html();
-
-    var template = Handlebars.compile(source)
-
-     if (d["alpha_2"] in IMPORTAPP.country_totals) {
-    var quantity_exports = IMPORTAPP.country_totals[d["alpha_2"]]["quantity_exports"]
-    quantity_exports = format(quantity_exports)
-}
-    else {quantity_exports="None"}
-
-    var html = template({
-        quantity_exports: quantity_exports,
-        this_country: this_country
-    })
-
-    return html
-}
 
 
 function get_consignments_by_country() {

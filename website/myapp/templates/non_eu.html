@@ -34,7 +34,7 @@
 
 <div id="mapcontainer" class="main all_results" >
 {% include 'spinner.html' %}
-	<h4 class="text-center">Imports received by product, country of origin, and port.  </h4>
+	<h4 class="text-center">{{impexp}} received by product, country of origin, and port.  </h4>
 	<p> Hover over countries to see further details.  Select item(s) from the boxes above to filter data.</p>
 </div>
 
@@ -47,17 +47,12 @@
 {% include 'spinner.html' %}
 	
 {% include 'stack_by.html' %}
-<h4 class="text-center">Time series of value of imports</h4>
+<h4 class="text-center">Time series of value of {{impexp}}</h4>
 </div>
-
 
 
 <div class="tooltip"></div>
-
-
 </div>
-
-
 
 {% endblock %}
 
@@ -72,14 +67,22 @@
 <script src="{{url_for('static', filename='topojson.v1.min.js') }}"></script>
 <script src="{{url_for('static', filename='queue.v1.min.js') }}"></script>
 <script src="{{url_for('static', filename='sankey.js') }}"></script>
-<script src="{{url_for('static', filename='main.js') }}"></script>
+<script src="{{url_for('static', filename='common.js') }}"></script>
+<script src="{{url_for('static', filename='non_eu.js') }}"></script>
 
 
 {% raw %}
 
 <script id="map-tooltip-template" type="text/x-handlebars-template">
 <p><strong>Country: </strong>{{this_country}}</p>
-<p><strong>Total value of exports to the UK: </strong>{{quantity_exports}}</p>
+<p><strong>Total value of {{imports_or_exports}} to the UK: </strong>{{quantity_exports}}</p>
+</script>
+
+<script id="stacked-tooltip-template" type="text/x-handlebars-template">
+<p>{{unit}}</p>
+<p><strong>Date: </strong>{{date}}</p>
+<p><strong>Value: </strong>{{quantity}}</p>
+<p><strong>Total this period: </strong>{{total}}</p>
 </script>
 
 

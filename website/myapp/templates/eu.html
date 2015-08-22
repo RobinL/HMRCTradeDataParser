@@ -47,13 +47,8 @@
 </div>
 
 
-
 <div class="tooltip"></div>
-
-
 </div>
-
-
 
 {% endblock %}
 
@@ -68,6 +63,7 @@
 <script src="{{url_for('static', filename='topojson.v1.min.js') }}"></script>
 <script src="{{url_for('static', filename='queue.v1.min.js') }}"></script>
 <script src="{{url_for('static', filename='sankey.js') }}"></script>
+<script src="{{url_for('static', filename='common.js') }}"></script>
 <script src="{{url_for('static', filename='eu.js') }}"></script>
 
 
@@ -75,9 +71,15 @@
 
 <script id="map-tooltip-template" type="text/x-handlebars-template">
 <p><strong>Country: </strong>{{this_country}}</p>
-<p><strong>Total value of exports to the UK: </strong>{{quantity_exports}}</p>
+<p><strong>Total value of {{impexp}}  to the UK: </strong>{{quantity_exports}}</p>
 </script>
 
+<script id="stacked-tooltip-template" type="text/x-handlebars-template">
+<p>{{unit}}</p>
+<p><strong>Date: </strong>{{date}}</p>
+<p><strong>Value: </strong>{{quantity}}</p>
+<p><strong>Total this period: </strong>{{total}}</p>
+</script>
 
 {% endraw %}
 
