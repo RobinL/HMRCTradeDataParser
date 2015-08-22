@@ -12,5 +12,16 @@ Why in some of the EU Dispatches data is the date things like 0991301 and what s
 
 Similarly in the EU Arrivals data some has 0000000
 
-#Question 2
-Why in some of the EU data is the date things like 0991301 and what should I do with these records?
+#Question 3
+Why in some of te EU data is the date things like 0991301 and what should I do with these records?
+
+
+#Question 4
+EU estimates - if only interested in 4 digit codes and more detailed, do we need this?
+
+
+#Question 5
+On the interactive tables on uktradestatistics, there's the category for 01-- - HS2 Below Threshold Trade.  Where is this in the data?
+
+#Todo
+Need to fix the commodity code lookup - add in the comprehennsive list of 8 digit codes

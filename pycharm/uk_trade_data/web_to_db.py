@@ -182,7 +182,14 @@ def get_and_iterate_historical(specific_url_part, add_to_database_function):
         final_files = []
 
 
-        # for f in file_list:
+        for f in file_list:
+            this_f = {}
+            this_f["file_name"] = f.replace(".zip", "")
+            this_f["file_name_zip"] = f
+            this_f["year"] = "20" + f[-8:-6]
+            this_f["month"] = f[-6:-4]
+            this_f["url_full"] = url
+            final_files.append(this_f)
 
 
         try:

@@ -772,7 +772,7 @@ function create_stacked_bar(data) {
 
                 tooltip
                     .html(function() {
-                        return d["name"] + ": £" + d3.format(".2s")(d["y1"] - d["y0"]);
+                        return d["name"] + ": £" + d3.format(".4s")(d["y1"] - d["y0"]);
                     })
                     .style("left", (d3.event.pageX + 15) + "px")
                     .style("top", (d3.event.pageY - 60) + "px");
