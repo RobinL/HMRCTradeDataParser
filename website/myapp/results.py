@@ -9,7 +9,7 @@ import datetime
 def get_selection_box_data(type = ""):
 
     sql = """
-    select select_box, my_key, value
+    select select_box as s, my_key as k, substr(value,1,70) as v
     from der_select_box_values
     {where}
     """

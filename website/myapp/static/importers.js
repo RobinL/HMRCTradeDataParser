@@ -81,11 +81,11 @@ function create_filters(data) {
         .append("option")
         .attr("value", function(d) {
         
-            return d["my_key"]
+            return d["k"]
         })
         .text(function(d) {
      
-            return d["value"].substr(0, 70)
+            return d["v"].substr(0, 70)
         })
 
     $(".select_boxes").each(function(index) {

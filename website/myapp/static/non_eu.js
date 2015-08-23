@@ -1,4 +1,3 @@
-
 function resize() {
 
     var chart = d3.select("svg.map")
@@ -35,26 +34,7 @@ var p1 = $.getJSON("static/world-110m.json")
 var p2 = $.ajax("static/countries.csv")
 var p3 = $.getJSON("selectboxdata.json")
 
-var port_colours = d3.scale.ordinal()
-    .range(["#1f77b4",
-        "#aec7e8",
-        "#ff7f0e",
-        "#ffbb78",
-        "#d62728",
-        "#ff9896",
-        "#9467bd",
-        "#c5b0d5",
-        "#8c564b",
-        "#c49c94",
-        "#e377c2",
-        "#f7b6d2",
-        "#7f7f7f",
-        "#c7c7c7",
-        "#bcbd22",
-        "#dbdb8d",
-        "#17becf",
-        "#9edae5"
-    ]);
+
 
 
 $(function() {
@@ -604,10 +584,10 @@ function create_filters(cn_code_length) {
     _.each(IMPORTAPP.select_box_data, function(d) {
         d = $.extend({}, d)
 
-        if (d.select_box.indexOf("product") > -1){
+        if (d.s.indexOf("product") > -1){
 
-            if (d.select_box.indexOf(cn_code_length) > -1){
-                d.select_box = "product"
+            if (d.s.indexOf(cn_code_length) > -1){
+                d.s = "product"
                 filtered_select_box_data.push(d)
             }
         }
@@ -624,7 +604,7 @@ function create_filters(cn_code_length) {
 
     _.each(filtered_select_box_data, function(d) {
 
-        filters_dict[d.select_box].push(d)
+        filters_dict[d.s].push(d)
     })
 
 
@@ -634,8 +614,8 @@ function create_filters(cn_code_length) {
     _.each(filters_dict, function(d, k, i) {
 
         d.unshift({
-            my_key: "All",
-            value: "All"
+            k: "All",
+            v: "All"    
         })
 
 
@@ -687,10 +667,10 @@ function create_filters(cn_code_length) {
         .enter()
         .append("option")
         .attr("value", function(d) {
-            return d["my_key"]
+            return d["k"]
         })
         .text(function(d) {
-            return d["value"].substr(0, 60)
+            return d["v"].substr(0, 60)
         })
 
     $(".select_boxes").each(function(index) {
@@ -715,10 +695,12 @@ function create_filters(cn_code_length) {
 
    $("#stack_by_btn").on("click", function() {
             get_new_imports_data()
-        }
+        } 
 
     )
-    $("#product").val(filters_dict.product[1].my_key).trigger("change");
+
+   
+    $("#product").val(filters_dict.product[1].k).trigger("change");
 
 
 
@@ -923,7 +905,6 @@ function csv_to_sankey_data() {
 
     links = links.concat(links2)
 
-      debugger;
 
     var links = links.map(function(d) {
         return d["values"]
@@ -937,110 +918,6 @@ function csv_to_sankey_data() {
     return sankey_data
 }
 
-
-function draw_map(world, names) {
-
-
-    d3.select("svg.map").remove()
-
-    world = IMPORTAPP.worlddata
-    names = IMPORTAPP.countrydata
-
-    var margin = {
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0
-        },
-        width = 1000 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
-
-    var svg = d3.select("#mapcontainer").append("svg")
-        .attr("class", "map")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .attr("viewBox", "0 0 " + width + " " + height)
-        .attr("preserveAspectRatio", "xMinYMin")
-        .append("g")
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    var countries = topojson.feature(world, world.objects.countries).features;
-
-    countries = countries.filter(function(d) {
-        return names.some(function(n) {
-            if (d.id == n.id) return d.name = n.name;
-        });
-    }).sort(function(a, b) {
-        return a.name.localeCompare(b.name);
-    });
-
-    var projection = d3.geo.mercator()
-        .scale(150)
-        .translate([-10 + width / 2, 50 + height / 2]);
-
-    var path = d3.geo.path()
-        .projection(projection);
-
-    svg.append("path")
-
-
-    var shapes = svg.selectAll(".countrypath")
-        .data(countries)
-
-
-    var tooltip = d3.select(".tooltip")
-
-    shapes.enter().append("path")
-        .attr("class", function(d) {
-            return "subunit " + d.id;
-        })
-        .attr("class", function(d) {
-            return "countrypath";
-        })
-        .attr("d", path)
-        .attr("id", function(d, i) {
-            return d.id;
-        })
-        .attr("name", function(d, i) {
-            return d.properties.name;
-        })
-
-
-
-    var shapes = svg.selectAll(".countrypath")
-        .data(countries)
-
-    shapes
-        .on("mousemove", function(d) {
-
-            alpha_2 = IMPORTAPP.country_numericid_lookup[d["id"]]["alpha_2"]
-            d["alpha_2"] = alpha_2
-       
-
-            tooltip.transition()
-                .duration(200)
-                .style("opacity", function() {
-                    return 0.9
-                });
-
-
-
-            tooltip
-                .html(function() {
-                    return map_tooltip_html(d)
-                })
-                .style("left", (d3.event.pageX + 15) + "px")
-                .style("top", (d3.event.pageY - 60) + "px");
-        
-    })
-        .on("mouseout", function(d) {
-            tooltip.transition()
-                .duration(500)
-                .style("opacity", 0);
-        });
-
-}
 
 
 
@@ -1142,108 +1019,6 @@ function map_colours() {
             return colour_scale(total)
         })
 
-
-
-}
-
-
-function draw_map_key() {
-
-    var num_steps = 50
-
-    var colour_scale = d3.scale.log().domain([1, 1000]).range(["black", "#00CE0F"]);
-
-    var max_key = 300
-    var axis_scale = d3.scale.log().domain([1, 1000]).range([max_key, 0])
-
-    var inverted_scale = axis_scale.invert
-
-    svg = d3.select("#mapcontainer svg")
-
-    svg.append("g")
-        .attr("transform", "translate(20,170)")
-        .append("rect")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("width", 80)
-        .attr("height", max_key + 70)
-        .attr("fill", "white")
-
-
-    steps = _.map(d3.range(num_steps), function(i) {
-        return i * max_key / num_steps
-    })
-
-    svg = d3.select("#mapcontainer svg")
-
-    svg.append("g")
-        .attr("transform", "translate(55,170)")
-        .selectAll(".keyrects")
-        .data(steps)
-        .enter()
-        .append("rect")
-        .attr("x", 0)
-        .attr("y", function(d) {
-            return d
-        })
-        .attr("width", 10)
-        .attr("height", (max_key / num_steps) * 1.06)
-        .attr("fill", function(d) {
-            return colour_scale(inverted_scale(d))
-        })
-
-    var yAxis = d3.svg.axis()
-        .scale(axis_scale)
-        .orient("left")
-        .ticks(10, ",0.2s")
-        .tickSize(-10, 0)
-
-
-    var svg = d3.select("#mapcontainer svg")
-
-    svg.append("g")
-        .attr("transform", "translate(55,170)")
-        .attr("class", "y axis")
-        .call(yAxis)
-
-    svg.append("g")
-        .attr("transform", "translate(70,170) rotate(90)")
-        .append("text")
-        .text("Value of imports (£)")
-        .style("font-weight", "bold")
-        .style("font-size", "12px")
-
-    svg.append("g").attr("transform", "translate(27,160)")
-        .append("text")
-        .text("Key:")
-        .style("font-weight", "bold")
-        .style("font-size", "12px")
-
-
-
-
-}
-
-function key_colours() {
-
-    //update numbers
-    my_max = _.max(IMPORTAPP.country_totals, function(d) {
-        return d["quantity_exports"]
-    })
-    my_max = my_max["quantity_exports"]
-
-    var axis_scale = d3.scale.log().domain([1, my_max]).range([300, 0])
-
-    var yAxis = d3.svg.axis()
-        .scale(axis_scale)
-        .orient("left")
-        .ticks(10, ",0.2s")
-        .tickSize(-10, 0)
-
-    d3.selectAll(".y.axis")
-        .transition()
-        .duration(2000)
-        .call(yAxis)
 
 
 }
