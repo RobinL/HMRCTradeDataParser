@@ -1,12 +1,10 @@
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.mail import Mail
 from flask_debugtoolbar import DebugToolbarExtension
 
 
 bootstrap = Bootstrap()
 db = SQLAlchemy()
-mail = Mail()
 toolbar = DebugToolbarExtension()
 
 from flask import Blueprint
@@ -25,7 +23,6 @@ def create_app(config_name):
 
     bootstrap.init_app(app)
     db.init_app(app)
-    mail.init_app(app)
 
     if config_name == "development":
     	toolbar = DebugToolbarExtension(app)

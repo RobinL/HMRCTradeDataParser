@@ -10,23 +10,28 @@ def create_derived_country_products_month():
     drop table if exists der_{import_or_export}_country_products_port_month_{code_detail};
     create table der_{import_or_export}_country_products_port_month_{code_detail} as
 
-    select  i_or_e.maf_{coo_or_cod}_alpha as country_code, cn.{desc_column_name}{code_detail} as product_code, maf_port_alpha as port_code,  i_or_e.maf_account_mm as month, i_or_e.maf_account_ccyy as year, sum(maf_value_int) as quantity
+    select  
+        i_or_e.maf_{coo_or_cod}_alpha as country_code, 
+        cn.{desc_column_name}{code_detail} as product_code, 
+        maf_port_alpha as port_code, 
+        i_or_e.maf_account_mm as month, 
+        i_or_e.maf_account_ccyy as year, 
+        sum(maf_value_int) as quantity
 
-        from {import_or_export} as i_or_e
+    from {import_or_export} as i_or_e
+
+    left join combined_nomenclature as cn
+
+    on substring(i_or_e.comcode8,1,6) = cn.combined_nomenclature_6 
+
+    where
+    maf_value_int is not null
+
+    and product_code is not null
+    and country_code is not null
 
 
-        left join combined_nomenclature as cn
-
-        on i_or_e.comcode8 = cn.commodity_code_8
-
-        where
-        maf_value_int is not null
-
-        and product_code is not null
-        and country_code is not null
-
-
-        group by country_code, product_code, port_code,  i_or_e.maf_account_mm, i_or_e.maf_account_ccyy;
+    group by country_code, product_code, port_code,  i_or_e.maf_account_mm, i_or_e.maf_account_ccyy;
 
     CREATE  INDEX ix_{import_or_export}_cppm_product_code_{code_detail} ON der_{import_or_export}_country_products_port_month_{code_detail} (product_code );
     CREATE  INDEX ix_{import_or_export}_cppm_port_code_{code_detail} ON der_{import_or_export}_country_products_port_month_{code_detail} (port_code );
@@ -209,11 +214,3 @@ def create_derived_country_products_month_eu():
                 for my_sql in sql_list:
                     logger.debug(my_sql.replace("\n","")[:100])
                     session.execute(my_sql)
-
-
-
-
-
-
-
-
