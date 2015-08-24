@@ -1,0 +1,5 @@
+Ref,From,To,Level,Item Name,Type,Size,Ment,Picture,Occurs,Range,Comments
+3,1,2,10,SITC-2,9,2,L,99,,,
+4,3,3,10,SITC-0,9,1,L,9,,,VALUE 0
+5,4,9,10,MONTH-IND,9,6,L,9(6),,,
+6,10,24,10,ESTIMATED-VALUE,9,15,L,9(15),,,

@@ -26,6 +26,8 @@ from write_export_data import raw_export_data_to_database
 from write_eu_import_data import raw_eu_import_data_to_database
 from write_eu_export_data import raw_eu_export_data_to_database
 from write_meta_data import write_meta_data_to_db
+from write_import_estimates_data import raw_import_estimates_data_to_db
+from write_export_estimates_data import raw_export_estimates_data_to_db
 from uk_trade_data.write_postcode_data import write_postcode_data_to_db
 
 from zipfile import BadZipfile
@@ -72,7 +74,10 @@ def specific_url_part_to_type(specific_url_part):
         "SMKI19": "imports",
         "SMKE19": "exports",
         "SMKM46": "eu_imports",
-        "SMKX46": "eu_exports"
+        "SMKX46": "eu_exports",
+        "SESM16": "import_estimates",
+        "SESX16": "export_estimates",
+
 
     }
 
@@ -143,12 +148,15 @@ def get_and_iterate_urls(specific_url_part, add_to_database_function):
 
             session.add(r)
             session.commit()
+            logger.info("Successfully added {} to the database".format(r.child_zip_file))
+
+
 
 
         except MultipleResultsFound:
             logger.debug("The file {} seems to have been added to the database multiple times".format(file_name))
 
-
+        break
 
 def get_urls_historical(specific_url_part):
 
@@ -309,12 +317,14 @@ def build_full_dataset():
 
 
 def check_for_updates():
-    get_and_iterate_urls("SMKA12", raw_control_data_to_database)
-    get_and_iterate_urls("SIAI11", raw_importer_data_to_database)
-    get_and_iterate_urls("SMKI19", raw_import_data_to_database)
-    get_and_iterate_urls("SMKE19", raw_export_data_to_database)
-    get_and_iterate_urls("SMKX46", raw_eu_export_data_to_database)
-    get_and_iterate_urls("SMKM46", raw_eu_import_data_to_database)
+    # get_and_iterate_urls("SMKA12", raw_control_data_to_database)
+    # get_and_iterate_urls("SIAI11", raw_importer_data_to_database)
+    # get_and_iterate_urls("SMKI19", raw_import_data_to_database)
+    # get_and_iterate_urls("SMKE19", raw_export_data_to_database)
+    # get_and_iterate_urls("SMKX46", raw_eu_export_data_to_database)
+    # get_and_iterate_urls("SMKM46", raw_eu_import_data_to_database)
+    get_and_iterate_urls("SESM16", raw_import_estimates_data_to_db)
+    get_and_iterate_urls("SESX16", raw_export_estimates_data_to_db)
 
 
 def build_historical_data():

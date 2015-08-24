@@ -14,6 +14,37 @@ these columns will magically appear and be correctly populated
 
 """
 
+class Import_Estimate(Base):
+    __tablename__ = 'import_estimates'
+
+    id = Column(Integer, primary_key=True)
+    sitc_2 = Column(String(2), index=True)
+    sitc_0 = Column(String(1), index=True)
+    month_ind = Column(String(6))
+    # estimated_value = Column(String(15))
+
+    source_file_id = Column(Integer, ForeignKey("rawfiles.id",ondelete="cascade"))
+    estimated_value_int = Column(BigInteger())
+    
+
+    rawfile = relationship("RawFileLog")
+
+class Export_Estimate(Base):
+    __tablename__ = 'export_estimates'
+
+    id = Column(Integer, primary_key=True)
+    sitc_2 = Column(String(2), index=True)
+    sitc_0 = Column(String(1), index=True)
+    month_ind = Column(String(6))
+    # estimated_value = Column(String(15))
+
+    source_file_id = Column(Integer, ForeignKey("rawfiles.id",ondelete="cascade"))
+    estimated_value_int = Column(BigInteger())
+    
+    rawfile = relationship("RawFileLog")
+
+
+
 class Import(Base):
     __tablename__ = 'imports'
 

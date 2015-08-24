@@ -4,6 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
+
 # and cast(substr(i_or_e.comcode8,1,2) as integer) < 23
 def create_derived_country_products_month():
     sql = """
@@ -12,7 +13,7 @@ def create_derived_country_products_month():
 
     select  
         i_or_e.maf_{coo_or_cod}_alpha as country_code, 
-        cn.{desc_column_name}{code_detail} as product_code, 
+        substr(i_or_e.comcode8,1,{code_detail}) as product_code, 
         maf_port_alpha as port_code, 
         i_or_e.maf_account_mm as month, 
         i_or_e.maf_account_ccyy as year, 
@@ -20,28 +21,30 @@ def create_derived_country_products_month():
 
     from {import_or_export} as i_or_e
 
-    left join combined_nomenclature as cn
-
-    on substring(i_or_e.comcode8,1,6) = cn.combined_nomenclature_6 
-
     where
     maf_value_int is not null
 
     and product_code is not null
     and country_code is not null
 
-
     group by country_code, product_code, port_code,  i_or_e.maf_account_mm, i_or_e.maf_account_ccyy;
 
-    CREATE  INDEX ix_{import_or_export}_cppm_product_code_{code_detail} ON der_{import_or_export}_country_products_port_month_{code_detail} (product_code );
-    CREATE  INDEX ix_{import_or_export}_cppm_port_code_{code_detail} ON der_{import_or_export}_country_products_port_month_{code_detail} (port_code );
-    CREATE  INDEX ix_{import_or_export}_cppm_country_code_{code_detail} ON der_{import_or_export}_country_products_port_month_{code_detail} (country_code );
-    CREATE  INDEX ix_{import_or_export}_cppm_month_{code_detail} ON der_{import_or_export}_country_products_port_month_{code_detail} (month );
-    CREATE  INDEX ix_{import_or_export}_cppm_year_{code_detail} ON der_{import_or_export}_country_products_port_month_{code_detail} (year);
+    CREATE  INDEX ix_{import_or_export}_cppm_product_code_{code_detail} 
+        ON der_{import_or_export}_country_products_port_month_{code_detail} (product_code );
+        
+    CREATE  INDEX ix_{import_or_export}_cppm_port_code_{code_detail} 
+        ON der_{import_or_export}_country_products_port_month_{code_detail} (port_code );
+        
+    CREATE  INDEX ix_{import_or_export}_cppm_country_code_{code_detail} 
+        ON der_{import_or_export}_country_products_port_month_{code_detail} (country_code );
+        
+    CREATE  INDEX ix_{import_or_export}_cppm_month_{code_detail} 
+        ON der_{import_or_export}_country_products_port_month_{code_detail} (month );
+        
+    CREATE  INDEX ix_{import_or_export}_cppm_year_{code_detail} 
+        ON der_{import_or_export}_country_products_port_month_{code_detail} (year);
 
     """
-
-
 
     for imp_exp in ["imports","exports"]:
 
@@ -56,9 +59,6 @@ def create_derived_country_products_month():
                                 desc_column_name = "combined_nomenclature_",
                                 coo_or_cod = coo_or_cod)
 
-
-            if code_detail == "8":
-                sql2 = sql2.replace("cn.combined_nomenclature_8", "comcode8")
 
             sql_list = sql2.split(";")
             for my_sql in sql_list:
@@ -169,34 +169,35 @@ def create_derived_country_products_month_eu():
     drop table if exists der_{import_or_export}_country_products_month_eu_{code_detail};
     create table der_{import_or_export}_country_products_month_eu_{code_detail} as
 
-    select  smk_cod_alpha as country_code, cn.{desc_column_name}{code_detail} as product_code,  i_or_e.smk_period_reference_month as month, i_or_e.smk_period_reference_year as year, sum(smk_stat_value_int) as quantity
+    select  smk_cod_alpha as country_code, 
+        substr(i_or_e.comcode8,1,{code_detail}) as product_code, 
+        i_or_e.smk_period_reference_month as month, 
+        i_or_e.smk_period_reference_year as year, 
+        sum(smk_stat_value_int) as quantity
    
-        from eu_{import_or_export} as i_or_e
+    from eu_{import_or_export} as i_or_e
 
-
-        left join combined_nomenclature as cn
-
-        on i_or_e.comcode8 = cn.commodity_code_8
- 
-        where
-        smk_stat_value_int is not null
- 
-        and product_code is not null
-        and country_code is not null
+    where
         and smk_nature_of_transaction != "000"
 
+    group by 
+        country_code, 
+        product_code, 
+        i_or_e.smk_period_reference_month, 
+        i_or_e.smk_period_reference_year;
 
+    CREATE  INDEX ix_{import_or_export}_cppm_eu_product_code_{code_detail} 
+        ON der_{import_or_export}_country_products_month_eu_{code_detail} (product_code );
 
-        group by country_code, product_code,  i_or_e.smk_period_reference_month, i_or_e.smk_period_reference_year;
+    CREATE  INDEX ix_{import_or_export}_cppm_eu_country_code_{code_detail} 
+        ON der_{import_or_export}_country_products_month_eu_{code_detail} (country_code );
 
-    CREATE  INDEX ix_{import_or_export}_cppm_eu_product_code_{code_detail} ON der_{import_or_export}_country_products_month_eu_{code_detail} (product_code );
-    CREATE  INDEX ix_{import_or_export}_cppm_eu_country_code_{code_detail} ON der_{import_or_export}_country_products_month_eu_{code_detail} (country_code );
-    CREATE  INDEX ix_{import_or_export}_cppm_eu_month{code_detail} ON der_{import_or_export}_country_products_month_eu_{code_detail} (month );
-    CREATE  INDEX ix_{import_or_export}_cppm_eu_year{code_detail} ON der_{import_or_export}_country_products_month_eu_{code_detail} (year );
+    CREATE  INDEX ix_{import_or_export}_cppm_eu_month{code_detail} 
+        ON der_{import_or_export}_country_products_month_eu_{code_detail} (month );
 
+    CREATE  INDEX ix_{import_or_export}_cppm_eu_year{code_detail} 
+        ON der_{import_or_export}_country_products_month_eu_{code_detail} (year );
     """
-
-
 
     for imp_exp in ["imports","exports"]:
 
@@ -214,3 +215,7 @@ def create_derived_country_products_month_eu():
                 for my_sql in sql_list:
                     logger.debug(my_sql.replace("\n","")[:100])
                     session.execute(my_sql)
+
+
+if __name__ == "__main__":
+    create_derived_country_products_month()

@@ -111,15 +111,15 @@ def get_non_eu_data(arguments):
 
     der_{imports_or_exports}_country_products_port_month_{cn_code_length} as main
 
-    left join {product_join_table} as pjt
+    left outer join {product_join_table} as pjt
     on
     main.product_code = pjt.{product_join_field}
 
 
-    left join countries as c on
+    left outer join countries as c on
     main.country_code = c.alpha_code
 
-    left join ports as p on
+    left outer join ports as p on
     main.port_code = p.alpha_code
 
 
