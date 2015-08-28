@@ -36,6 +36,10 @@ def eu_imports_view():
     return render_template('eu_imports.html')
 
 
+@myapp.route('/treemap',methods=["GET","POST"])
+def tremap_view():
+    return render_template('treemap.html')
+
 #All json routes are below
 from flask import jsonify
 
@@ -244,3 +248,8 @@ def get_importers_json():
     resp.status_code = 200
 
     return resp
+
+
+@myapp.route('/treemap.json', methods=["GET","POST"])
+def get_treemap_json():
+    return app.send_static_file('index.html')
