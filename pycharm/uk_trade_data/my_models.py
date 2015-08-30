@@ -359,3 +359,33 @@ class Postcode(Base):
     postcode = Column(String(8), index=True)
     lat = Column(Float())
     lng = Column(Float())
+
+
+class Lookup_Code_1(Base):
+    __tablename__ = "lookup_codes_1"
+
+    id = Column(Integer, primary_key=True)
+    code_2 = Column(String(2), index=True)
+    code = Column(String(2), index=True)
+    desc = Column(String(500))
+
+class Lookup_Code_2(Base):
+    __tablename__ = "lookup_codes_2"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String(2), index=True)
+    desc = Column(String(500))
+
+class Lookup_Code_4(Base):
+    __tablename__ = "lookup_codes_4"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String(2), index=True)
+    desc = Column(String(500))
+
+class Lookup_Code_6(Base):
+    __tablename__ = "lookup_codes_6"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String(2), index=True)
+    desc = Column(String(500))

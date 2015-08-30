@@ -1,45 +1,64 @@
-#chart {
-  width: 960px;
-  height: 500px;
-  background: #ddd;
-}
+    #chart {
+      width: 820px;
+      height: 700px;
+      background: #bbb;
+      margin: 1px auto;
+      position: relative;
+      -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+          box-sizing: border-box;
+    }
 
-text {
-  pointer-events: none;
-}
+    text {
+      pointer-events: none;
 
-.grandparent text {
-  font-weight: bold;
-}
+    }
 
-rect {
-  fill: none;
-  stroke: #fff;
-}
+    .grandparent text { /* header text */
+      font-weight: bold;
+      font-size: medium;
+      font-family: "Open Sans", Helvetica, Arial, sans-serif; 
+    }
 
-rect.parent,
-.grandparent rect {
-  stroke-width: 2px;
-}
+    rect {
+      fill: none;
+      stroke: #fff;
+    }
 
-.grandparent rect {
-  fill: orange;
-}
+    rect.parent,
+    .grandparent rect {
+      stroke-width: 2px;
+      
+    }
 
-.grandparent:hover rect {
-  fill: #ee9700;
-}
+    .grandparent rect {
+      fill: #fff;
+    }
 
-.children rect.parent,
-.grandparent rect {
-  cursor: pointer;
-}
+    .children rect.parent,
+    .grandparent rect {
+      cursor: pointer;
+      
+    }
 
-.children rect.parent {
-  fill: #bbb;
-  fill-opacity: .5;
-}
+    rect.parent {
+      pointer-events: all; 
 
-.children:hover rect.child {
-  fill: #bbb;
-}
+    }
+
+    rect.child {
+      stroke-width: 2px;
+    }
+
+    .children:hover rect.child,
+    .grandparent:hover rect {
+      fill: #aaa;
+    }
+
+    .textdiv { /* text in the boxes */
+      font-size: x-small;
+      padding: 5px;
+      font-family: "Open Sans", Helvetica, Arial, sans-serif; 
+      overflow:   hidden;
+      word-wrap: break-word
+    }

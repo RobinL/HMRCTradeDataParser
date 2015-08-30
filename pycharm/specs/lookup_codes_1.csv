@@ -1,22 +1,97 @@
-code,desc
-1,Live Animals; Animal Products 
-2,Vegetable Products 
-3,Animal Or Vegetable Fats And Oils And Their Cleavage Products; Prepared Edible Fats; Animal Or Vegetable Waxes 
-4,"Prepared Foodstuffs; Beverages, Spirits And Vinegar; Tobacco And Manufactured Tobacco Substitutes "
-5,Mineral Products 
-6,Products Of The Chemical Or Allied Industries 
-7,Plastics And Articles Thereof; Rubber And Articles Thereof 
-8,"Raw Hides And Skins, Leather, Furskins And Articles Thereof; Saddlery And Harness; Travel Goods, Handbags And Similar Containers; Articles Of Animal Gut (Other Than Silkworm Gut) "
-9,"Wood And Articles Of Wood; Wood Charcoal; Cork And Articles Of Cork; Manufactures Of Straw, Of Esparto Or Of Other Plaiting Materials; Basketware And Wickerwork "
-10,Pulp Of Wood Or Of Other Fibrous Cellulosic Material; Recovered (Waste And Scrap) Paper Or Paperboard; Paper And Paperboard And Articles Thereof 
-11,Textiles And Textile Articles 
-12,"Footwear, Headgear, Umbrellas, Sun Umbrellas, Walking Sticks, Seat-Sticks, Whips, Riding-Crops And Parts Thereof; Prepared Feathers And Articles Made Therewith; Artificial Flowers; Articles Of Human "
-13,"Articles Of Stone, Plaster, Cement, Asbestos, Mica Or Similar Materials; Ceramic Products; Glass And Glassware "
-14,"Natural Or Cultured Pearls, Precious Or Semi-Precious Stones, Precious Metals, Metals Clad With Precious Metal, And Articles Thereof; Imitation Jewellery; Coin "
-15,Base Metals And Articles Of Base Metal 
-16,"Machinery And Mechanical Appliances; Electrical Equipment; Parts Thereof; Sound Recorders And Reproducers, Television Image And Sound Recorders And Reproducers, And Parts And Accessories Of Such "
-17,"Vehicles, Aircraft, Vessels And Associated Transport Equipment "
-18,"Optical, Photographic, Cinematographic, Measuring, Checking, Precision, Medical Or Surgical Instruments And Apparatus; Clocks And Watches; Musical Instruments; Parts And Accessories Thereof "
-19,Arms And Ammunition; Parts And Accessories Thereof 
-20,Miscellaneous Manufactured Articles 
-21,"Works Of Art, Collectors' Pieces And Antiques "
+code_2,code,desc
+01,1,Live Animals; Animal Products 
+02,1,Live Animals; Animal Products 
+03,1,Live Animals; Animal Products 
+04,1,Live Animals; Animal Products 
+05,1,Live Animals; Animal Products 
+06,2,Vegetable Products 
+07,2,Vegetable Products 
+08,2,Vegetable Products 
+09,2,Vegetable Products 
+10,2,Vegetable Products 
+11,2,Vegetable Products 
+12,2,Vegetable Products 
+13,2,Vegetable Products 
+14,2,Vegetable Products 
+15,3,Animal Or Vegetable Fats And Oils And Their Cleavage Products; Prepared Edible Fats; Animal Or Vegetable Waxes 
+16,4,"Prepared Foodstuffs; Beverages, Spirits And Vinegar; Tobacco And Manufactured Tobacco Substitutes "
+17,4,"Prepared Foodstuffs; Beverages, Spirits And Vinegar; Tobacco And Manufactured Tobacco Substitutes "
+18,4,"Prepared Foodstuffs; Beverages, Spirits And Vinegar; Tobacco And Manufactured Tobacco Substitutes "
+19,4,"Prepared Foodstuffs; Beverages, Spirits And Vinegar; Tobacco And Manufactured Tobacco Substitutes "
+20,4,"Prepared Foodstuffs; Beverages, Spirits And Vinegar; Tobacco And Manufactured Tobacco Substitutes "
+21,4,"Prepared Foodstuffs; Beverages, Spirits And Vinegar; Tobacco And Manufactured Tobacco Substitutes "
+22,4,"Prepared Foodstuffs; Beverages, Spirits And Vinegar; Tobacco And Manufactured Tobacco Substitutes "
+23,4,"Prepared Foodstuffs; Beverages, Spirits And Vinegar; Tobacco And Manufactured Tobacco Substitutes "
+24,4,"Prepared Foodstuffs; Beverages, Spirits And Vinegar; Tobacco And Manufactured Tobacco Substitutes "
+25,5,Mineral Products 
+26,5,Mineral Products 
+27,5,Mineral Products 
+28,6,Products Of The Chemical Or Allied Industries 
+29,6,Products Of The Chemical Or Allied Industries 
+30,6,Products Of The Chemical Or Allied Industries 
+31,6,Products Of The Chemical Or Allied Industries 
+32,6,Products Of The Chemical Or Allied Industries 
+33,6,Products Of The Chemical Or Allied Industries 
+34,6,Products Of The Chemical Or Allied Industries 
+35,6,Products Of The Chemical Or Allied Industries 
+36,6,Products Of The Chemical Or Allied Industries 
+37,6,Products Of The Chemical Or Allied Industries 
+38,6,Products Of The Chemical Or Allied Industries 
+39,7,Plastics And Articles Thereof; Rubber And Articles Thereof 
+40,7,Plastics And Articles Thereof; Rubber And Articles Thereof 
+41,8,"Raw Hides And Skins, Leather, Furskins And Articles Thereof; Saddlery And Harness; Travel Goods, Handbags And Similar Containers; Articles Of Animal Gut (Other Than Silkworm Gut) "
+42,8,"Raw Hides And Skins, Leather, Furskins And Articles Thereof; Saddlery And Harness; Travel Goods, Handbags And Similar Containers; Articles Of Animal Gut (Other Than Silkworm Gut) "
+43,8,"Raw Hides And Skins, Leather, Furskins And Articles Thereof; Saddlery And Harness; Travel Goods, Handbags And Similar Containers; Articles Of Animal Gut (Other Than Silkworm Gut) "
+44,9,"Wood And Articles Of Wood; Wood Charcoal; Cork And Articles Of Cork; Manufactures Of Straw, Of Esparto Or Of Other Plaiting Materials; Basketware And Wickerwork "
+45,9,"Wood And Articles Of Wood; Wood Charcoal; Cork And Articles Of Cork; Manufactures Of Straw, Of Esparto Or Of Other Plaiting Materials; Basketware And Wickerwork "
+46,9,"Wood And Articles Of Wood; Wood Charcoal; Cork And Articles Of Cork; Manufactures Of Straw, Of Esparto Or Of Other Plaiting Materials; Basketware And Wickerwork "
+47,10,Pulp Of Wood Or Of Other Fibrous Cellulosic Material; Recovered (Waste And Scrap) Paper Or Paperboard; Paper And Paperboard And Articles Thereof 
+48,10,Pulp Of Wood Or Of Other Fibrous Cellulosic Material; Recovered (Waste And Scrap) Paper Or Paperboard; Paper And Paperboard And Articles Thereof 
+49,10,Pulp Of Wood Or Of Other Fibrous Cellulosic Material; Recovered (Waste And Scrap) Paper Or Paperboard; Paper And Paperboard And Articles Thereof 
+50,11,Textiles And Textile Articles 
+51,11,Textiles And Textile Articles 
+52,11,Textiles And Textile Articles 
+53,11,Textiles And Textile Articles 
+54,11,Textiles And Textile Articles 
+55,11,Textiles And Textile Articles 
+56,11,Textiles And Textile Articles 
+57,11,Textiles And Textile Articles 
+58,11,Textiles And Textile Articles 
+59,11,Textiles And Textile Articles 
+60,11,Textiles And Textile Articles 
+61,11,Textiles And Textile Articles 
+62,11,Textiles And Textile Articles 
+63,11,Textiles And Textile Articles 
+64,12,"Footwear, Headgear, Umbrellas, Sun Umbrellas, Walking Sticks, Seat-Sticks, Whips, Riding-Crops And Parts Thereof; Prepared Feathers And Articles Made Therewith; Artificial Flowers; Articles Of Human "
+65,12,"Footwear, Headgear, Umbrellas, Sun Umbrellas, Walking Sticks, Seat-Sticks, Whips, Riding-Crops And Parts Thereof; Prepared Feathers And Articles Made Therewith; Artificial Flowers; Articles Of Human "
+66,12,"Footwear, Headgear, Umbrellas, Sun Umbrellas, Walking Sticks, Seat-Sticks, Whips, Riding-Crops And Parts Thereof; Prepared Feathers And Articles Made Therewith; Artificial Flowers; Articles Of Human "
+67,12,"Footwear, Headgear, Umbrellas, Sun Umbrellas, Walking Sticks, Seat-Sticks, Whips, Riding-Crops And Parts Thereof; Prepared Feathers And Articles Made Therewith; Artificial Flowers; Articles Of Human "
+68,13,"Articles Of Stone, Plaster, Cement, Asbestos, Mica Or Similar Materials; Ceramic Products; Glass And Glassware "
+69,13,"Articles Of Stone, Plaster, Cement, Asbestos, Mica Or Similar Materials; Ceramic Products; Glass And Glassware "
+70,13,"Articles Of Stone, Plaster, Cement, Asbestos, Mica Or Similar Materials; Ceramic Products; Glass And Glassware "
+71,14,"Natural Or Cultured Pearls, Precious Or Semi-Precious Stones, Precious Metals, Metals Clad With Precious Metal, And Articles Thereof; Imitation Jewellery; Coin "
+72,15,Base Metals And Articles Of Base Metal 
+73,15,Base Metals And Articles Of Base Metal 
+74,15,Base Metals And Articles Of Base Metal 
+75,15,Base Metals And Articles Of Base Metal 
+76,15,Base Metals And Articles Of Base Metal 
+78,15,Base Metals And Articles Of Base Metal 
+79,15,Base Metals And Articles Of Base Metal 
+80,15,Base Metals And Articles Of Base Metal 
+81,15,Base Metals And Articles Of Base Metal 
+82,15,Base Metals And Articles Of Base Metal 
+83,15,Base Metals And Articles Of Base Metal 
+84,16,"Machinery And Mechanical Appliances; Electrical Equipment; Parts Thereof; Sound Recorders And Reproducers, Television Image And Sound Recorders And Reproducers, And Parts And Accessories Of Such "
+85,16,"Machinery And Mechanical Appliances; Electrical Equipment; Parts Thereof; Sound Recorders And Reproducers, Television Image And Sound Recorders And Reproducers, And Parts And Accessories Of Such "
+86,17,"Vehicles, Aircraft, Vessels And Associated Transport Equipment "
+87,17,"Vehicles, Aircraft, Vessels And Associated Transport Equipment "
+88,17,"Vehicles, Aircraft, Vessels And Associated Transport Equipment "
+89,17,"Vehicles, Aircraft, Vessels And Associated Transport Equipment "
+90,18,"Optical, Photographic, Cinematographic, Measuring, Checking, Precision, Medical Or Surgical Instruments And Apparatus; Clocks And Watches; Musical Instruments; Parts And Accessories Thereof "
+91,18,"Optical, Photographic, Cinematographic, Measuring, Checking, Precision, Medical Or Surgical Instruments And Apparatus; Clocks And Watches; Musical Instruments; Parts And Accessories Thereof "
+92,18,"Optical, Photographic, Cinematographic, Measuring, Checking, Precision, Medical Or Surgical Instruments And Apparatus; Clocks And Watches; Musical Instruments; Parts And Accessories Thereof "
+93,19,Arms And Ammunition; Parts And Accessories Thereof 
+94,20,Miscellaneous Manufactured Articles 
+95,20,Miscellaneous Manufactured Articles 
+96,20,Miscellaneous Manufactured Articles 
+97,21,"Works Of Art, Collectors' Pieces And Antiques "

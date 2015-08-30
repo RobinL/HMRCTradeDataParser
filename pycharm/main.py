@@ -21,10 +21,10 @@ logger.addHandler(ch)
 logger.debug("starting")
 
 from uk_trade_data.my_database import init_db, session
-init_db(remove=True)
+init_db(remove=False)
 
-# build_lookups()
-check_for_updates()
+build_lookups()
+# check_for_updates()
 # build_historical_data()
 
 #Check the cascade deletes work
@@ -38,7 +38,7 @@ check_for_updates()
 from uk_trade_data.create_derived_tables_sqlite import create_derived_country_products_month, create_derived_select_box, create_derived_country_products_month_eu, create_derived_importers_for_web
 
 
-create_derived_country_products_month()
-create_derived_select_box()
-create_derived_country_products_month_eu()
-create_derived_importers_for_web()
+#create_derived_country_products_month()
+#create_derived_select_box()
+#create_derived_country_products_month_eu()
+#create_derived_importers_for_web()

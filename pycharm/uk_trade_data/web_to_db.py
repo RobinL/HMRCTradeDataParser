@@ -19,7 +19,7 @@ from zipfile import ZipFile
 from urllib import urlopen
 
 from write_country_data import download_and_insert_country_data, download_and_insert_port_data
-from write_control_data import raw_control_data_to_database, write_xls_heirarchy_to_otherdigitcodes
+from write_control_data import raw_control_data_to_database, write_code_lookup_tables
 from write_importer_data import raw_importer_data_to_database
 from write_import_data import raw_import_data_to_database
 from write_export_data import raw_export_data_to_database
@@ -332,13 +332,14 @@ def build_historical_data():
     get_and_iterate_historical("SMKA12", raw_control_data_to_database)
     get_and_iterate_historical("SIAI11", raw_importer_data_to_database)
     get_and_iterate_historical("SMKI19", raw_import_data_to_database)
-    get_and_iterate_historical("SMKE19", raw_export_data_to_database)
+    write_code_lookup_tablescal("SMKE19", raw_export_data_to_database)
     get_and_iterate_historical("SMKM46", raw_eu_import_data_to_database)
     get_and_iterate_historical("SMKX46", raw_eu_export_data_to_database)
 
 def build_lookups():
-    write_postcode_data_to_db()
-    write_meta_data_to_db()
-    write_xls_heirarchy_to_otherdigitcodes()
-    download_and_insert_country_data()
-    download_and_insert_port_data()
+    # write_postcode_data_to_db()
+    # write_meta_data_to_db()
+    # download_and_insert_country_data()
+    # download_and_insert_port_data()
+
+    write_code_lookup_tables()

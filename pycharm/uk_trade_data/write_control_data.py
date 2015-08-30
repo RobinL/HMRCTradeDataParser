@@ -3,6 +3,7 @@ import pandas as pd
 from .utils import get_fields_df, get_zipped_file_contents, get_specs_dict, build_from_spec
 from my_models import EightDigitCode, CombinedNomenclature
 from my_database import session
+from my_database import engine
 import trade_data_config
 import logging
 logger = logging.getLogger(__name__)
@@ -102,45 +103,37 @@ def write_middle_records_to_db(df,rawfile):
     session.commit()
 
 
+from my_models import Lookup_Code_1, Lookup_Code_2, Lookup_Code_4, Lookup_Code_6
+def write_code_lookup_tables():
 
+    df = pd.read_csv("specs/lookup_codes_1.csv", dtype={"code": str, "code_2":str}, encoding="utf-8")
+    rows_dict = df.to_dict(orient="records")
 
-def write_xls_heirarchy_to_otherdigitcodes():
+    engine.execute(
+        Lookup_Code_1.__table__.insert(),
+        rows_dict
+    )
 
-    df = pd.read_excel("code_heirarchy.xlsx")
+    df = pd.read_csv("specs/lookup_codes_2.csv", dtype={"code" : str}, encoding="utf-8")
+    rows_dict = df.to_dict(orient="records")
 
-    for row in df.iterrows():
-        r = row[1]
+    engine.execute(
+        Lookup_Code_2.__table__.insert(),
+        rows_dict
+    )
 
-        c = CombinedNomenclature()
-        c.combined_nomenclature_1 = r["combined_nomenclature_1"]
-        c.combined_nomenclature_1_desc = r["combined_nomenclature_1_desc"]
-        c.combined_nomenclature_2 = "{0:02d}".format(r["combined_nomenclature_2"])
-        c.combined_nomenclature_2_desc = r["combined_nomenclature_2_desc"]
-        c.combined_nomenclature_4 = "{0:04d}".format(r["combined_nomenclature_4"])
-        c.combined_nomenclature_4_desc = r["combined_nomenclature_4_desc"]
-        c.combined_nomenclature_6 = "{0:06d}".format(r["combined_nomenclature_6"])
-        c.combined_nomenclature_6_desc = r["combined_nomenclature_6_desc"]
-        c.commodity_code_8 = "{0:08d}".format(r["commodity_code_8"])
-        c.commodity_code_8_desc = r["commodity_code_8_desc"]
+    df = pd.read_csv("specs/lookup_codes_4.csv", dtype={"code" : str}, encoding="utf-8")
+    rows_dict = df.to_dict(orient="records")
 
-        session.add(c)
+    engine.execute(
+        Lookup_Code_4.__table__.insert(),
+        rows_dict
+    )
 
-    session.commit()
+    df = pd.read_csv("specs/lookup_codes_6.csv", dtype={"code" : str}, encoding="utf-8")
+    rows_dict = df.to_dict(orient="records")
 
-
-    sql = """
-    create table lookup_codes_{i} as
-    select distinct combined_nomenclature_{i} as code, combined_nomenclature_{i}_desc as desc
-    from combined_nomenclature
-    """
-
-    for i in ["1","2","4","6"]:
-        sql2 = sql.format(i=i)
-        session.execute(sql2)
-
-
-
-
-
-
-
+    engine.execute(
+        Lookup_Code_6.__table__.insert(),
+        rows_dict
+    )

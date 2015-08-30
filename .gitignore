@@ -11,3 +11,4 @@ ukpostcodes.csv
 *.db-journal
 *.exe
 *.log
+**.json
