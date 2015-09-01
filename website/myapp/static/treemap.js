@@ -5,6 +5,36 @@
   formatNumber = d3.format(",d"),
   transitioning;
 
+  
+
+
+
+  /* load in data, display root */
+  
+  json_file_name = $("#json_type > .btn.btn-default.active").attr("pval")
+
+  
+
+  d3.json("static/" + json_file_name + ".json", function(data) {
+
+    redraw(data)
+  
+  });
+
+  $("#json_type").click(function(){
+               json_file_name = $("#json_type > .btn.btn-default.active").attr("pval")
+
+                 d3.json("static/" + json_file_name + ".json", function(data) {
+
+    redraw(data)
+  
+  });
+         });
+  
+
+
+function redraw(my_data) {
+
   /* create x and y scales */
   var x = d3.scale.linear()
     .domain([0, width])
@@ -20,7 +50,14 @@
     .ratio(height / width * 0.5 * (1 + Math.sqrt(5)))
     .round(false);
 
-  /* create svg */
+    /* create svg */
+
+    transitioning = false;
+
+    if (!d3.select("#treemap svg").empty()) {
+      d3.select("#treemap svg").remove()
+    }
+
   var svg = d3.select("#treemap").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.bottom + margin.top)
@@ -45,8 +82,12 @@
     .attr("y", 6 - margin.top)
     .attr("dy", ".75em");
 
-  /* load in data, display root */
-  d3.json("static/data.json", function(root) {
+    draw(my_data)
+
+
+
+
+  function draw(root) {
 
     initialize(root);
     accumulate(root);
@@ -122,7 +163,7 @@
            .attr("class", "child")
            .call(rect)
            .append("title")
-           .text(function(d) { return d.name + " " + d.desc; });
+           .text(function(d) { debugger; return d.name + " " + d.desc; });
            
 
       /* write parent rectangle */
@@ -145,7 +186,7 @@
         .attr("class","foreignobj")
         .append("xhtml:div") 
         .attr("dy", ".75em")
-        .html(function(d) { return d.name + " - " + d.desc; 
+        .html(function(d) { return "£"+d3.format(",0.2s")(d.value) + " - " + d3.format("0.1%")(d.area) + " - " + d.name + " - " + d.desc; 
         })
         .attr("class","textdiv")
        
@@ -212,7 +253,7 @@
       .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
       .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); })
       .style("fill", function(d) { return d.parent ? color(d.name) : null; })
-      .style("fill-opacity", 0.8);
+      .style("fill-opacity", 0.9);
     }
 
     function foreign(foreign){ /* added */
@@ -227,4 +268,23 @@
       ? name(d.parent) + "." + d.name
       : d.name;
       }
+
+
+  }
+
+
+}
+
+
+
+
+  $(function() {
+    //The following code deals with what happens when you click the 'level of detail' commodity codes
+    $(".btn-group > .btn").click(function(){
+        $(this).parent().parent().find(".btn-group > .btn").removeClass("active");
+        $(this).addClass("active");
     });
+
+
+
+});

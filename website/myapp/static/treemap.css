@@ -47,12 +47,12 @@
     }
 
     rect.child {
-      stroke-width: 2px;
+      stroke-width: 1px;
     }
 
     .children:hover rect.child,
     .grandparent:hover rect {
-      fill: #aaa;
+    fill: #aaa;
     }
 
     .textdiv { /* text in the boxes */
@@ -60,5 +60,10 @@
       padding: 5px;
       font-family: "Open Sans", Helvetica, Arial, sans-serif; 
       overflow:   hidden;
-      word-wrap: break-word
+      word-wrap: break-word;
+      pointer-events: none;
+    }
+
+    rect.parent:hover {
+      fill-opacity: 1 !important
     }
