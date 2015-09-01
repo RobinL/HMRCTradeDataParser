@@ -368,6 +368,9 @@ class Lookup_Code_1(Base):
     code_2 = Column(String(2), index=True)
     code = Column(String(2), index=True)
     desc = Column(String(500))
+    code_base = Column(String(2))   
+    desc_base = Column(String(500))
+
 
 class Lookup_Code_2(Base):
     __tablename__ = "lookup_codes_2"
