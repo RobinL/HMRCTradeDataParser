@@ -24,8 +24,8 @@ from uk_trade_data.my_database import init_db, session
 init_db(remove=False)
 
 build_lookups()
-# check_for_updates()
-# build_historical_data()
+check_for_updates()
+build_historical_data()
 
 #Check the cascade deletes work
 # from uk_trade_data.my_models import Import, RawFileLog
@@ -37,8 +37,8 @@ build_lookups()
 
 from uk_trade_data.create_derived_tables_sqlite import create_derived_country_products_month, create_derived_select_box, create_derived_country_products_month_eu, create_derived_importers_for_web
 
-
-#create_derived_country_products_month()
-#create_derived_select_box()
-#create_derived_country_products_month_eu()
-#create_derived_importers_for_web()
+#
+# create_derived_country_products_month()
+# create_derived_select_box()
+# create_derived_country_products_month_eu()
+# create_derived_importers_for_web()

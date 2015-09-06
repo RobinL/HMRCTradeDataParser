@@ -154,15 +154,15 @@ def get_and_iterate_urls(specific_url_part, add_to_database_function):
 
 
         except MultipleResultsFound:
-            logger.debug("The file {} seems to have been added to the database multiple times".format(file_name))
+            logger.debug("The file {} seems to have been added to the database multiple times".format(r.child_zip_file))
 
-        break
+
 
 def get_urls_historical(specific_url_part):
 
 
     urls = [r"https://www.uktradeinfo.com/Statistics/Documents/{}_{}archive.zip" \
-            .format(specific_url_part, y) for y in range(2014,2012,-1)]
+            .format(specific_url_part, y) for y in range(2014,2013,-1)]
 
     #one of the archives has the wrong url - do a find and replace
     replace_this = r"https://www.uktradeinfo.com/Statistics/Documents/SIAI11_2011archive.zip"
@@ -219,8 +219,9 @@ def get_and_iterate_historical(specific_url_part, add_to_database_function):
                     zip_file2 = StringIO(zip_file.read(file_info["file_name_zip"]))
                     zip_file2 = ZipFile(zip_file2)
 
-                except BadZipfile:
+                except BadZipfile as e:
                     logger.info("File from {} was a bad zip file".format(file_info["url_full"]))
+                    logger.exception(e)
                     continue
 
                 r = RawFileLog()
@@ -240,8 +241,9 @@ def get_and_iterate_historical(specific_url_part, add_to_database_function):
                 try:
                     add_to_database_function(zip_file2, file_info,r)
                     r.processing_completed = True
-                except:
+                except Exception as e:
                     logger.debug("Something failed in adding the file {} to the database")
+                    logger.exception(e)
 
                 session.add(r)
                 session.commit()
@@ -317,29 +319,32 @@ def build_full_dataset():
 
 
 def check_for_updates():
-    # get_and_iterate_urls("SMKA12", raw_control_data_to_database)
-    # get_and_iterate_urls("SIAI11", raw_importer_data_to_database)
-    # get_and_iterate_urls("SMKI19", raw_import_data_to_database)
-    # get_and_iterate_urls("SMKE19", raw_export_data_to_database)
-    # get_and_iterate_urls("SMKX46", raw_eu_export_data_to_database)
-    # get_and_iterate_urls("SMKM46", raw_eu_import_data_to_database)
+    get_and_iterate_urls("SMKA12", raw_control_data_to_database)
+    get_and_iterate_urls("SIAI11", raw_importer_data_to_database)
+    get_and_iterate_urls("SMKI19", raw_import_data_to_database)
+    get_and_iterate_urls("SMKE19", raw_export_data_to_database)
+    get_and_iterate_urls("SMKX46", raw_eu_export_data_to_database)
+    get_and_iterate_urls("SMKM46", raw_eu_import_data_to_database)
     get_and_iterate_urls("SESM16", raw_import_estimates_data_to_db)
     get_and_iterate_urls("SESX16", raw_export_estimates_data_to_db)
 
 
 def build_historical_data():
 
+
+    get_and_iterate_historical("SESX16", raw_export_estimates_data_to_db)
+    get_and_iterate_historical("SESM16", raw_import_estimates_data_to_db)
     get_and_iterate_historical("SMKA12", raw_control_data_to_database)
     get_and_iterate_historical("SIAI11", raw_importer_data_to_database)
     get_and_iterate_historical("SMKI19", raw_import_data_to_database)
-    write_code_lookup_tablescal("SMKE19", raw_export_data_to_database)
+    get_and_iterate_historical("SMKE19", raw_export_data_to_database)
     get_and_iterate_historical("SMKM46", raw_eu_import_data_to_database)
     get_and_iterate_historical("SMKX46", raw_eu_export_data_to_database)
 
 def build_lookups():
-    # write_postcode_data_to_db()
-    # write_meta_data_to_db()
-    # download_and_insert_country_data()
-    # download_and_insert_port_data()
+    write_postcode_data_to_db()
+    write_meta_data_to_db()
+    download_and_insert_country_data()
+    download_and_insert_port_data()
 
     write_code_lookup_tables()

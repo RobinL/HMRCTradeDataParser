@@ -1,7 +1,7 @@
 __author__ = 'Robin'
 import pandas as pd
 from .utils import get_fields_df, get_zipped_file_contents, get_specs_dict, build_from_spec
-from my_models import EightDigitCode, CombinedNomenclature
+from my_models import EightDigitCode
 from my_database import session
 from my_database import engine
 import trade_data_config
