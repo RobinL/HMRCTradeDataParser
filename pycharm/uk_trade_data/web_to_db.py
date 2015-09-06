@@ -162,7 +162,7 @@ def get_urls_historical(specific_url_part):
 
 
     urls = [r"https://www.uktradeinfo.com/Statistics/Documents/{}_{}archive.zip" \
-            .format(specific_url_part, y) for y in range(2014,2013,-1)]
+            .format(specific_url_part, y) for y in range(2014,2007,-1)]
 
     #one of the archives has the wrong url - do a find and replace
     replace_this = r"https://www.uktradeinfo.com/Statistics/Documents/SIAI11_2011archive.zip"
