@@ -12,3 +12,4 @@ ukpostcodes.csv
 *.exe
 *.log
 **.json
+**.tmp

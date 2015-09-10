@@ -1,4 +1,27 @@
 
+function format_currency(value) {
+  var formatted = d3.format(".4s")(value);
+
+  formatted = formatted.replace("G", "bn")
+  
+  return formatted
+}
+
+function resize() {
+
+    var chart = d3.select("#treemap svg")
+    aspect = chart.attr("width") / chart.attr("height")
+    var targetWidth = $("#treemap").width()
+    targetWidth = Math.min(1200, targetWidth)
+    chart.attr("width", targetWidth);
+    chart.attr("height", targetWidth / aspect);
+
+ 
+
+   
+}
+
+
   var margin = {top: 20, right: 0, bottom: 0, left: 0},
   width = 820,
   height = 700 - margin.top - margin.bottom,
@@ -18,6 +41,7 @@
   d3.json("static/" + json_file_name + ".json", function(data) {
 
     redraw(data)
+    resize()
   
   });
 
@@ -27,6 +51,8 @@
                  d3.json("static/" + json_file_name + ".json", function(data) {
 
     redraw(data)
+    resize()
+
   
   });
          });
@@ -63,9 +89,13 @@ function redraw(my_data) {
     .attr("height", height + margin.bottom + margin.top)
     .style("margin-left", -margin.left + "px")
     .style("margin.right", -margin.right + "px")
+        .attr("viewBox", "0 0 " + width + " " + height)
+        .attr("preserveAspectRatio", "xMinYMin")
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
     .style("shape-rendering", "crispEdges");
+
+
 
   var color = d3.scale.category20c();
 
@@ -163,7 +193,7 @@ function redraw(my_data) {
            .attr("class", "child")
            .call(rect)
            .append("title")
-           .text(function(d) { debugger; return d.name + " " + d.desc; });
+           .text(function(d) {return d.name + " " + d.desc; });
            
 
       /* write parent rectangle */
@@ -177,6 +207,7 @@ function redraw(my_data) {
         .text(function(d) { return d.name + " " + d.desc; }); /*should be d.value*/
         
 
+
       /* Adding a foreign object instead of a text object, allows for text wrapping */
       g.append("foreignObject")
         .call(rect)
@@ -186,7 +217,13 @@ function redraw(my_data) {
         .attr("class","foreignobj")
         .append("xhtml:div") 
         .attr("dy", ".75em")
-        .html(function(d) { return "£"+d3.format(",0.2s")(d.value) + " - " + d3.format("0.1%")(d.area) + " - " + d.name + " - " + d.desc; 
+        .html(function(d) {
+          var dep = get_current_depth(d)
+          if (dep == 1) {
+            return d.name + " - " + d.desc + " - " + "</br>"  + d3.format("0.1%")(d.area) + " - " + "(Aggregates at this level are estimates, see caveats)"  ; 
+        }
+          
+          return "£"+format_currency(d.value) + " - " + d3.format("0.1%")(d.area) + " - code " + d.name + " - " + d.desc; 
         })
         .attr("class","textdiv")
        
@@ -288,3 +325,34 @@ function redraw(my_data) {
 
 
 });
+
+function get_current_depth(d) {
+
+    var depth = 0
+
+    var errored = false
+    while (errored == false) {
+
+        if (d.hasOwnProperty("parent")) {
+
+
+            depth += 1
+            d = d.parent
+            errored = false
+        } else {
+            errored = true
+
+        }
+
+    }
+
+
+    return depth
+
+
+
+
+
+};
+
+d3.select(window).on('resize', resize);
