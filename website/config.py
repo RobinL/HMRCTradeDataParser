@@ -12,6 +12,9 @@ if os.path.exists('.env'):
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'd987j'
     DEBUG = False
+    # SQLALCHEMY_DATABASE_URI = r'sqlite:////home/azureuser/website_runs_from_here/HMRCTradeDataParser/website/trade_data.db'
+
+
 
 
 class DevelopmentConfig(Config):

@@ -38,7 +38,11 @@ var p3 = $.getJSON("selectboxdata.json")
 
 
 $(function() {
+
+
 $.when(p1, p2, p3).done(function(worlddata, countrydata, select_data) {
+
+    debugger;
 
     IMPORTAPP.worlddata = worlddata[0]
     IMPORTAPP.countrydata = d3.csv.parse(countrydata[0])
